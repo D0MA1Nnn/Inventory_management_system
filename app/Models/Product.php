@@ -15,9 +15,9 @@ class Product extends Model
         'model_number',
         'architecture_socket',
         'core_configuration',
-        'performance',
         'integrated_graphics',
         'description',
+        'performance',
         'price',
         'quantity',
         'category_id',
@@ -27,5 +27,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    
+    // Add this relationship
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class, 'supplier_product', 'product_id', 'supplier_id');
     }
 }

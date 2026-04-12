@@ -11,7 +11,7 @@
     <div id="categoryContainer" class="contents"></div>
 
     <!-- 🔹 ADD CARD -->
-    <div onclick="showForm()"
+    <div onclick="resetForm(); showForm()"
         class="bg-gray-300 h-80 flex flex-col items-center justify-center rounded-xl
                 cursor-pointer transition-all duration-300
                 hover:bg-gray-400 hover:scale-105 hover:shadow-lg
@@ -26,7 +26,7 @@
 
 </div>
 
-<!-- 🔹 MODAL -->
+<!-- 🔹 MODAL (Same modal for Add and Edit - like Product page) -->
 <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-96">
         <h2 class="text-xl font-bold mb-4" id="modalTitle">Add Category</h2>
@@ -34,7 +34,7 @@
             <input type="hidden" id="category_id">
             <input type="text" id="name" placeholder="Category Name" class="w-full border p-2 mb-3 rounded" required>
             <input type="file" id="image" accept="image/*" class="w-full border p-2 mb-3 rounded">
-            <img id="preview" class="hidden h-24 mx-auto mb-3">
+            <img id="preview" class="hidden h-24 mx-auto mb-3 rounded object-cover">
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="hideForm()" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
@@ -83,13 +83,19 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
-// Show modal
-function showForm() {
-    document.getElementById('modal').classList.remove('hidden');
+// Reset form (for adding new category) - like Product page
+function resetForm() {
     document.getElementById('modalTitle').innerText = 'Add Category';
     document.getElementById('category_id').value = '';
     document.getElementById('name').value = '';
     document.getElementById('preview').classList.add('hidden');
+    document.getElementById('preview').src = '';
+    document.getElementById('image').value = '';
+}
+
+// Show modal (just shows it, does NOT reset - like Product page)
+function showForm() {
+    document.getElementById('modal').classList.remove('hidden');
 }
 
 // Hide modal
@@ -99,16 +105,19 @@ function hideForm() {
 
 // Show confirm modal for delete
 let pendingDeleteId = null;
+let pendingDeleteName = null;
 
 function showConfirmModal(categoryId, categoryName) {
     pendingDeleteId = categoryId;
-    document.getElementById('confirmMessage').innerHTML = `Are you sure you want to delete category <strong>"${categoryName}"</strong>?<br>This will also affect products in this category.`;
+    pendingDeleteName = categoryName;
+    document.getElementById('confirmMessage').innerHTML = `Are you sure you want to delete category <strong>"${escapeHtml(categoryName)}"</strong>?<br>This will also affect products in this category.`;
     document.getElementById('confirmModal').classList.remove('hidden');
 }
 
 function hideConfirmModal() {
     document.getElementById('confirmModal').classList.add('hidden');
     pendingDeleteId = null;
+    pendingDeleteName = null;
 }
 
 // Load categories
@@ -168,14 +177,43 @@ async function loadCategories() {
     }
 }
 
-// Escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+// Edit category (populates form then shows modal - like Product page)
+async function editCategory(id) {
+    try {
+        console.log('Fetching category ID:', id);
+        
+        const res = await fetch(`/api/categories/${id}`);
+        const category = await res.json();
+        
+        console.log('Category data received:', category);
+        
+        // Populate the form fields (like Product page)
+        document.getElementById('category_id').value = category.id;
+        document.getElementById('name').value = category.name || '';
+        
+        // Show existing image if any (like Product page)
+        if (category.image) {
+            const preview = document.getElementById('preview');
+            preview.src = `/storage/${category.image}`;
+            preview.classList.remove('hidden');
+        } else {
+            document.getElementById('preview').classList.add('hidden');
+            document.getElementById('preview').src = '';
+        }
+        
+        // Change modal title (like Product page)
+        document.getElementById('modalTitle').innerText = 'Edit Category';
+        
+        // Show the modal (like Product page)
+        showForm();
+        
+    } catch (error) {
+        console.error('Error loading category:', error);
+        showToast('Error loading category data', true);
+    }
 }
 
-// Save category
+// Save category (ADD or UPDATE)
 async function saveCategory(event) {
     event.preventDefault();
     
@@ -214,12 +252,11 @@ async function saveCategory(event) {
             const action = categoryId ? 'updated' : 'added';
             showToast(`Category ${action} successfully!`);
             hideForm();
-            document.getElementById('categoryForm').reset();
-            document.getElementById('preview').classList.add('hidden');
-            document.getElementById('category_id').value = '';
-            await loadCategories();
+            resetForm(); // Reset after successful save
+            await loadCategories(); // Reload the list
         } else {
             const error = await res.text();
+            console.error('Server error:', error);
             showToast('Error saving category', true);
         }
     } catch (error) {
@@ -228,30 +265,7 @@ async function saveCategory(event) {
     }
 }
 
-// Edit category
-async function editCategory(id) {
-    try {
-        const res = await fetch(`/api/categories/${id}`);
-        const category = await res.json();
-        
-        document.getElementById('category_id').value = category.id;
-        document.getElementById('name').value = category.name;
-        document.getElementById('modalTitle').innerText = 'Edit Category';
-        
-        if (category.image) {
-            const preview = document.getElementById('preview');
-            preview.src = `/storage/${category.image}`;
-            preview.classList.remove('hidden');
-        }
-        
-        showForm();
-    } catch (error) {
-        console.error('Error:', error);
-        showToast('Error loading category', true);
-    }
-}
-
-// Delete category (called from confirm modal)
+// Delete category
 async function deleteCategory() {
     if (!pendingDeleteId) return;
     
@@ -284,6 +298,14 @@ function previewImage(event) {
     if (event.target.files[0]) {
         reader.readAsDataURL(event.target.files[0]);
     }
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Set up event listeners

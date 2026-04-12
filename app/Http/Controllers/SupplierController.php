@@ -2,101 +2,164 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Supplier;
 use Illuminate\Http\Request;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\Storage;
 
 class SupplierController extends Controller
 {
     public function index()
     {
-        return Supplier::all();
+        $suppliers = Supplier::with('products')->get();
+        
+        $suppliers = $suppliers->map(function($supplier) {
+            return [
+                'id' => $supplier->id,
+                'name' => $supplier->name,
+                'contact_number' => $supplier->contact_number,
+                'address' => $supplier->address,
+                'email' => $supplier->email,
+                'image' => $supplier->image,
+                'created_at' => $supplier->created_at,
+                'updated_at' => $supplier->updated_at,
+                'products_offered' => $supplier->products->pluck('id')->toArray(),
+                'products' => $supplier->products
+            ];
+        });
+        
+        return response()->json($suppliers);
     }
 
     public function show($id)
     {
-        return Supplier::findOrFail($id);
+        $supplier = Supplier::with('products')->findOrFail($id);
+        
+        $transformed = [
+            'id' => $supplier->id,
+            'name' => $supplier->name,
+            'contact_number' => $supplier->contact_number,
+            'address' => $supplier->address,
+            'email' => $supplier->email,
+            'image' => $supplier->image,
+            'created_at' => $supplier->created_at,
+            'updated_at' => $supplier->updated_at,
+            'products_offered' => $supplier->products->pluck('id')->toArray(),
+            'products' => $supplier->products
+        ];
+        
+        return response()->json($transformed);
     }
 
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'contact_number' => 'required|string|max:20',
-                'address' => 'required|string',
-                'products_offered' => 'nullable|string',
-                'email' => 'nullable|email',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
-            ]);
+        $request->validate([
+            'name' => 'required',
+            'contact_number' => 'required',
+            'address' => 'required',
+        ]);
 
-            $path = null;
-            
-            if ($request->hasFile('image')) {
-                // Store the image in public/suppliers folder
-                $path = $request->file('image')->store('suppliers', 'public');
-            }
+        $imagePath = null;
 
-            $supplier = Supplier::create([
-                'name' => $request->name,
-                'contact_number' => $request->contact_number,
-                'address' => $request->address,
-                'products_offered' => $request->products_offered,
-                'email' => $request->email,
-                'image' => $path
-            ]);
-
-            return response()->json($supplier, 201);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('suppliers', 'public');
         }
+
+        $supplier = Supplier::create([
+            'name' => $request->name,
+            'contact_number' => $request->contact_number,
+            'address' => $request->address,
+            'email' => $request->email,
+            'image' => $imagePath,
+        ]);
+
+        // SAVE PRODUCTS TO PIVOT TABLE
+        if ($request->products_offered) {
+            $productIds = json_decode($request->products_offered, true);
+            if (is_array($productIds) && count($productIds) > 0) {
+                $supplier->products()->sync($productIds);
+                \Log::info('Products saved for supplier: ' . $supplier->id, ['product_ids' => $productIds]);
+            }
+        }
+
+        $supplier->load('products');
+        $transformed = [
+            'id' => $supplier->id,
+            'name' => $supplier->name,
+            'contact_number' => $supplier->contact_number,
+            'address' => $supplier->address,
+            'email' => $supplier->email,
+            'image' => $supplier->image,
+            'created_at' => $supplier->created_at,
+            'updated_at' => $supplier->updated_at,
+            'products_offered' => $supplier->products->pluck('id')->toArray(),
+            'products' => $supplier->products
+        ];
+
+        return response()->json($transformed);
     }
 
     public function update(Request $request, $id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-            
-            $data = [
-                'name' => $request->name,
-                'contact_number' => $request->contact_number,
-                'address' => $request->address,
-                'products_offered' => $request->products_offered,
-                'email' => $request->email
-            ];
-            
-            if ($request->hasFile('image')) {
-                // Delete old image if exists
-                if ($supplier->image && Storage::disk('public')->exists($supplier->image)) {
-                    Storage::disk('public')->delete($supplier->image);
-                }
-                $data['image'] = $request->file('image')->store('suppliers', 'public');
+        $supplier = Supplier::findOrFail($id);
+
+        $imagePath = $supplier->image;
+
+        if ($request->hasFile('image')) {
+            if ($supplier->image) {
+                Storage::disk('public')->delete($supplier->image);
             }
-            
-            $supplier->update($data);
-            return response()->json($supplier);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            $imagePath = $request->file('image')->store('suppliers', 'public');
         }
+
+        $supplier->update([
+            'name' => $request->name,
+            'contact_number' => $request->contact_number,
+            'address' => $request->address,
+            'email' => $request->email,
+            'image' => $imagePath,
+        ]);
+
+        // UPDATE PIVOT TABLE
+        if ($request->products_offered) {
+            $productIds = json_decode($request->products_offered, true);
+            if (is_array($productIds)) {
+                $supplier->products()->sync($productIds);
+                \Log::info('Products updated for supplier: ' . $supplier->id, ['product_ids' => $productIds]);
+            }
+        } else {
+            $supplier->products()->detach();
+            \Log::info('Products cleared for supplier: ' . $supplier->id);
+        }
+
+        $supplier->load('products');
+        $transformed = [
+            'id' => $supplier->id,
+            'name' => $supplier->name,
+            'contact_number' => $supplier->contact_number,
+            'address' => $supplier->address,
+            'email' => $supplier->email,
+            'image' => $supplier->image,
+            'created_at' => $supplier->created_at,
+            'updated_at' => $supplier->updated_at,
+            'products_offered' => $supplier->products->pluck('id')->toArray(),
+            'products' => $supplier->products
+        ];
+
+        return response()->json($transformed);
     }
 
     public function destroy($id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-            
-            // Delete image if exists
-            if ($supplier->image && Storage::disk('public')->exists($supplier->image)) {
-                Storage::disk('public')->delete($supplier->image);
-            }
-            
-            $supplier->delete();
-            return response()->json(['message' => 'Supplier deleted successfully']);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        $supplier = Supplier::findOrFail($id);
+
+        $supplier->products()->detach();
+
+        if ($supplier->image) {
+            Storage::disk('public')->delete($supplier->image);
         }
+
+        $supplier->delete();
+
+        return response()->json(['success' => true]);
     }
 }

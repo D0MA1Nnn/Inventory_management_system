@@ -39,7 +39,7 @@
             <a href="/categories-ui" class="nav-link hover:text-blue-400 transition">Category</a>
             <a href="/products-ui" class="nav-link hover:text-blue-400 transition">Product</a>
             <a href="/suppliers-ui" class="nav-link hover:text-blue-400 transition">Supplier</a>
-            <a href="#" class="nav-link hover:text-blue-400 transition">Purchases</a>
+            <a href="/purchases-ui" class="nav-link hover:text-blue-400 transition">Purchases</a>
             <a href="#" class="nav-link hover:text-blue-400 transition">Sales</a>
         </div>
 

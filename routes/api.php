@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseController;
 
 // ========== UI VIEWS ==========
 Route::get('/', function () {
@@ -44,4 +45,12 @@ Route::prefix('api')->group(function () {
     Route::post('/suppliers', [SupplierController::class, 'store']);
     Route::put('/suppliers/{id}', [SupplierController::class, 'update']);
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy']);
+
+    // ========== PURCHASE ROUTES ==========
+    Route::get('/purchase/products', [PurchaseController::class, 'getProducts']);
+    Route::get('/purchase/product-suppliers/{productId}', [PurchaseController::class, 'getProductSuppliers']);
+    Route::post('/purchase/add-to-coming', [PurchaseController::class, 'addToComing']);
+    Route::get('/purchase/coming', [PurchaseController::class, 'getComing']);
+    Route::post('/purchase/receive', [PurchaseController::class, 'receive']);
+    Route::get('/purchase/received', [PurchaseController::class, 'getReceived']);
 });

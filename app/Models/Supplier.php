@@ -10,8 +10,12 @@ class Supplier extends Model
         'name',
         'contact_number',
         'address',
-        'products_offered',
         'email',
         'image'
     ];
-} 
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'supplier_product', 'supplier_id', 'product_id');
+    }
+}

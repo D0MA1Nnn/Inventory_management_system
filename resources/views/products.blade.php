@@ -4,21 +4,21 @@
 
 <h1 class="text-2xl font-bold mb-4 text-center">PRODUCT</h1>
 
-<!-- 🔹 FILTER -->
+<!-- FILTER DROPDOWN (changed from modal to dropdown like purchases) -->
 <div class="flex justify-end mb-3">
-    <button onclick="showFilterModal()" class="bg-gray-300 px-3 py-1 text-sm rounded hover:bg-gray-400 transition">
-        FILTER BY CATEGORY
-    </button>
+    <select id="categoryFilter" class="bg-gray-300 px-3 py-1 text-sm rounded hover:bg-gray-400 transition cursor-pointer" onchange="filterByCategory()">
+        <option value="">ALL CATEGORIES</option>
+    </select>
 </div>
 
-<!-- 🔹 GRID -->
+<!-- GRID -->
 <div class="grid grid-cols-4 gap-4">
 
-    <!-- 🔹 PRODUCT CARDS -->
+    <!-- PRODUCT CARDS -->
     <div id="productContainer" class="contents"></div>
 
-    <!-- 🔹 ADD CARD -->
-    <div onclick="showForm()"
+    <!-- ADD CARD -->
+    <div onclick="resetForm(); showForm()"
         class="bg-gray-300 h-80 flex flex-col items-center justify-center rounded-xl
                 cursor-pointer transition-all duration-200
                 hover:bg-gray-400 hover:scale-105 hover:shadow-lg
@@ -33,7 +33,7 @@
 
 </div>
 
-<!-- 🔹 PRODUCT MODAL (UPDATED with more fields) -->
+<!-- PRODUCT MODAL -->
 <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl font-bold mb-4" id="modalTitle">Add Product</h2>
@@ -95,7 +95,7 @@
                 
                 <div class="mb-3 col-span-2">
                     <label class="block text-gray-700 text-sm mb-1">Product Image</label>
-                    <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded">
+                    <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded" onchange="previewImage(event)">
                     <img id="preview" class="hidden h-24 mx-auto mt-2 rounded object-cover">
                 </div>
             </div>
@@ -108,7 +108,7 @@
     </div>
 </div>
 
-<!-- 🔹 PRODUCT DETAILS MODAL (NEW) -->
+<!-- PRODUCT DETAILS MODAL -->
 <div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
@@ -119,22 +119,7 @@
     </div>
 </div>
 
-<!-- 🔹 FILTER MODAL -->
-<div id="filterModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg w-96">
-        <h2 class="text-xl font-bold mb-4">Filter by Category</h2>
-        <select id="filterCategory" class="w-full border p-2 rounded mb-4">
-            <option value="">All Categories</option>
-        </select>
-        <div class="flex justify-end gap-2">
-            <button onclick="clearFilter()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Clear</button>
-            <button onclick="hideFilterModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-            <button onclick="applyFilter()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Apply</button>
-        </div>
-    </div>
-</div>
-
-<!-- 🔹 CONFIRMATION MODAL -->
+<!-- CONFIRMATION MODAL -->
 <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-96 text-center">
         <div class="text-6xl mb-4">⚠️</div>
@@ -147,7 +132,7 @@
     </div>
 </div>
 
-<!-- 🔹 TOAST NOTIFICATION -->
+<!-- TOAST NOTIFICATION -->
 <div id="toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
     <span id="toastMessage"></span>
 </div>
@@ -156,6 +141,7 @@
 // Variables
 let pendingDeleteId = null;
 let currentFilter = '';
+let allProductsData = [];
 
 // Show toast notification
 function showToast(message, isError = false) {
@@ -178,12 +164,6 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
-// Show product modal
-function showForm() {
-    document.getElementById('modal').classList.remove('hidden');
-    // Don't reset the form here - let the edit function populate it
-}
-
 // Reset form when adding new product
 function resetForm() {
     document.getElementById('modalTitle').innerText = 'Add Product';
@@ -193,8 +173,10 @@ function resetForm() {
     document.getElementById('preview').src = '';
 }
 
-// Update your ADD CARD onclick to use resetForm
-// Change: onclick="showForm()" to onclick="resetForm(); showForm()"
+// Show product modal
+function showForm() {
+    document.getElementById('modal').classList.remove('hidden');
+}
 
 // Hide product modal
 function hideForm() {
@@ -225,31 +207,6 @@ function hideDetailsModal() {
     document.getElementById('detailsModal').classList.add('hidden');
 }
 
-// Show filter modal
-async function showFilterModal() {
-    await loadFilterCategories();
-    document.getElementById('filterModal').classList.remove('hidden');
-}
-
-function hideFilterModal() {
-    document.getElementById('filterModal').classList.add('hidden');
-}
-
-async function applyFilter() {
-    const filterValue = document.getElementById('filterCategory').value;
-    currentFilter = filterValue;
-    hideFilterModal();
-    showToast(currentFilter ? 'Filtering products...' : 'Showing all products...');
-    await loadProducts();
-}
-
-async function clearFilter() {
-    currentFilter = '';
-    document.getElementById('filterCategory').value = '';
-    await loadProducts();
-    showToast('Filter cleared');
-}
-
 // Show confirm modal
 function showConfirmModal(id, name) {
     pendingDeleteId = id;
@@ -268,14 +225,29 @@ async function loadFilterCategories() {
         const res = await fetch('/api/categories');
         const categories = await res.json();
         
-        const select = document.getElementById('filterCategory');
-        select.innerHTML = '<option value="">All Categories</option>';
+        const select = document.getElementById('categoryFilter');
+        select.innerHTML = '<option value="">ALL CATEGORIES</option>';
         
         categories.forEach(cat => {
             select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
         });
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+// Filter products by category (like purchases page)
+function filterByCategory() {
+    const filterValue = document.getElementById('categoryFilter').value;
+    currentFilter = filterValue;
+    
+    if (!currentFilter) {
+        displayProducts(allProductsData);
+        showToast('Showing all products');
+    } else {
+        const filtered = allProductsData.filter(p => p.category_id == currentFilter);
+        displayProducts(filtered);
+        showToast('Filtering products...');
     }
 }
 
@@ -299,12 +271,7 @@ async function loadCategories() {
 // Load products
 async function loadProducts() {
     try {
-        let url = '/api/products';
-        if (currentFilter && currentFilter !== '') {
-            url = `/api/products?category_id=${currentFilter}`;
-        }
-        
-        const res = await fetch(url);
+        const res = await fetch('/api/products');
         
         if (!res.ok) {
             throw new Error(`HTTP ${res.status}`);
@@ -316,54 +283,60 @@ async function loadProducts() {
             products = products.data;
         }
         
-        const container = document.getElementById('productContainer');
-        container.innerHTML = '';
+        allProductsData = products;
+        displayProducts(allProductsData);
         
-        if (products.length === 0) {
-            let message = currentFilter ? 'No products found in this category. Click + ADD PRODUCT to create one!' : 'No products yet. Click + ADD PRODUCT to create one!';
-            container.innerHTML = `<div class="col-span-4 text-center text-gray-500 py-8">${message}</div>`;
-            return;
-        }
-        
-        products.forEach(product => {
-            const formattedPrice = parseFloat(product.price).toFixed(2);
-
-
-            container.innerHTML += `
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" style="border-radius: 12px;">
-                    <div style="background-color: #1a1f2e; padding: 10px 16px 24px 16px; display: flex; justify-content: space-evenly; align-items: center;">
-                        <button onclick='showDetailsModal(${JSON.stringify(product)})' style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            DETAILS
-                        </button>
-                        <button onclick="editProduct(${product.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            EDIT
-                        </button>
-                        <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                            DELETE
-                        </button>
-                    </div>
-                    <div style="height: 160px; background-color: #e5e7eb; overflow: hidden; border-radius: 20px; margin-top: -20px; border-top: 2px solid white;">
-                        ${product.image
-                            ? `<img src="/storage/${product.image}" style="width: 100%; height: 100%; object-fit: cover;">`
-                            : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:#9ca3af;">NO IMAGE</span></div>'
-                        }
-                    </div>
-                    <div style="padding: 14px 16px 16px;">
-                        <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: 0.2px;">${escapeHtml(product.name)}</h2>
-                        <p style="font-size: 13px; color: #16a34a; font-weight: 700; margin: 0 0 3px 0;">₱ ${formattedPrice}</p>
-                        <p style="font-size: 13px; color: #4b5563; margin: 0 0 3px 0;">Stock: ${product.quantity}</p>
-                        <p style="font-size: 13px; color: #2563eb; margin: 0 0 4px 0;">${product.category ? escapeHtml(product.category.name) : 'No Category'}</p>
-                    </div>
-                </div>
-            `;
-        });
     } catch (error) {
         console.error('Error loading products:', error);
         showToast('Error loading products', true);
     }
+}
+
+// Display products in grid
+function displayProducts(products) {
+    const container = document.getElementById('productContainer');
+    container.innerHTML = '';
+    
+    if (products.length === 0) {
+        let message = currentFilter ? 'No products found in this category. Click + ADD PRODUCT to create one!' : 'No products yet. Click + ADD PRODUCT to create one!';
+        container.innerHTML = `<div class="col-span-4 text-center text-gray-500 py-8">${message}</div>`;
+        return;
+    }
+    
+    products.forEach(product => {
+        const formattedPrice = parseFloat(product.price).toFixed(2);
+
+        container.innerHTML += `
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" style="border-radius: 12px;">
+                <div style="background-color: #1a1f2e; padding: 10px 16px 24px 16px; display: flex; justify-content: space-evenly; align-items: center;">
+                    <button onclick='showDetailsModal(${JSON.stringify(product)})' style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        DETAILS
+                    </button>
+                    <button onclick="editProduct(${product.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        EDIT
+                    </button>
+                    <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        DELETE
+                    </button>
+                </div>
+                <div style="height: 160px; background-color: #e5e7eb; overflow: hidden; border-radius: 20px; margin-top: -20px; border-top: 2px solid white;">
+                    ${product.image
+                        ? `<img src="/storage/${product.image}" style="width: 100%; height: 100%; object-fit: cover;">`
+                        : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:#9ca3af;">NO IMAGE</span></div>'
+                    }
+                </div>
+                <div style="padding: 14px 16px 16px;">
+                    <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: 0.2px;">${escapeHtml(product.name)}</h2>
+                    <p style="font-size: 13px; color: #16a34a; font-weight: 700; margin: 0 0 3px 0;">₱ ${formattedPrice}</p>
+                    <p style="font-size: 13px; color: #4b5563; margin: 0 0 3px 0;">Stock: ${product.quantity}</p>
+                    <p style="font-size: 13px; color: #2563eb; margin: 0 0 4px 0;">${product.category ? escapeHtml(product.category.name) : 'No Category'}</p>
+                </div>
+            </div>
+        `;
+    });
 }
 
 // Save product
@@ -464,7 +437,6 @@ async function editProduct(id) {
     }
 }
 
-
 // Delete product
 async function deleteProduct() {
     if (!pendingDeleteId) return;
@@ -512,6 +484,7 @@ function escapeHtml(text) {
 document.addEventListener('DOMContentLoaded', function() {
     loadCategories();
     loadProducts();
+    loadFilterCategories();
     
     const form = document.getElementById('productForm');
     if (form) {
