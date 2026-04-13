@@ -2,70 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        return Category::withCount('products')->get();
+        return Category::all();
     }
 
     public function show($id)
     {
-        return Category::withCount('products')->findOrFail($id);
+        return Category::findOrFail($id);
     }
 
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120' // Increased to 5MB, added webp
-            ]);
+        $request->validate([
+            'name' => 'required',
+        ]);
 
-            $path = null;
+        $imagePath = null;
 
-            if ($request->hasFile('image')) {
-                // Store the image
-                $path = $request->file('image')->store('categories', 'public');
-            }
-
-            $category = Category::create([
-                'name' => $request->name,
-                'image' => $path
-            ]);
-
-            return response()->json($category, 201);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('categories', 'public');
         }
+
+        $category = Category::create([
+            'name' => $request->name,
+            'image' => $imagePath,
+            'fields_schema' => $request->fields_schema ? json_decode($request->fields_schema, true) : null
+        ]);
+
+        return response()->json($category);
     }
 
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
-        
-        $data = ['name' => $request->name];
-        
+
+        $imagePath = $category->image;
+
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
+            if ($category->image) {
                 Storage::disk('public')->delete($category->image);
             }
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $imagePath = $request->file('image')->store('categories', 'public');
         }
-        
-        $category->update($data);
-        
+
+        $category->update([
+            'name' => $request->name,
+            'image' => $imagePath,
+            'fields_schema' => $request->fields_schema ? json_decode($request->fields_schema, true) : null
+        ]);
+
         return response()->json($category);
     }
 
@@ -73,12 +65,12 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         
-        if ($category->image && Storage::disk('public')->exists($category->image)) {
+        if ($category->image) {
             Storage::disk('public')->delete($category->image);
         }
         
         $category->delete();
-        
-        return response()->json(['message' => 'Category deleted successfully']);
+
+        return response()->json(['success' => true]);
     }
 }

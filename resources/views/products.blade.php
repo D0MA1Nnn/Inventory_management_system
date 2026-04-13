@@ -4,7 +4,7 @@
 
 <h1 class="text-2xl font-bold mb-4 text-center">PRODUCT</h1>
 
-<!-- FILTER DROPDOWN (changed from modal to dropdown like purchases) -->
+<!-- FILTER DROPDOWN -->
 <div class="flex justify-end mb-3">
     <select id="categoryFilter" class="bg-gray-300 px-3 py-1 text-sm rounded hover:bg-gray-400 transition cursor-pointer" onchange="filterByCategory()">
         <option value="">ALL CATEGORIES</option>
@@ -13,8 +13,6 @@
 
 <!-- GRID -->
 <div class="grid grid-cols-4 gap-4">
-
-    <!-- PRODUCT CARDS -->
     <div id="productContainer" class="contents"></div>
 
     <!-- ADD CARD -->
@@ -23,14 +21,11 @@
                 cursor-pointer transition-all duration-200
                 hover:bg-gray-400 hover:scale-105 hover:shadow-lg
                 hover:ring-2 hover:ring-blue-400">
-
         <div class="text-4xl font-bold text-gray-700">+</div>
         <div class="text-sm mt-2 text-gray-700 font-medium">
             ADD PRODUCT
         </div>
-
     </div>
-
 </div>
 
 <!-- PRODUCT MODAL -->
@@ -40,67 +35,90 @@
         <form id="productForm" enctype="multipart/form-data">
             <input type="hidden" id="product_id">
             
-            <div class="grid grid-cols-2 gap-3">
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Product Name *</label>
-                    <input type="text" id="name" required class="w-full border p-2 rounded">
+            <div class="space-y-4">
+                <!-- SECTION 1: Basic Information -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Basic Information</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="mb-3 col-span-2">
+                            <label class="block text-gray-700 text-sm mb-1">Product Name *</label>
+                            <input type="text" id="name" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Brand *</label>
+                            <input type="text" id="brand" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Model Number *</label>
+                            <input type="text" id="model_number" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Brand</label>
-                    <input type="text" id="brand" class="w-full border p-2 rounded">
+                <!-- SECTION 2: Custom Specifications (Based on Category) -->
+                <div id="dynamicFieldsSection" class="border rounded-lg p-4" style="display: none;">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Custom Specifications</h3>
+                    <div id="dynamicFields" class="grid grid-cols-2 gap-3">
+                        <!-- Custom fields will be loaded here based on selected category -->
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Model Number</label>
-                    <input type="text" id="model_number" class="w-full border p-2 rounded">
+                <!-- SECTION 3: Pricing & Inventory -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Pricing & Inventory</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Price *</label>
+                            <input type="number" id="price" required step="0.01" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Quantity *</label>
+                            <input type="number" id="quantity" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Architecture/Socket</label>
-                    <input type="text" id="architecture_socket" class="w-full border p-2 rounded">
+                <!-- SECTION 4: Category -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Classification</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Category *</label>
+                            <select id="category_id" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" onchange="updateDynamicFields()">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Core Configuration</label>
-                    <input type="text" id="core_configuration" class="w-full border p-2 rounded">
+                <!-- SECTION 5: Performance Details -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Performance Details</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Performance Details *</label>
+                            <textarea id="performance" rows="3" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" placeholder="Base clock, boost clock, TDP, cache, etc."></textarea>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Integrated Graphics</label>
-                    <input type="text" id="integrated_graphics" class="w-full border p-2 rounded">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Price *</label>
-                    <input type="number" id="price" required step="0.01" class="w-full border p-2 rounded">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm mb-1">Quantity *</label>
-                    <input type="number" id="quantity" required class="w-full border p-2 rounded">
-                </div>
-                
-                <div class="mb-3 col-span-2">
-                    <label class="block text-gray-700 text-sm mb-1">Category</label>
-                    <select id="category_id" class="w-full border p-2 rounded">
-                        <option value="">Select Category</option>
-                    </select>
-                </div>
-                
-                <div class="mb-3 col-span-2">
-                    <label class="block text-gray-700 text-sm mb-1">Performance Details</label>
-                    <textarea id="performance" rows="3" class="w-full border p-2 rounded" placeholder="Base clock, boost clock, TDP, cache, etc."></textarea>
-                </div>
-                
-                <div class="mb-3 col-span-2">
-                    <label class="block text-gray-700 text-sm mb-1">Product Image</label>
-                    <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded" onchange="previewImage(event)">
-                    <img id="preview" class="hidden h-24 mx-auto mt-2 rounded object-cover">
+                <!-- SECTION 6: Product Image -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3 text-base">Product Image</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Product Image</label>
+                            <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded" onchange="previewImage(event)">
+                            <img id="preview" class="hidden h-24 mx-auto mt-2 rounded object-cover">
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="flex justify-end gap-2 mt-4">
+            <div class="flex justify-end gap-2 mt-6 pt-4 border-t">
                 <button type="button" onclick="hideForm()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Save</button>
             </div>
@@ -143,7 +161,6 @@ let pendingDeleteId = null;
 let currentFilter = '';
 let allProductsData = [];
 
-// Show toast notification
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
@@ -158,19 +175,101 @@ function showToast(message, isError = false) {
     }
     
     toast.classList.remove('hidden');
-    
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 3000);
+}
+
+// Update custom fields based on selected category
+async function updateDynamicFields() {
+    const categoryId = document.getElementById('category_id').value;
+    const dynamicFields = document.getElementById('dynamicFields');
+    const dynamicFieldsSection = document.getElementById('dynamicFieldsSection');
+    
+    if (!categoryId) {
+        dynamicFieldsSection.style.display = 'none';
+        dynamicFields.innerHTML = '';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/api/categories/${categoryId}`);
+        const category = await res.json();
+        
+        let fieldsSchema = [];
+        if (category.fields_schema) {
+            fieldsSchema = typeof category.fields_schema === 'string' 
+                ? JSON.parse(category.fields_schema) 
+                : category.fields_schema;
+        }
+        
+        if (fieldsSchema.length === 0) {
+            dynamicFieldsSection.style.display = 'none';
+            dynamicFields.innerHTML = '';
+            return;
+        }
+        
+        dynamicFieldsSection.style.display = 'block';
+        let fieldsHtml = '';
+        
+        fieldsSchema.forEach(field => {
+            const required = field.required ? 'required' : '';
+            let fieldInput = '';
+            
+            if (field.type === 'textarea') {
+                fieldInput = `<textarea id="${field.name}" name="${field.name}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" rows="2" ${required}></textarea>`;
+                fieldsHtml += `<div class="mb-3 col-span-2">
+                    <label class="block text-gray-700 text-sm mb-1">${field.label} ${field.required ? '*' : ''}</label>
+                    ${fieldInput}
+                </div>`;
+            } else if (field.type === 'select' && field.options) {
+                fieldInput = `<select id="${field.name}" name="${field.name}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" ${required}>
+                    <option value="">Select ${field.label}</option>
+                    ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                </select>`;
+                fieldsHtml += `<div class="mb-3">
+                    <label class="block text-gray-700 text-sm mb-1">${field.label} ${field.required ? '*' : ''}</label>
+                    ${fieldInput}
+                </div>`;
+            } else if (field.type === 'number') {
+                fieldInput = `<input type="number" id="${field.name}" name="${field.name}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" step="any" ${required}>`;
+                fieldsHtml += `<div class="mb-3">
+                    <label class="block text-gray-700 text-sm mb-1">${field.label} ${field.required ? '*' : ''}</label>
+                    ${fieldInput}
+                </div>`;
+            } else {
+                fieldInput = `<input type="text" id="${field.name}" name="${field.name}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" ${required}>`;
+                fieldsHtml += `<div class="mb-3">
+                    <label class="block text-gray-700 text-sm mb-1">${field.label} ${field.required ? '*' : ''}</label>
+                    ${fieldInput}
+                </div>`;
+            }
+        });
+        
+        dynamicFields.innerHTML = fieldsHtml;
+        
+    } catch (error) {
+        console.error('Error loading category fields:', error);
+        dynamicFieldsSection.style.display = 'none';
+        dynamicFields.innerHTML = '';
+    }
 }
 
 // Reset form when adding new product
 function resetForm() {
     document.getElementById('modalTitle').innerText = 'Add Product';
     document.getElementById('product_id').value = '';
-    document.getElementById('productForm').reset();
+    document.getElementById('name').value = '';
+    document.getElementById('brand').value = '';
+    document.getElementById('model_number').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('category_id').value = '';
+    document.getElementById('performance').value = '';
     document.getElementById('preview').classList.add('hidden');
     document.getElementById('preview').src = '';
+    document.getElementById('dynamicFieldsSection').style.display = 'none';
+    document.getElementById('dynamicFields').innerHTML = '';
 }
 
 // Show product modal
@@ -185,19 +284,39 @@ function hideForm() {
 
 // Show details modal
 function showDetailsModal(product) {
+    let extraFieldsHtml = '';
+    
+    // Show standard fields
+    if (product.brand) {
+        extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>Brand:</strong><br>${escapeHtml(product.brand)}</div>`;
+    }
+    if (product.model_number) {
+        extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>Model Number:</strong><br>${escapeHtml(product.model_number)}</div>`;
+    }
+    
+    // Show custom fields
+    if (product.dynamic_fields) {
+        const dynamicFields = typeof product.dynamic_fields === 'string' 
+            ? JSON.parse(product.dynamic_fields) 
+            : product.dynamic_fields;
+        
+        for (const [key, value] of Object.entries(dynamicFields)) {
+            if (value) {
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>${label}:</strong><br>${escapeHtml(String(value))}</div>`;
+            }
+        }
+    }
+    
     document.getElementById('detailsTitle').innerText = product.name;
     document.getElementById('detailsContent').innerHTML = `
         <div class="grid grid-cols-2 gap-4">
             ${product.image ? `<div class="col-span-2"><img src="/storage/${product.image}" class="w-full max-h-64 object-cover rounded"></div>` : ''}
-            <div class="bg-gray-50 p-2 rounded"><strong>Brand:</strong><br>${product.brand || 'N/A'}</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Model Number:</strong><br>${product.model_number || 'N/A'}</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Architecture/Socket:</strong><br>${product.architecture_socket || 'N/A'}</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Core Configuration:</strong><br>${product.core_configuration || 'N/A'}</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Integrated Graphics:</strong><br>${product.integrated_graphics || 'N/A'}</div>
+            ${extraFieldsHtml}
             <div class="bg-gray-50 p-2 rounded"><strong>Price:</strong><br>₱ ${parseFloat(product.price).toFixed(2)}</div>
             <div class="bg-gray-50 p-2 rounded"><strong>Stock:</strong><br>${product.quantity} units</div>
             <div class="bg-gray-50 p-2 rounded"><strong>Category:</strong><br>${product.category ? product.category.name : 'N/A'}</div>
-            <div class="col-span-2 bg-gray-50 p-2 rounded"><strong>Performance:</strong><br>${product.performance || 'N/A'}</div>
+            ${product.performance ? `<div class="col-span-2 bg-gray-50 p-2 rounded"><strong>Performance:</strong><br>${escapeHtml(product.performance)}</div>` : ''}
         </div>
     `;
     document.getElementById('detailsModal').classList.remove('hidden');
@@ -236,7 +355,7 @@ async function loadFilterCategories() {
     }
 }
 
-// Filter products by category (like purchases page)
+// Filter products by category
 function filterByCategory() {
     const filterValue = document.getElementById('categoryFilter').value;
     currentFilter = filterValue;
@@ -332,7 +451,7 @@ function displayProducts(products) {
                     <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: 0.2px;">${escapeHtml(product.name)}</h2>
                     <p style="font-size: 13px; color: #16a34a; font-weight: 700; margin: 0 0 3px 0;">₱ ${formattedPrice}</p>
                     <p style="font-size: 13px; color: #4b5563; margin: 0 0 3px 0;">Stock: ${product.quantity}</p>
-                    <p style="font-size: 13px; color: #2563eb; margin: 0 0 4px 0;">${product.category ? escapeHtml(product.category.name) : 'No Category'}</p>
+                    <p style="font-size: 13px; color: #2563eb; margin: 0 0 4px 0;">${product.category ? product.category.name : 'No Category'}</p>
                 </div>
             </div>
         `;
@@ -347,13 +466,19 @@ async function saveProduct(event) {
     formData.append('name', document.getElementById('name').value);
     formData.append('brand', document.getElementById('brand').value);
     formData.append('model_number', document.getElementById('model_number').value);
-    formData.append('architecture_socket', document.getElementById('architecture_socket').value);
-    formData.append('core_configuration', document.getElementById('core_configuration').value);
-    formData.append('performance', document.getElementById('performance').value);
-    formData.append('integrated_graphics', document.getElementById('integrated_graphics').value);
     formData.append('price', document.getElementById('price').value);
     formData.append('quantity', document.getElementById('quantity').value);
     formData.append('category_id', document.getElementById('category_id').value);
+    formData.append('performance', document.getElementById('performance').value);
+    
+    // Get all custom fields from the form
+    const dynamicFieldsContainer = document.getElementById('dynamicFields');
+    const dynamicInputs = dynamicFieldsContainer.querySelectorAll('input, select, textarea');
+    dynamicInputs.forEach(input => {
+        if (input.id && input.value) {
+            formData.append(input.id, input.value);
+        }
+    });
     
     const imageFile = document.getElementById('image').files[0];
     if (imageFile) {
@@ -384,6 +509,8 @@ async function saveProduct(event) {
             document.getElementById('preview').classList.add('hidden');
             await loadProducts();
         } else {
+            const error = await res.text();
+            console.error('Error:', error);
             showToast('Error saving product', true);
         }
     } catch (error) {
@@ -395,30 +522,20 @@ async function saveProduct(event) {
 // Edit product
 async function editProduct(id) {
     try {
-        console.log('Fetching product ID:', id);
-        
         const res = await fetch(`/api/products/${id}`);
         const product = await res.json();
         
-        console.log('Product data received:', product);
-        
-        // Populate all fields
         document.getElementById('product_id').value = product.id;
         document.getElementById('name').value = product.name || '';
         document.getElementById('brand').value = product.brand || '';
         document.getElementById('model_number').value = product.model_number || '';
-        document.getElementById('architecture_socket').value = product.architecture_socket || '';
-        document.getElementById('core_configuration').value = product.core_configuration || '';
-        document.getElementById('performance').value = product.performance || '';
-        document.getElementById('integrated_graphics').value = product.integrated_graphics || '';
         document.getElementById('price').value = product.price || '';
         document.getElementById('quantity').value = product.quantity || '';
         document.getElementById('category_id').value = product.category_id || '';
+        document.getElementById('performance').value = product.performance || '';
         
-        // Change modal title
         document.getElementById('modalTitle').innerText = 'Edit Product';
         
-        // Show existing image if any
         if (product.image) {
             const preview = document.getElementById('preview');
             preview.src = `/storage/${product.image}`;
@@ -428,7 +545,25 @@ async function editProduct(id) {
             document.getElementById('preview').src = '';
         }
         
-        // Show the modal
+        // Trigger category change to load custom fields
+        await updateDynamicFields();
+        
+        // Populate custom fields after they're loaded
+        setTimeout(() => {
+            if (product.dynamic_fields) {
+                const dynamicFields = typeof product.dynamic_fields === 'string' 
+                    ? JSON.parse(product.dynamic_fields) 
+                    : product.dynamic_fields;
+                
+                for (const [key, value] of Object.entries(dynamicFields)) {
+                    const field = document.getElementById(key);
+                    if (field && value) {
+                        field.value = value;
+                    }
+                }
+            }
+        }, 300);
+        
         showForm();
         
     } catch (error) {

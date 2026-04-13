@@ -1,90 +1,110 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
 
 class ProductPageController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Product::with('category');
-        
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->where('category_id', $request->category_id);
-        }
-        
-        return $query->get();
-    }
-
-    public function store(Request $request)
-    {
-        $path = null;
-        
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-        }
-        
-        $product = Product::create([
-            'name' => $request->name,
-            'brand' => $request->brand,
-            'model_number' => $request->model_number,
-            'architecture_socket' => $request->architecture_socket,
-            'core_configuration' => $request->core_configuration,
-            'performance' => $request->performance,
-            'integrated_graphics' => $request->integrated_graphics,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'category_id' => $request->category_id,
-            'image' => $path
-        ]);
-        
-        return response()->json($product, 201);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-        
-        $data = [
-            'name' => $request->name,
-            'brand' => $request->brand,
-            'model_number' => $request->model_number,
-            'architecture_socket' => $request->architecture_socket,
-            'core_configuration' => $request->core_configuration,
-            'performance' => $request->performance,
-            'integrated_graphics' => $request->integrated_graphics,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'category_id' => $request->category_id
-        ];
-        
-        if ($request->hasFile('image')) {
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
-        
-        $product->update($data);
-        return response()->json($product);
+        return Product::with('category')->get();
     }
 
     public function show($id)
     {
         return Product::with('category')->findOrFail($id);
     }
-    
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'quantity' => 'required|integer',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        // Get dynamic fields from request (all fields except the standard ones)
+        $dynamicFields = [];
+        $standardFields = ['name', 'brand', 'model_number', 'price', 'quantity', 'category_id', 'image', 'performance', '_method', '_token'];
+        
+        foreach ($request->all() as $key => $value) {
+            if (!in_array($key, $standardFields) && !is_null($value) && $value !== '') {
+                $dynamicFields[$key] = $value;
+            }
+        }
+
+        $product = Product::create([
+            'name' => $request->name,
+            'brand' => $request->brand,
+            'model_number' => $request->model_number,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'category_id' => $request->category_id,
+            'image' => $imagePath,
+            'performance' => $request->performance,
+            'dynamic_fields' => $dynamicFields,
+        ]);
+
+        return response()->json($product);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $imagePath = $product->image;
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        // Get dynamic fields from request
+        $dynamicFields = [];
+        $standardFields = ['name', 'brand', 'model_number', 'price', 'quantity', 'category_id', 'image', 'performance', '_method', '_token'];
+        
+        foreach ($request->all() as $key => $value) {
+            if (!in_array($key, $standardFields) && !is_null($value) && $value !== '') {
+                $dynamicFields[$key] = $value;
+            }
+        }
+
+        $product->update([
+            'name' => $request->name,
+            'brand' => $request->brand,
+            'model_number' => $request->model_number,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'category_id' => $request->category_id,
+            'image' => $imagePath,
+            'performance' => $request->performance,
+            'dynamic_fields' => $dynamicFields,
+        ]);
+
+        return response()->json($product);
+    }
+
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
         
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
+        if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
         
         $product->delete();
+
         return response()->json(['success' => true]);
     }
 }
