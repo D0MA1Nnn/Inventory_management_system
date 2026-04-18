@@ -1,31 +1,50 @@
 @extends('layouts.app')
 
+@section('title', 'Products')
 @section('content')
 
-<h1 class="text-2xl font-bold mb-4 text-center">PRODUCT</h1>
-
-<!-- FILTER DROPDOWN -->
-<div class="flex justify-end mb-3">
-    <select id="categoryFilter" class="bg-gray-300 px-3 py-1 text-sm rounded hover:bg-gray-400 transition cursor-pointer" onchange="filterByCategory()">
-        <option value="">ALL CATEGORIES</option>
-    </select>
-</div>
-
-<!-- GRID -->
-<div class="grid grid-cols-4 gap-4">
-    <div id="productContainer" class="contents"></div>
-
-    <!-- ADD CARD -->
-    <div onclick="resetForm(); showForm()"
-        class="bg-gray-300 h-80 flex flex-col items-center justify-center rounded-xl
-                cursor-pointer transition-all duration-200
-                hover:bg-gray-400 hover:scale-105 hover:shadow-lg
-                hover:ring-2 hover:ring-blue-400">
-        <div class="text-4xl font-bold text-gray-700">+</div>
-        <div class="text-sm mt-2 text-gray-700 font-medium">
-            ADD PRODUCT
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900"></h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <select id="categoryFilter" class="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterByCategory()">
+                <option value="">ALL CATEGORIES</option>
+            </select>
+            <button onclick="resetForm(); showForm()" 
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Product
+            </button>
         </div>
     </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="totalProductsCount">0</p>
+            <p class="text-xs text-gray-500">Total Products</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-green-600" id="inStockCount">0</p>
+            <p class="text-xs text-gray-500">In Stock</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-amber-600" id="lowStockCount">0</p>
+            <p class="text-xs text-gray-500">Low Stock</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-blue-600" id="totalValueCount">₱0</p>
+            <p class="text-xs text-gray-500">Total Inventory Value</p>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 </div>
 
 <!-- PRODUCT MODAL -->
@@ -60,9 +79,7 @@
                 <!-- SECTION 2: Custom Specifications (Based on Category) -->
                 <div id="dynamicFieldsSection" class="border rounded-lg p-4" style="display: none;">
                     <h3 class="font-semibold text-gray-800 mb-3 text-base">Custom Specifications</h3>
-                    <div id="dynamicFields" class="grid grid-cols-2 gap-3">
-                        <!-- Custom fields will be loaded here based on selected category -->
-                    </div>
+                    <div id="dynamicFields" class="grid grid-cols-2 gap-3"></div>
                 </div>
                 
                 <!-- SECTION 3: Pricing & Inventory -->
@@ -126,7 +143,7 @@
     </div>
 </div>
 
-<!-- PRODUCT DETAILS MODAL - SAME UI AS PURCHASES PAGE -->
+<!-- PRODUCT DETAILS MODAL -->
 <div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto">
         <div class="h-48 overflow-hidden">
@@ -184,6 +201,19 @@ function showToast(message, isError = false) {
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 3000);
+}
+
+// Update stats
+function updateStats(products) {
+    const totalProducts = products.length;
+    const inStock = products.filter(p => p.quantity > 0).length;
+    const lowStock = products.filter(p => p.quantity > 0 && p.quantity < 10).length;
+    const totalValue = products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+    
+    document.getElementById('totalProductsCount').innerText = totalProducts;
+    document.getElementById('inStockCount').innerText = inStock;
+    document.getElementById('lowStockCount').innerText = lowStock;
+    document.getElementById('totalValueCount').innerText = '₱' + totalValue.toLocaleString();
 }
 
 // Update custom fields based on selected category
@@ -293,11 +323,10 @@ function hideDetailsModal() {
     document.getElementById('detailsModal').classList.add('hidden');
 }
 
-// Show details modal - EXACT SAME UI AS PURCHASES PAGE
+// Show details modal
 function showDetailsModal(product) {
     let extraFieldsHtml = '';
     
-    // Brand field
     if (product.brand) {
         extraFieldsHtml += `
             <div class="p-2.5 border-b border-gray-100">
@@ -307,7 +336,6 @@ function showDetailsModal(product) {
         `;
     }
     
-    // Model Number field
     if (product.model_number) {
         extraFieldsHtml += `
             <div class="p-2.5 border-b border-gray-100">
@@ -317,7 +345,6 @@ function showDetailsModal(product) {
         `;
     }
     
-    // Custom fields from dynamic_fields
     if (product.dynamic_fields) {
         const dynamicFields = typeof product.dynamic_fields === 'string' 
             ? JSON.parse(product.dynamic_fields) 
@@ -448,6 +475,7 @@ async function loadProducts() {
         }
         
         allProductsData = products;
+        updateStats(products);
         displayProducts(allProductsData);
         
     } catch (error) {
@@ -462,41 +490,63 @@ function displayProducts(products) {
     container.innerHTML = '';
     
     if (products.length === 0) {
-        let message = currentFilter ? 'No products found in this category. Click + ADD PRODUCT to create one!' : 'No products yet. Click + ADD PRODUCT to create one!';
-        container.innerHTML = `<div class="col-span-4 text-center text-gray-500 py-8">${message}</div>`;
+        let message = currentFilter ? 'No products found in this category. Click ADD PRODUCT to create one!' : 'No products yet. Click ADD PRODUCT to create one!';
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">${message}</h3>
+                <p class="text-gray-500 mb-4">Get started by adding your first product</p>
+                <button onclick="resetForm(); showForm()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Add Product</button>
+            </div>
+        `;
         return;
     }
     
     products.forEach(product => {
         const formattedPrice = parseFloat(product.price).toFixed(2);
+        const isLowStock = product.quantity > 0 && product.quantity < 10;
 
         container.innerHTML += `
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" style="border-radius: 12px;">
-                <div style="background-color: #1a1f2e; padding: 10px 16px 24px 16px; display: flex; justify-content: space-evenly; align-items: center;">
-                    <button onclick='showDetailsModal(${JSON.stringify(product)})' style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        DETAILS
-                    </button>
-                    <button onclick="editProduct(${product.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        EDIT
-                    </button>
-                    <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                        DELETE
-                    </button>
-                </div>
-                <div style="height: 160px; background-color: #e5e7eb; overflow: hidden; border-radius: 20px; margin-top: -20px; border-top: 2px solid white;">
+            <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                <div class="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                     ${product.image
-                        ? `<img src="/storage/${product.image}" style="width: 100%; height: 100%; object-fit: cover;">`
-                        : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:#9ca3af;">NO IMAGE</span></div>'
+                        ? `<img src="/storage/${product.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                        : `<div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>`
                     }
+                    <div class="absolute top-3 right-3">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">
+                            ${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
+                        </span>
+                    </div>
                 </div>
-                <div style="padding: 14px 16px 16px;">
-                    <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: 0.2px;">${escapeHtml(product.name)}</h2>
-                    <p style="font-size: 13px; color: #16a34a; font-weight: 700; margin: 0 0 3px 0;">₱ ${formattedPrice}</p>
-                    <p style="font-size: 13px; color: #4b5563; margin: 0 0 3px 0;">Stock: ${product.quantity}</p>
-                    <p style="font-size: 13px; color: #2563eb; margin: 0 0 4px 0;">${product.category ? product.category.name : 'No Category'}</p>
+                <div class="p-4">
+                    <h3 class="font-bold text-gray-900 text-lg mb-1 truncate">${escapeHtml(product.name)}</h3>
+                    <p class="text-2xl font-bold text-green-600 mb-2">₱ ${formattedPrice}</p>
+                    <div class="flex items-center justify-between text-sm mb-3">
+                        <span class="text-gray-500">Stock: ${product.quantity} units</span>
+                        <span class="text-blue-600 text-xs font-medium">${product.category ? product.category.name : 'No Category'}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick='showDetailsModal(${JSON.stringify(product)})' class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+                            Details
+                        </button>
+                        <button onclick="editProduct(${product.id})" class="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">
+                            Edit
+                        </button>
+                        <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" class="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -516,7 +566,6 @@ async function saveProduct(event) {
     formData.append('category_id', document.getElementById('category_id').value);
     formData.append('performance', document.getElementById('performance').value);
     
-    // Get all custom fields from the form
     const dynamicFieldsContainer = document.getElementById('dynamicFields');
     const dynamicInputs = dynamicFieldsContainer.querySelectorAll('input, select, textarea');
     dynamicInputs.forEach(input => {
@@ -590,10 +639,8 @@ async function editProduct(id) {
             document.getElementById('preview').src = '';
         }
         
-        // Trigger category change to load custom fields
         await updateDynamicFields();
         
-        // Populate custom fields after they're loaded
         setTimeout(() => {
             if (product.dynamic_fields) {
                 const dynamicFields = typeof product.dynamic_fields === 'string' 
@@ -691,8 +738,10 @@ document.addEventListener('DOMContentLoaded', function() {
     .animate-bounce {
         animation: bounce 0.5s ease-in-out;
     }
-    .transition {
-        transition: all 0.3s ease;
+    .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 

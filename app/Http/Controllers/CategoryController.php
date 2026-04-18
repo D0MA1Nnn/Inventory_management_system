@@ -10,12 +10,14 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        return Category::all();
+        $categories = Category::withCount('products')->get();
+        return response()->json($categories);
     }
 
     public function show($id)
     {
-        return Category::findOrFail($id);
+        $category = Category::withCount('products')->findOrFail($id);
+        return response()->json($category);
     }
 
     public function store(Request $request)

@@ -1,17 +1,45 @@
 @extends('layouts.app')
 
+@section('title', 'Suppliers')
 @section('content')
 
-<h1 class="text-2xl font-bold mb-4 text-center">SUPPLIER</h1>
-
-<!-- GRID -->
-<div class="grid grid-cols-4 gap-4">
-    <div id="supplierContainer" class="contents"></div>
-    
-    <div onclick="resetFormAndShow()" class="bg-gray-300 h-80 flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all duration-200 hover:bg-gray-400 hover:scale-105 hover:shadow-lg hover:ring-2 hover:ring-blue-400">
-        <div class="text-4xl font-bold text-gray-700">+</div>
-        <div class="text-sm mt-2 text-gray-700 font-medium">ADD SUPPLIER</div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900"></h1>
+        </div>
+        <button onclick="resetFormAndShow()" 
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Supplier
+        </button>
     </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="totalSuppliersCount">0</p>
+            <p class="text-xs text-gray-500">Total Suppliers</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-green-600" id="activeSuppliersCount">0</p>
+            <p class="text-xs text-gray-500">Active Suppliers</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-blue-600" id="suppliersWithProductsCount">0</p>
+            <p class="text-xs text-gray-500">With Products</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-purple-600" id="totalProductsFromSuppliers">0</p>
+            <p class="text-xs text-gray-500">Products Supplied</p>
+        </div>
+    </div>
+
+    <!-- Suppliers Grid -->
+    <div id="supplierContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 </div>
 
 <!-- SUPPLIER MODAL -->
@@ -65,7 +93,7 @@
     </div>
 </div>
 
-<!-- SUPPLIER DETAILS MODAL - SAME UI AS PRODUCTS/PURCHASES -->
+<!-- SUPPLIER DETAILS MODAL -->
 <div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto">
         <div class="h-48 overflow-hidden">
@@ -109,6 +137,24 @@ function showToast(message, isError = false) {
     toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
     toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// Update stats
+function updateSupplierStats(suppliers) {
+    const total = suppliers.length;
+    const active = suppliers.filter(s => s.products_offered && s.products_offered.length > 0).length;
+    const withProducts = suppliers.filter(s => s.products_offered && s.products_offered.length > 0).length;
+    let totalProducts = 0;
+    suppliers.forEach(s => {
+        if (s.products_offered) {
+            totalProducts += s.products_offered.length;
+        }
+    });
+    
+    document.getElementById('totalSuppliersCount').innerText = total;
+    document.getElementById('activeSuppliersCount').innerText = active;
+    document.getElementById('suppliersWithProductsCount').innerText = withProducts;
+    document.getElementById('totalProductsFromSuppliers').innerText = totalProducts;
 }
 
 // Load products for dropdown
@@ -174,15 +220,10 @@ function hideForm() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// Show supplier details - SAME UI AS PRODUCTS/PURCHASES
 async function showDetailsModal(supplierId) {
-    console.log('Fetching supplier details for ID:', supplierId);
-    
     try {
         const res = await fetch(`/api/suppliers/${supplierId}`);
         const supplier = await res.json();
-        
-        console.log('Supplier data from API:', supplier);
         
         let productsHtml = '<p class="text-sm text-gray-500">No products selected</p>';
         
@@ -276,38 +317,79 @@ async function loadSuppliers() {
         const container = document.getElementById('supplierContainer');
         container.innerHTML = '';
         
+        updateSupplierStats(suppliers);
+        
         if (!suppliers || suppliers.length === 0) {
-            container.innerHTML = '<div class="col-span-4 text-center text-gray-500 py-8">No suppliers yet. Click + ADD SUPPLIER to create one!</div>';
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">No suppliers yet</h3>
+                    <p class="text-gray-500 mb-4">Click the Add Supplier button to create your first supplier</p>
+                    <button onclick="resetFormAndShow()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Add Supplier</button>
+                </div>
+            `;
             return;
         }
         
         suppliers.forEach(supplier => {
+            const productCount = supplier.products_offered ? supplier.products_offered.length : 0;
+            const hasProducts = productCount > 0;
+            
             container.innerHTML += `
-                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" style="border-radius: 12px;">
-                    <div style="background-color: #1a1f2e; padding: 10px 16px 24px 16px; display: flex; justify-content: space-evenly; align-items: center;">
-                        <button onclick="showDetailsModal(${supplier.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            DETAILS
-                        </button>
-                        <button onclick="editSupplier(${supplier.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            EDIT
-                        </button>
-                        <button onclick="showConfirmModal(${supplier.id}, '${escapeHtml(supplier.name)}')" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                            DELETE
-                        </button>
-                    </div>
-                    <div style="height: 160px; background-color: #e5e7eb; overflow: hidden; border-radius: 20px; margin-top: -20px; border-top: 2px solid white;">
+                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                    <div class="relative h-40 overflow-hidden">
                         ${supplier.image
-                            ? `<img src="/storage/${supplier.image}" style="width: 100%; height: 100%; object-fit: cover;">`
-                            : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:#9ca3af;">NO IMAGE</span></div>'
+                            ? `<img src="/storage/${supplier.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
+                            : `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center">
+                                <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                               </div>`
                         }
+                        <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editSupplier(${supplier.id})" class="p-2 bg-white rounded-xl shadow-md hover:bg-gray-100 transition">
+                                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="showConfirmModal(${supplier.id}, '${escapeHtml(supplier.name)}')" class="p-2 bg-white rounded-xl shadow-md hover:bg-red-50 transition">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div style="padding: 14px 16px 16px;">
-                        <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: 0.2px;">${escapeHtml(supplier.name)}</h2>
-                        <p style="font-size: 13px; color: #4b5563; margin: 0 0 3px 0;">📞 ${escapeHtml(supplier.contact_number)}</p>
-                        <p style="font-size: 13px; color: #4b5563; margin: 0;">📍 ${escapeHtml(supplier.address.substring(0, 50))}${supplier.address.length > 50 ? '...' : ''}</p>
+                    <div class="p-5">
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">${escapeHtml(supplier.name)}</h3>
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>${escapeHtml(supplier.contact_number)}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mb-3 line-clamp-1">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="truncate">${escapeHtml(supplier.address.substring(0, 50))}${supplier.address.length > 50 ? '...' : ''}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                <span class="text-sm text-gray-600">${productCount} products</span>
+                            </div>
+                            <button onclick="showDetailsModal(${supplier.id})" class="text-blue-600 text-sm font-medium hover:text-blue-700 transition">
+                                View Details →
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -515,7 +597,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         50% { transform: translateY(-10px); }
     }
     .animate-bounce { animation: bounce 0.5s ease-in-out; }
-    .transition { transition: all 0.3s ease; }
+    .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 </style>
 
 @endsection

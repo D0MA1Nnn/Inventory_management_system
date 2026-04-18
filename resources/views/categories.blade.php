@@ -1,21 +1,45 @@
 @extends('layouts.app')
 
+@section('title', 'Categories')
 @section('content')
 
-<h1 class="text-2xl font-bold mb-8 text-center">CATEGORY</h1>
-
-<!-- GRID -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div id="categoryContainer" class="contents"></div>
-    
-    <div onclick="resetForm(); showForm()"
-        class="bg-gray-300 h-80 flex flex-col items-center justify-center rounded-xl
-                cursor-pointer transition-all duration-300
-                hover:bg-gray-400 hover:scale-105 hover:shadow-lg
-                hover:ring-2 hover:ring-blue-400">
-        <div class="text-4xl font-bold text-gray-700">+</div>
-        <div class="text-xs mt-2 text-gray-700 font-medium">ADD CATEGORY</div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900"></h1>
+        </div>
+        <button onclick="resetForm(); showForm()"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Category
+        </button>
     </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="totalCategoriesCount">0</p>
+            <p class="text-xs text-gray-500">Total Categories</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="categoriesWithProducts">0</p>
+            <p class="text-xs text-gray-500">With Products</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="totalCustomFields">0</p>
+            <p class="text-xs text-gray-500">Custom Fields</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <p class="text-2xl font-bold text-gray-900" id="totalProductsInCategories">0</p>
+            <p class="text-xs text-gray-500">Total Products</p>
+        </div>
+    </div>
+
+    <!-- Categories Grid -->
+    <div id="categoryContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 </div>
 
 <!-- MODAL -->
@@ -134,7 +158,6 @@ function addField(fieldData = null) {
         </div>
     `;
     
-    // Add event listener for type change
     const typeSelect = fieldDiv.querySelector('.field-type');
     typeSelect.addEventListener('change', function() {
         const optionsContainer = fieldDiv.querySelector('.field-options-container');
@@ -214,52 +237,102 @@ async function loadCategories() {
         const container = document.getElementById('categoryContainer');
         container.innerHTML = '';
         
+        let categoriesWithProducts = 0;
+        let totalCustomFields = 0;
+        let totalProducts = 0;
+        
         if (categories.length === 0) {
-            container.innerHTML = '<div class="col-span-4 text-center text-gray-500 py-8">No categories yet. Click + ADD CATEGORY to create one!</div>';
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">No categories yet</h3>
+                    <p class="text-gray-500 mb-4">Click the Add Category button to create your first category</p>
+                    <button onclick="resetForm(); showForm()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Add Category</button>
+                </div>
+            `;
+            document.getElementById('totalCategoriesCount').innerText = 0;
+            document.getElementById('categoriesWithProducts').innerText = 0;
+            document.getElementById('totalCustomFields').innerText = 0;
+            document.getElementById('totalProductsInCategories').innerText = 0;
             return;
         }
         
         categories.forEach(cat => {
             const formattedId = 'CA' + String(cat.id).padStart(3, '0');
+            // Use products_count from the API response
+            const productCount = cat.products_count || 0;
+            totalProducts += productCount;
+            if (productCount > 0) categoriesWithProducts++;
             
-            // Safely check fields_schema
             let fieldsCount = 0;
             if (cat.fields_schema) {
                 try {
                     const schema = typeof cat.fields_schema === 'string' ? JSON.parse(cat.fields_schema) : cat.fields_schema;
                     fieldsCount = Array.isArray(schema) ? schema.length : 0;
-                } catch(e) {
-                    fieldsCount = 0;
-                }
+                    totalCustomFields += fieldsCount;
+                } catch(e) { fieldsCount = 0; }
             }
             
             container.innerHTML += `
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" style="border-radius: 12px;">
-                <div style="background-color: #1a1f2e; padding: 5px 16px 24px 16px; display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
-                    <button onclick="editCategory(${cat.id})" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        EDIT
-                    </button>
-                    <button onclick="showConfirmModal(${cat.id}, '${escapeHtml(cat.name)}')" style="color: white; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                        DELETE
-                    </button>
+                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                    <div class="relative h-40 overflow-hidden">
+                        ${cat.image
+                            ? `<img src="/storage/${cat.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
+                            : `<div class="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+                                <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                               </div>`
+                        }
+                        <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editCategory(${cat.id})" class="p-2 bg-white rounded-xl shadow-md hover:bg-gray-100 transition">
+                                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="showConfirmModal(${cat.id}, '${escapeHtml(cat.name)}')" class="p-2 bg-white rounded-xl shadow-md hover:bg-red-50 transition">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-3 left-3">
+                            <span class="px-2 py-1 bg-black/50 backdrop-blur-sm rounded-lg text-white text-xs font-medium">${formattedId}</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">${escapeHtml(cat.name)}</h3>
+                        <div class="flex items-center justify-between mt-4">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                <span class="text-sm text-gray-600">${productCount} products</span>
+                            </div>
+                            ${fieldsCount > 0 ? `
+                            <div class="flex items-center gap-1">
+                                <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="text-xs text-gray-500">${fieldsCount} fields</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
                 </div>
-                <div style="height: 160px; background-color: #e5e7eb; overflow: hidden; border-radius: 20px; margin-top: -20px; border-top: 2px solid white;">
-                    ${cat.image
-                        ? `<img src="/storage/${cat.image}" style="width: 100%; height: 100%; object-fit: cover;">`
-                        : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-size:12px;color:#9ca3af;">NO IMAGE</span></div>'
-                    }
-                </div>
-                <div style="padding: 14px 16px 16px;">
-                    <h2 style="font-size: 15px; font-weight: 800; color: #111827; margin: 0 0 6px 0;">${escapeHtml(cat.name)}</h2>
-                    <p style="font-size: 13px; color: #4b5563; margin: 0 0 4px 0;">Total products: ${cat.products_count || 0}</p>
-                    <p style="font-size: 13px; color: #2563eb; font-weight: 500; margin: 0;">${formattedId}</p>
-                    ${fieldsCount > 0 ? `<p style="font-size: 11px; color: #6b7280; margin-top: 8px;">📋 ${fieldsCount} custom fields</p>` : ''}
-                </div>
-            </div>
-        `;
+            `;
         });
+        
+        document.getElementById('totalCategoriesCount').innerText = categories.length;
+        document.getElementById('categoriesWithProducts').innerText = categoriesWithProducts;
+        document.getElementById('totalCustomFields').innerText = totalCustomFields;
+        document.getElementById('totalProductsInCategories').innerText = totalProducts;
+        
     } catch (error) {
         console.error('Error:', error);
         showToast('Error loading categories', true);
@@ -284,7 +357,6 @@ async function editCategory(id) {
             document.getElementById('preview').src = '';
         }
         
-        // Load fields schema
         let fieldsSchema = [];
         if (category.fields_schema) {
             try {
