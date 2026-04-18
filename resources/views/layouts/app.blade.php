@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JUSTRIX</title>
+    <title>JUSTRIX - Inventory Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-gray-200">
@@ -24,22 +25,48 @@
                 </div>
             </div>
 
-            <!-- Search + Settings -->
+            <!-- Search + Settings + Auth -->
             <div class="flex items-center gap-3">
                 <input type="text" placeholder="Search"
                     class="px-3 py-1 rounded bg-gray-800 text-white text-sm outline-none hidden md:block">
-                ⚙️
+                
+                <!-- 🔹 LOGIN / REGISTER BUTTONS -->
+                @guest
+                    <a href="{{ route('login') }}" 
+                       class="px-4 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 rounded-lg transition text-white">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}" 
+                       class="px-4 py-1.5 text-sm bg-green-600 hover:bg-green-700 rounded-lg transition text-white">
+                        Register
+                    </a>
+                @else
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-300">{{ Auth::user()->name }}</span>
+                        <a href="{{ route('logout') }}" 
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                           class="px-4 py-1.5 text-sm bg-red-600 hover:bg-red-700 rounded-lg transition text-white">
+                            Logout
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+                    </div>
+                @endguest
+                
+                <span class="text-xl cursor-pointer hover:text-gray-300 transition">⚙️</span>
             </div>
 
         </div>
 
+
         <!-- 🔹 MENU ROW -->
         <div class="flex justify-center mt-4 space-x-8 text-sm">
-            <a href="/dashboard" class="nav-link hover:text-blue-400 transition">Dashboard</a>
-            <a href="/categories-ui" class="nav-link hover:text-blue-400 transition">Category</a>
-            <a href="/products-ui" class="nav-link hover:text-blue-400 transition">Product</a>
-            <a href="/suppliers-ui" class="nav-link hover:text-blue-400 transition">Supplier</a>
-            <a href="/purchases-ui" class="nav-link hover:text-blue-400 transition">Purchases</a>
+            <a href="{{ route('dashboard') }}" class="nav-link hover:text-blue-400 transition">Dashboard</a>
+            <a href="{{ route('categories-ui') }}" class="nav-link hover:text-blue-400 transition">Category</a>
+            <a href="{{ route('products-ui') }}" class="nav-link hover:text-blue-400 transition">Product</a>
+            <a href="{{ route('suppliers-ui') }}" class="nav-link hover:text-blue-400 transition">Supplier</a>
+            <a href="{{ route('purchases-ui') }}" class="nav-link hover:text-blue-400 transition">Purchases</a>
             <a href="#" class="nav-link hover:text-blue-400 transition">Sales</a>
         </div>
 
@@ -55,37 +82,40 @@
         function setActiveLink() {
             const currentUrl = window.location.pathname;
             
-            // Get all nav links
             const navLinks = document.querySelectorAll('.nav-link');
             
             navLinks.forEach(link => {
-                // Remove active class from all links
                 link.classList.remove('text-blue-400');
                 link.classList.add('text-white');
                 
-                // Get the href attribute
                 const href = link.getAttribute('href');
                 
-                // Check if this link matches the current URL
-                if (href === currentUrl) {
+                // Handle dashboard
+                if ((currentUrl === '/dashboard' || currentUrl === '/dashboard/') && href === '{{ route('dashboard') }}') {
                     link.classList.remove('text-white');
                     link.classList.add('text-blue-400');
                 }
                 
-                // Special case for categories-ui
-                if (currentUrl === '/categories-ui' && href === '/categories-ui') {
+                // Handle categories
+                if (currentUrl === '/categories-ui' && href === '{{ route('categories-ui') }}') {
                     link.classList.remove('text-white');
                     link.classList.add('text-blue-400');
                 }
                 
-                // Special case for products-ui
-                if (currentUrl === '/products-ui' && href === '/products-ui') {
+                // Handle products
+                if (currentUrl === '/products-ui' && href === '{{ route('products-ui') }}') {
                     link.classList.remove('text-white');
                     link.classList.add('text-blue-400');
                 }
                 
-                // Handle root/home page
-                if ((currentUrl === '/' || currentUrl === '') && href === '/dashboard') {
+                // Handle suppliers
+                if (currentUrl === '/suppliers-ui' && href === '{{ route('suppliers-ui') }}') {
+                    link.classList.remove('text-white');
+                    link.classList.add('text-blue-400');
+                }
+                
+                // Handle purchases
+                if (currentUrl === '/purchases-ui' && href === '{{ route('purchases-ui') }}') {
                     link.classList.remove('text-white');
                     link.classList.add('text-blue-400');
                 }

@@ -126,14 +126,17 @@
     </div>
 </div>
 
-<!-- PRODUCT DETAILS MODAL -->
+<!-- PRODUCT DETAILS MODAL - SAME UI AS PURCHASES PAGE -->
 <div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold" id="detailsTitle">Product Details</h2>
-            <button onclick="hideDetailsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    <div class="bg-white rounded-lg w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto">
+        <div class="h-48 overflow-hidden">
+            <img id="detailsImage" src="" class="w-full h-full object-cover">
         </div>
-        <div class="p-6" id="detailsContent"></div>
+        <div class="flex items-center justify-between px-4 py-2 sticky top-0 bg-white z-10">
+            <span id="detailsTitle" class="text-lg font-bold text-gray-900"></span>
+            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 leading-none" onclick="hideDetailsModal()">✕</button>
+        </div>
+        <div id="detailsContent"></div>
     </div>
 </div>
 
@@ -160,6 +163,9 @@
 let pendingDeleteId = null;
 let currentFilter = '';
 let allProductsData = [];
+
+// Local placeholder images
+const noImage600 = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'600\' height=\'200\' viewBox=\'0 0 600 200\'%3E%3Crect width=\'600\' height=\'200\' fill=\'%23cccccc\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666666\' font-size=\'20\'%3ENo Image%3C/text%3E%3C/svg%3E';
 
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -282,19 +288,36 @@ function hideForm() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// Show details modal
+// Hide details modal
+function hideDetailsModal() {
+    document.getElementById('detailsModal').classList.add('hidden');
+}
+
+// Show details modal - EXACT SAME UI AS PURCHASES PAGE
 function showDetailsModal(product) {
     let extraFieldsHtml = '';
     
-    // Show standard fields
+    // Brand field
     if (product.brand) {
-        extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>Brand:</strong><br>${escapeHtml(product.brand)}</div>`;
-    }
-    if (product.model_number) {
-        extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>Model Number:</strong><br>${escapeHtml(product.model_number)}</div>`;
+        extraFieldsHtml += `
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Brand</div>
+                <div class="text-sm text-gray-900 font-medium">${escapeHtml(product.brand)}</div>
+            </div>
+        `;
     }
     
-    // Show custom fields
+    // Model Number field
+    if (product.model_number) {
+        extraFieldsHtml += `
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Model Number</div>
+                <div class="text-sm text-gray-900 font-medium">${escapeHtml(product.model_number)}</div>
+            </div>
+        `;
+    }
+    
+    // Custom fields from dynamic_fields
     if (product.dynamic_fields) {
         const dynamicFields = typeof product.dynamic_fields === 'string' 
             ? JSON.parse(product.dynamic_fields) 
@@ -303,27 +326,49 @@ function showDetailsModal(product) {
         for (const [key, value] of Object.entries(dynamicFields)) {
             if (value) {
                 const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                extraFieldsHtml += `<div class="bg-gray-50 p-2 rounded"><strong>${label}:</strong><br>${escapeHtml(String(value))}</div>`;
+                extraFieldsHtml += `
+                    <div class="p-2.5 border-b border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">${escapeHtml(label)}</div>
+                        <div class="text-sm text-gray-900 font-medium">${escapeHtml(String(value))}</div>
+                    </div>
+                `;
             }
         }
     }
     
     document.getElementById('detailsTitle').innerText = product.name;
-    document.getElementById('detailsContent').innerHTML = `
-        <div class="grid grid-cols-2 gap-4">
-            ${product.image ? `<div class="col-span-2"><img src="/storage/${product.image}" class="w-full max-h-64 object-cover rounded"></div>` : ''}
+    document.getElementById('detailsImage').src = product.image ? '/storage/' + product.image : noImage600;
+    
+    let detailsContent = document.getElementById('detailsContent');
+    detailsContent.innerHTML = `
+        <div class="grid grid-cols-2 gap-0 px-4">
             ${extraFieldsHtml}
-            <div class="bg-gray-50 p-2 rounded"><strong>Price:</strong><br>₱ ${parseFloat(product.price).toFixed(2)}</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Stock:</strong><br>${product.quantity} units</div>
-            <div class="bg-gray-50 p-2 rounded"><strong>Category:</strong><br>${product.category ? product.category.name : 'N/A'}</div>
-            ${product.performance ? `<div class="col-span-2 bg-gray-50 p-2 rounded"><strong>Performance:</strong><br>${escapeHtml(product.performance)}</div>` : ''}
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Price</div>
+                <div class="text-sm text-gray-900 font-medium">₱ ${parseFloat(product.price).toLocaleString()}</div>
+            </div>
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Stock</div>
+                <div class="text-sm text-gray-900 font-medium">${product.quantity} units</div>
+            </div>
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Category</div>
+                <div class="text-sm text-gray-900 font-medium">${product.category ? product.category.name : 'N/A'}</div>
+            </div>
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Status</div>
+                <div class="text-sm text-gray-900 font-medium">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</div>
+            </div>
         </div>
+        ${product.performance ? `
+        <div class="p-3 border-t border-gray-100">
+            <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Performance</div>
+            <div class="text-sm text-gray-900 leading-relaxed">${escapeHtml(product.performance)}</div>
+        </div>
+        ` : ''}
     `;
+    
     document.getElementById('detailsModal').classList.remove('hidden');
-}
-
-function hideDetailsModal() {
-    document.getElementById('detailsModal').classList.add('hidden');
 }
 
 // Show confirm modal

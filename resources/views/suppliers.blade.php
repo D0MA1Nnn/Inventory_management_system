@@ -65,14 +65,17 @@
     </div>
 </div>
 
-<!-- SUPPLIER DETAILS MODAL -->
+<!-- SUPPLIER DETAILS MODAL - SAME UI AS PRODUCTS/PURCHASES -->
 <div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold" id="detailsTitle">Supplier Details</h2>
-            <button onclick="hideDetailsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    <div class="bg-white rounded-lg w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto">
+        <div class="h-48 overflow-hidden">
+            <img id="detailsImage" src="" class="w-full h-full object-cover">
         </div>
-        <div class="p-6" id="detailsContent"></div>
+        <div class="flex items-center justify-between px-4 py-2 sticky top-0 bg-white z-10">
+            <span id="detailsTitle" class="text-lg font-bold text-gray-900"></span>
+            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 leading-none" onclick="hideDetailsModal()">✕</button>
+        </div>
+        <div id="detailsContent"></div>
     </div>
 </div>
 
@@ -97,6 +100,7 @@
 <script>
 let pendingDeleteId = null;
 let allProductsList = [];
+const noImage600 = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'600\' height=\'200\' viewBox=\'0 0 600 200\'%3E%3Crect width=\'600\' height=\'200\' fill=\'%23cccccc\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666666\' font-size=\'20\'%3ENo Image%3C/text%3E%3C/svg%3E';
 
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -170,11 +174,10 @@ function hideForm() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// FIXED: Show supplier details with products
+// Show supplier details - SAME UI AS PRODUCTS/PURCHASES
 async function showDetailsModal(supplierId) {
     console.log('Fetching supplier details for ID:', supplierId);
     
-    // Fetch the supplier directly from API to ensure we have fresh data
     try {
         const res = await fetch(`/api/suppliers/${supplierId}`);
         const supplier = await res.json();
@@ -183,15 +186,11 @@ async function showDetailsModal(supplierId) {
         
         let productsHtml = '<p class="text-sm text-gray-500">No products selected</p>';
         
-        // Check if supplier has products_offered
         if (supplier.products_offered && supplier.products_offered.length > 0) {
             try {
                 let productIds = supplier.products_offered;
                 
-                console.log('Product IDs for details:', productIds);
-                
                 if (productIds && productIds.length > 0) {
-                    // Fetch all products
                     const productsRes = await fetch('/api/products');
                     let allProducts = await productsRes.json();
                     
@@ -199,17 +198,12 @@ async function showDetailsModal(supplierId) {
                         allProducts = allProducts.data;
                     }
                     
-                    console.log('All products loaded:', allProducts);
-                    
-                    // Filter products that match the IDs
                     const selectedProducts = allProducts.filter(product => {
                         return productIds.includes(product.id);
                     });
                     
-                    console.log('Selected products found:', selectedProducts);
-                    
                     if (selectedProducts.length > 0) {
-                        productsHtml = '<ul class="list-disc pl-4 mt-1 space-y-2">';
+                        productsHtml = '<ul class="list-disc pl-4 mt-1 space-y-1">';
                         selectedProducts.forEach(product => {
                             productsHtml += `
                                 <li class="text-sm text-gray-700">
@@ -220,35 +214,34 @@ async function showDetailsModal(supplierId) {
                             `;
                         });
                         productsHtml += '</ul>';
-                    } else {
-                        productsHtml = `<p class="text-sm text-yellow-600">No matching products found. Product IDs: ${productIds.join(', ')}</p>`;
                     }
                 }
             } catch (e) {
                 console.error('Error parsing products:', e);
-                productsHtml = '<p class="text-sm text-red-500">Error loading products: ' + e.message + '</p>';
+                productsHtml = '<p class="text-sm text-red-500">Error loading products</p>';
             }
         }
         
         document.getElementById('detailsTitle').innerText = supplier.name;
+        document.getElementById('detailsImage').src = supplier.image ? '/storage/' + supplier.image : noImage600;
+        
         document.getElementById('detailsContent').innerHTML = `
-            <div class="grid grid-cols-2 gap-4">
-                ${supplier.image ? `<div class="col-span-2"><img src="/storage/${supplier.image}" class="w-full max-h-64 object-cover rounded"></div>` : ''}
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <strong class="text-gray-700">📞 Contact:</strong><br>
-                    <span class="text-gray-600">${escapeHtml(supplier.contact_number)}</span>
+            <div class="grid grid-cols-2 gap-0 px-4">
+                <div class="p-2.5 border-b border-gray-100">
+                    <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Contact Number</div>
+                    <div class="text-sm text-gray-900 font-medium">${escapeHtml(supplier.contact_number)}</div>
                 </div>
-                <div class="bg-gray-50 p-3 rounded-lg">
-                    <strong class="text-gray-700">📧 Email:</strong><br>
-                    <span class="text-gray-600">${supplier.email ? escapeHtml(supplier.email) : 'N/A'}</span>
+                <div class="p-2.5 border-b border-gray-100">
+                    <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Email</div>
+                    <div class="text-sm text-gray-900 font-medium">${supplier.email ? escapeHtml(supplier.email) : 'N/A'}</div>
                 </div>
-                <div class="col-span-2 bg-gray-50 p-3 rounded-lg">
-                    <strong class="text-gray-700">📍 Address:</strong><br>
-                    <span class="text-gray-600">${escapeHtml(supplier.address)}</span>
+                <div class="p-2.5 border-b border-gray-100 col-span-2">
+                    <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Address</div>
+                    <div class="text-sm text-gray-900 font-medium">${escapeHtml(supplier.address)}</div>
                 </div>
-                <div class="col-span-2 bg-gray-50 p-3 rounded-lg">
-                    <strong class="text-gray-700">📦 Products Offered:</strong><br>
-                    ${productsHtml}
+                <div class="p-2.5 border-b border-gray-100 col-span-2">
+                    <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Products Offered</div>
+                    <div class="text-sm text-gray-900 font-medium">${productsHtml}</div>
                 </div>
             </div>
         `;
