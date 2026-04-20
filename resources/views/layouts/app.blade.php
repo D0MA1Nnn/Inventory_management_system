@@ -123,46 +123,44 @@
                 <div class="px-4 mb-3">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Main Menu</p>
                 </div>
-                
-                <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
+
+                {{-- ALL USERS --}}
+                <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                     <span class="text-sm font-medium">Dashboard</span>
                 </a>
-                
-                <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 01.586 1.414V19a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Categories</span>
-                </a>
-                
-                <a href="{{ route('products-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                    </svg>
+
+                <a href="{{ route('products-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                     <span class="text-sm font-medium">Products</span>
                 </a>
-                
-                <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Suppliers</span>
-                </a>
-                
-                <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Purchases</span>
-                </a>
-                
-                <a href="{{ route('sales-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all nav-link">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+
+                {{-- ADMIN + MANAGER --}}
+                @if(in_array(auth()->user()->role ?? '', ['admin','manager']))
+                    <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Purchases</span>
+                    </a>
+                @endif
+
+                {{-- ADMIN ONLY --}}
+                @if((auth()->user()->role ?? '') === 'admin')
+                    <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Categories</span>
+                    </a>
+
+                    <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Suppliers</span>
+                    </a>
+
+                    <a href="{{ route('staff-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Staff</span>
+                    </a>
+
+                    <a href="{{ route('customers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Customers</span>
+                    </a>
+                @endif
+
+                {{-- ALL USERS --}}
+                <a href="{{ route('sales-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                     <span class="text-sm font-medium">Sales</span>
                 </a>
             </nav>
@@ -172,11 +170,11 @@
                 <div class="user-dropdown relative">
                     <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 cursor-pointer">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            <span class="text-white font-bold text-sm">{{ auth()->user()->name[0] ?? 'G' }}</span>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                            <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name ?? 'Guest' }}</p>
+                            <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email ?? '' }}</p>
                         </div>
                         <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -203,7 +201,7 @@
                 <div class="px-4 sm:px-8 py-4 flex items-center justify-between">
                     <div class="min-w-0">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800 truncate">@yield('title', 'Dashboard')</h1>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">Welcome back, {{ Auth::user()->name }}</p>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">Welcome back, {{ auth()->user()->name ?? 'Guest' }}</p>
                     </div>
                     
                     <!-- Notifications -->
@@ -286,6 +284,13 @@
     </form>
     
     <script>
+        let lastNotificationHash = '';
+
+        function playNotificationSound() {
+            const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+            audio.play().catch(() => {});
+        }
+
         // Mobile sidebar toggle
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -343,131 +348,98 @@
         // Load notifications data
         async function loadNotifications() {
             try {
-                // Load low stock products
+                // ================= LOW STOCK =================
                 const productsRes = await fetch('/api/products');
                 let products = await productsRes.json();
                 if (products.data) products = products.data;
-                
-                const lowStockProducts = products.filter(p => p.quantity > 0 && p.quantity < 10);
-                const lowStockCount = lowStockProducts.length;
-                
-                const lowStockBadge = document.getElementById('lowStockBadge');
-                const lowStockList = document.getElementById('lowStockList');
-                
-                if (lowStockCount > 0) {
-                    lowStockBadge.classList.remove('hidden');
-                    lowStockBadge.innerText = lowStockCount;
-                    
-                    lowStockList.innerHTML = lowStockProducts.map(product => `
-                        <div class="p-3 border-b hover:bg-gray-50 transition">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-medium text-gray-800 text-sm">${escapeHtml(product.name)}</p>
-                                    <p class="text-xs text-gray-500">Stock: ${product.quantity} units</p>
-                                </div>
-                                <a href="/products-ui" class="text-xs text-blue-600 hover:text-blue-800 transition">View →</a>
-                            </div>
+
+                const lowStock = products.filter(p => p.quantity > 0 && p.quantity < 10);
+
+                document.getElementById('lowStockBadge').innerText = lowStock.length;
+                document.getElementById('lowStockBadge').classList.toggle('hidden', lowStock.length === 0);
+
+                document.getElementById('lowStockList').innerHTML =
+                    lowStock.length > 0
+                    ? lowStock.map(p => `
+                        <div class="p-3 border-b">
+                            <p class="text-sm font-medium">${escapeHtml(p.name)}</p>
+                            <p class="text-xs text-gray-500">Stock: ${p.quantity}</p>
                         </div>
-                    `).join('');
-                } else {
-                    lowStockBadge.classList.add('hidden');
-                    lowStockBadge.innerText = '0';
-                    lowStockList.innerHTML = '<div class="p-4 text-center text-gray-500">No low stock products</div>';
+                    `).join('')
+                    : '<div class="p-4 text-center text-gray-500">No low stock</div>';
+
+                // ================= PENDING PURCHASES =================
+                const purchaseRes = await fetch('/api/purchase/coming');
+
+                let purchases = [];
+                if (purchaseRes.ok) {
+                    purchases = await purchaseRes.json();
                 }
-                
-                // Load pending purchases
-                const purchasesRes = await fetch('/api/purchase/coming');
-                const purchases = await purchasesRes.json();
-                const pendingCount = Object.keys(purchases).length;
-                
-                const pendingBadge = document.getElementById('pendingPurchasesBadge');
-                const pendingList = document.getElementById('pendingPurchasesList');
-                
-                if (pendingCount > 0) {
-                    pendingBadge.classList.remove('hidden');
-                    pendingBadge.innerText = pendingCount;
-                    
-                    pendingList.innerHTML = Object.values(purchases).slice(0, 5).map(purchase => `
-                        <div class="p-3 border-b hover:bg-gray-50 transition">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-medium text-gray-800 text-sm">${escapeHtml(purchase.product_name)}</p>
-                                    <p class="text-xs text-gray-500">From: ${escapeHtml(purchase.supplier_name)} • Qty: ${purchase.quantity}</p>
-                                </div>
-                                <a href="/purchases-ui" class="text-xs text-amber-600 hover:text-amber-800 transition">Receive →</a>
-                            </div>
+
+                document.getElementById('pendingPurchasesBadge').innerText = purchases.length;
+                document.getElementById('pendingPurchasesBadge')
+                    .classList.toggle('hidden', purchases.length === 0);
+
+                document.getElementById('pendingPurchasesList').innerHTML =
+                    purchases.length > 0
+                    ? purchases.slice(0,5).map(p => `
+                        <div class="p-3 border-b">
+                            <p class="text-sm font-medium">${escapeHtml(p.product?.name)}</p>
+                            <p class="text-xs text-gray-500">
+                                ${escapeHtml(p.supplier?.name)} • Qty: ${p.quantity}
+                            </p>
                         </div>
-                    `).join('');
-                } else {
-                    pendingBadge.classList.add('hidden');
-                    pendingBadge.innerText = '0';
-                    pendingList.innerHTML = '<div class="p-4 text-center text-gray-500">No pending purchases</div>';
-                }
-                
-                // Load today's sales
+                    `).join('')
+                    : '<div class="p-4 text-center text-gray-500">No pending purchases</div>';
+
+                // ================= TODAY SALES =================
                 const salesRes = await fetch('/api/sales');
-                let salesData = await salesRes.json();
-                let sales = [];
-                if (Array.isArray(salesData)) {
-                    sales = salesData;
-                } else if (typeof salesData === 'object' && salesData !== null) {
-                    sales = Object.values(salesData);
-                }
-                
+                const sales = await salesRes.json();
+
                 const today = new Date().toDateString();
                 const todaySales = sales.filter(s => new Date(s.sold_at).toDateString() === today);
-                const todaySalesCount = todaySales.length;
-                const todaySalesTotal = todaySales.reduce((sum, s) => sum + parseFloat(s.total_price), 0);
-                
-                const todayBadge = document.getElementById('todaySalesBadge');
-                const todayList = document.getElementById('todaySalesList');
-                
-                if (todaySalesCount > 0) {
-                    todayBadge.classList.remove('hidden');
-                    todayBadge.innerText = todaySalesCount;
-                    
-                    todayList.innerHTML = `
-                        <div class="p-3 border-b bg-green-50">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-semibold text-gray-800">Total Today</span>
-                                <span class="text-lg font-bold text-green-600">₱${todaySalesTotal.toLocaleString()}</span>
-                            </div>
+
+                document.getElementById('todaySalesBadge').innerText = todaySales.length;
+                document.getElementById('todaySalesBadge')
+                    .classList.toggle('hidden', todaySales.length === 0);
+
+                document.getElementById('todaySalesList').innerHTML =
+                    todaySales.length > 0
+                    ? todaySales.slice(0,5).map(s => `
+                        <div class="p-3 border-b">
+                            <p class="text-sm font-medium">${escapeHtml(s.product?.name)}</p>
+                            <p class="text-xs text-gray-500">Qty: ${s.quantity}</p>
                         </div>
-                        ${todaySales.slice(0, 5).map(sale => `
-                            <div class="p-3 border-b hover:bg-gray-50 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="font-medium text-gray-800 text-sm">${escapeHtml(sale.product?.name || 'Product')}</p>
-                                        <p class="text-xs text-gray-500">Qty: ${sale.quantity} • ${sale.customer_name || 'Walk-in'}</p>
-                                    </div>
-                                    <span class="text-sm font-semibold text-green-600">₱${parseFloat(sale.total_price).toLocaleString()}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                        ${todaySalesCount > 5 ? `<div class="p-3 text-center"><a href="/sales-ui" class="text-xs text-blue-600 hover:text-blue-800 transition">View all ${todaySalesCount} sales →</a></div>` : ''}
-                    `;
-                } else {
-                    todayBadge.classList.add('hidden');
-                    todayBadge.innerText = '0';
-                    todayList.innerHTML = '<div class="p-4 text-center text-gray-500">No sales today</div>';
+                    `).join('')
+                    : '<div class="p-4 text-center text-gray-500">No sales today</div>';
+
+                const currentHash = JSON.stringify({
+                    lowStockCount: lowStock.length,
+                    purchasesCount: purchases.length,
+                    salesCount: todaySales.length
+                });
+
+                if (lastNotificationHash && lastNotificationHash !== currentHash) {
+                    playNotificationSound();
                 }
-                
+
+                lastNotificationHash = currentHash;
+
             } catch (error) {
-                console.error('Error loading notifications:', error);
+                console.error('Notification error:', error);
             }
         }
-        
+
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
-        // Load notifications on page load and every 30 seconds
+
         document.addEventListener('DOMContentLoaded', () => {
             loadNotifications();
-            setInterval(loadNotifications, 30000);
+            setInterval(loadNotifications, 5000); // every 5 seconds
         });
     </script>
 </body>

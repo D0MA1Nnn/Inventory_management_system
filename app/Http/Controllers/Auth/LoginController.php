@@ -3,33 +3,51 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    use AuthenticatesUsers;
 
-    protected $redirectTo = '/dashboard';
-
-    public function __construct()
+    public function login(Request $request)
     {
-        // Remove middleware calls
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials)) {
+
+            $request->session()->regenerate();
+            $user = Auth::user();
+
+            switch ($user->role) {
+                case 'admin':
+                    return redirect('/dashboard');
+
+                case 'manager':
+                    return redirect('/dashboard');
+
+                case 'staff':
+                    return redirect('/dashboard');
+
+                default:
+                    return redirect('/');
+            }
+        }
+
+        return back()->withErrors([
+            'email' => 'Invalid credentials.',
+        ]);
     }
 
-    /**
-     * The user has been authenticated.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $user
-     * @return mixed
-     */
-    protected function authenticated(Request $request, $user)
+    public function logout(Request $request)
     {
-        if ($user->role === 'admin') {
-            return redirect()->route('dashboard');
-        }
-        
-        return redirect()->route('shop');
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }

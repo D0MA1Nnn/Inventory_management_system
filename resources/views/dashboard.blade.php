@@ -8,7 +8,11 @@
     <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-lg p-6 md:p-8 text-white">
         <div class="flex flex-col md:flex-row items-center justify-between">
             <div>
-                <h2 class="text-2xl md:text-3xl font-bold mb-2">Welcome back, {{ Auth::user()->name }}!</h2>
+                <h2 class="text-2xl md:text-3xl font-bold mb-2">Welcome back, 
+                    @auth
+                        {{ Auth::user()->name }}
+                    @endauth
+                </h2>
                 <p class="text-blue-100">Here's what's happening with your inventory today.</p>
             </div>
             <div class="hidden md:block">
@@ -164,6 +168,7 @@
                 Quick Actions
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {{-- ALL USERS --}}
                 <a href="{{ route('products-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition group">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition">
@@ -173,10 +178,8 @@
                         </div>
                         <span class="text-sm font-medium text-gray-700">Add New Product</span>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
                 </a>
+
                 <a href="{{ route('sales-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-green-50 transition group">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition">
@@ -186,36 +189,36 @@
                         </div>
                         <span class="text-sm font-medium text-gray-700">New Sale</span>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
                 </a>
-                <a href="{{ route('purchases-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-amber-50 transition group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center group-hover:bg-amber-200 transition">
-                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
-                            </svg>
+
+                {{-- ADMIN + MANAGER --}}
+                @if(in_array(auth()->user()->role, ['admin','manager']))
+                    <a href="{{ route('purchases-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-amber-50 transition group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center group-hover:bg-amber-200 transition">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Create Purchase Order</span>
                         </div>
-                        <span class="text-sm font-medium text-gray-700">Create Purchase Order</span>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('suppliers-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-purple-50 transition group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition">
-                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
+                    </a>
+                @endif
+
+                {{-- ADMIN ONLY --}}
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('suppliers-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-purple-50 transition group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Add New Supplier</span>
                         </div>
-                        <span class="text-sm font-medium text-gray-700">Add New Supplier</span>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
+                    </a>
+                @endif
+
             </div>
         </div>
     </div>

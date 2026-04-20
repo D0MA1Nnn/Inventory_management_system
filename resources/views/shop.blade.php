@@ -68,7 +68,11 @@
                     <div class="relative profile-trigger">
                         <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-                                <span class="text-white font-bold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                <span class="text-white font-bold text-sm">
+                                    @auth
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                    @endauth
+                                </span>
                             </div>
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -78,7 +82,11 @@
                             <div class="p-4 border-b bg-gray-50">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                        <span class="text-white font-bold text-lg">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                        <span class="text-white font-bold text-lg">
+                                            @auth
+                                                {{ substr(Auth::user()->name, 0, 1) }}
+                                            @endauth
+                                        </span>
                                     </div>
                                     <div>
                                         <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
@@ -138,7 +146,11 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-center mb-4">
                         <div class="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                            <span class="text-white font-bold text-3xl">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            <span class="text-white font-bold text-3xl">
+                                @auth
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                @endauth
+                            </span>
                         </div>
                     </div>
                     <div class="bg-gray-50 rounded-xl p-4">

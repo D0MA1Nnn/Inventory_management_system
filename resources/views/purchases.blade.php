@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Purchases</h1>
+            <h1 class="text-2xl font-bold text-gray-900"></h1>
         </div>
         <div class="flex items-center gap-3">
             <select id="categoryFilter" class="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
@@ -77,7 +77,7 @@
     </div>
 </div>
 
-<!-- HISTORY MODAL (View All Received Products) -->
+<!-- HISTORY MODAL -->
 <div id="historyModal" class="modal-bg" onclick="if(event.target===this)closeHistoryModal()">
     <div class="bg-white rounded-2xl w-[900px] max-w-[95%] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
@@ -159,6 +159,20 @@
     </div>
 </div>
 
+<!-- Password Confirmation Modal for Staff -->
+<div id="passwordConfirmModal" class="modal-bg" onclick="if(event.target===this)closePasswordModal()">
+    <div class="bg-white rounded-2xl w-[400px] max-w-[90%] text-center p-6 shadow-2xl">
+        <div class="text-6xl mb-4">🔒</div>
+        <div class="text-lg font-bold mb-2 text-gray-900">Confirm Password</div>
+        <p class="text-sm text-gray-600 mb-4">Please enter your password to complete this purchase</p>
+        <input type="password" id="confirmPassword" class="w-full border border-gray-300 rounded-xl p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
+        <div class="flex gap-3">
+            <button onclick="closePasswordModal()" class="flex-1 py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition">Cancel</button>
+            <button id="confirmPasswordBtn" class="flex-1 py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <!-- SUCCESS TOAST -->
 <div id="successToast" class="fixed bottom-5 right-5 bg-green-600 text-white py-3 px-5 rounded-xl text-sm z-[300] hidden shadow-lg">
     Success!
@@ -181,6 +195,7 @@
 
 <script>
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    const userRole = "{{ Auth::user()->role }}";
     
     const noImage150 = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' viewBox=\'0 0 150 150\'%3E%3Crect width=\'150\' height=\'150\' fill=\'%23cccccc\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666666\' font-size=\'14\'%3ENo Image%3C/text%3E%3C/svg%3E';
     const noImage70 = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'70\' viewBox=\'0 0 70 70\'%3E%3Crect width=\'70\' height=\'70\' fill=\'%23cccccc\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666666\' font-size=\'10\'%3ENo Image%3C/text%3E%3C/svg%3E';
@@ -192,6 +207,7 @@
     let selectedSupplier = null;
     let confirmCallback = null;
     let pendingReceiveCartKey = null;
+    let pendingProductId = null;
 
     function openHistoryModal() {
         document.getElementById('historyModal').classList.add('open');
@@ -300,6 +316,92 @@
         return div.innerHTML;
     }
 
+    // Password confirmation functions
+    function showPasswordModal(productId) {
+        pendingProductId = productId;
+        document.getElementById('passwordConfirmModal').classList.add('open');
+        document.getElementById('confirmPassword').value = '';
+    }
+
+    function closePasswordModal() {
+        document.getElementById('passwordConfirmModal').classList.remove('open');
+        pendingProductId = null;
+    }
+
+    async function verifyPasswordAndProceed() {
+        const password = document.getElementById('confirmPassword').value;
+        
+        if (!password) {
+            showToast('Please enter your password', true);
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/verify-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ password: password })
+            });
+            
+            const data = await res.json();
+            
+            if (data.valid) {
+                closePasswordModal();
+                // Proceed to supplier modal
+                if (pendingProductId) {
+                    proceedToSupplierModal(pendingProductId);
+                }
+            } else {
+                showToast('Incorrect password. Please try again.', true);
+                document.getElementById('confirmPassword').value = '';
+            }
+        } catch (error) {
+            console.error('Error verifying password:', error);
+            showToast('Error verifying password', true);
+        }
+    }
+
+    document.getElementById('confirmPasswordBtn').onclick = verifyPasswordAndProceed;
+
+    // Modified showSupplierModal with role check
+    async function showSupplierModal(productId) {
+        if (allSuppliers.length === 0) {
+            showSuccess('Loading suppliers, please wait...');
+            await loadSuppliers();
+        }
+        
+        // Check if user is staff (not admin)
+        if (userRole === 'staff') {
+            showPasswordModal(productId);
+            return;
+        }
+        
+        // Admin proceeds directly
+        proceedToSupplierModal(productId);
+    }
+
+    async function proceedToSupplierModal(productId) {
+        currentBuyProduct = allProducts.find(p => p.id == productId);
+        if (!currentBuyProduct) return;
+
+        document.getElementById('supplierProductName').innerText = currentBuyProduct.name;
+        document.getElementById('supplierProductPrice').innerText = `₱ ${parseFloat(currentBuyProduct.price).toLocaleString()}`;
+        document.getElementById('supplierProductImage').src = currentBuyProduct.image ? '/storage/' + currentBuyProduct.image : noImage70;
+
+        document.getElementById('supplierQuantity').value = '1';
+        selectedSupplier = null;
+        document.getElementById('confirmSupplierBtn').disabled = true;
+        document.getElementById('confirmSupplierBtn').innerText = 'Select Supplier First';
+        updateSupplierTotalPrice();
+
+        const productSuppliers = getProductSuppliers(productId);
+        displaySuppliers(productSuppliers);
+        document.getElementById('supplierModal').classList.add('open');
+    }
+
     async function loadSuppliers() {
         try {
             const res = await fetch('/api/suppliers');
@@ -398,29 +500,6 @@
             }
         });
         return productSuppliers;
-    }
-
-    async function showSupplierModal(productId) {
-        if (allSuppliers.length === 0) {
-            showSuccess('Loading suppliers, please wait...');
-            await loadSuppliers();
-        }
-        currentBuyProduct = allProducts.find(p => p.id == productId);
-        if (!currentBuyProduct) return;
-
-        document.getElementById('supplierProductName').innerText = currentBuyProduct.name;
-        document.getElementById('supplierProductPrice').innerText = `₱ ${parseFloat(currentBuyProduct.price).toLocaleString()}`;
-        document.getElementById('supplierProductImage').src = currentBuyProduct.image ? '/storage/' + currentBuyProduct.image : noImage70;
-
-        document.getElementById('supplierQuantity').value = '1';
-        selectedSupplier = null;
-        document.getElementById('confirmSupplierBtn').disabled = true;
-        document.getElementById('confirmSupplierBtn').innerText = 'Select Supplier First';
-        updateSupplierTotalPrice();
-
-        const productSuppliers = getProductSuppliers(productId);
-        displaySuppliers(productSuppliers);
-        document.getElementById('supplierModal').classList.add('open');
     }
 
     function displaySuppliers(suppliers) {

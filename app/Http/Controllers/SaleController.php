@@ -133,6 +133,13 @@ class SaleController extends Controller
 
     public function destroy($id)
     {
+        // 🔒 BLOCK STAFF
+        if (auth()->user()->role === 'staff') {
+            return response()->json([
+                'error' => 'Access denied.'
+            ], 403);
+        }
+
         try {
             $sale = Sale::findOrFail($id);
             
@@ -151,5 +158,23 @@ class SaleController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function analytics()
+    {
+        $sales = \App\Models\Sale::with('product')->get();
+
+        return response()->json([
+            'total_sales' => $sales->sum('total_price'),
+            'total_orders' => $sales->count(),
+            'avg_order' => $sales->avg('total_price'),
+            'top_products' => $sales->groupBy('product_id')
+                ->map(function ($group) {
+                    return [
+                        'name' => optional($group->first()->product)->name,
+                        'total' => $group->sum('quantity')
+                    ];
+                })->values()
+        ]);
     }
 }

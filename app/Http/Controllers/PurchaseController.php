@@ -78,7 +78,12 @@ class PurchaseController extends Controller
             ];
         }
         
-        return response()->json($formatted);
+        return response()->json(
+        \App\Models\Purchase::with(['product','supplier'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get()
+        );
     }
 
     // Receive product (move from pending to received)
