@@ -271,9 +271,22 @@
                     
                     <!-- Products Grid - Right Side -->
                     <div class="flex-1">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold text-gray-800">Shop Products</h2>
-                            <div class="text-sm text-gray-500" id="productCount">Loading...</div>
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Shop Products</h2>
+                                <div class="text-sm text-gray-500 mt-1" id="productCount">Loading...</div>
+                            </div>
+                            <div class="relative w-full md:w-80">
+                                <input
+                                    type="search"
+                                    id="productSearch"
+                                    placeholder="Search products, brands, or categories"
+                                    class="w-full rounded-2xl border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                >
+                                <svg class="absolute left-4 top-1/2 w-5 h-5 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"></path>
+                                </svg>
+                            </div>
                         </div>
                         <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"><div class="text-center py-8 text-gray-500 col-span-full">Loading products...</div></div>
                     </div>
@@ -295,6 +308,55 @@
     <!-- Checkout Modal -->
     <div id="checkoutModal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center hidden" onclick="if(event.target===this)closeCheckoutModal()">
         <div class="bg-white rounded-2xl w-full max-w-md mx-4 shadow-2xl"><div class="p-6"><h2 class="text-xl font-bold text-gray-800 mb-4">Checkout</h2><form id="checkoutForm">@csrf<div class="mb-4"><label class="block text-gray-700 text-sm font-semibold mb-2">Full Name *</label><input type="text" id="customer_name" value="{{ Auth::user()->name }}" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"></div><div class="mb-4"><label class="block text-gray-700 text-sm font-semibold mb-2">Email *</label><input type="email" id="customer_email" value="{{ Auth::user()->email }}" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"></div><div class="mb-4"><label class="block text-gray-700 text-sm font-semibold mb-2">Phone Number *</label><input type="text" id="customer_phone" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"></div><div class="mb-4"><label class="block text-gray-700 text-sm font-semibold mb-2">Payment Method</label><select id="payment_method" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"><option value="cash">Cash on Delivery</option><option value="card">Credit/Debit Card</option><option value="bank_transfer">Bank Transfer</option></select></div><div class="mb-4"><label class="block text-gray-700 text-sm font-semibold mb-2">Delivery Address *</label><textarea id="notes" rows="2" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter your complete address"></textarea></div><div class="flex gap-3"><button type="button" onclick="closeCheckoutModal()" class="flex-1 py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition">Cancel</button><button type="submit" class="flex-1 py-3 bg-green-600 rounded-xl text-white font-semibold hover:bg-green-700 transition">Place Order</button></div></form></div></div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div id="productDetailsModal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center hidden p-4" onclick="if(event.target===this)closeProductDetails()">
+        <div class="w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b px-6 py-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Product Details</p>
+                    <h2 id="productDetailsTitle" class="text-2xl font-bold text-gray-900">Product</h2>
+                </div>
+                <button onclick="closeProductDetails()" class="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid gap-6 p-6 md:grid-cols-[1.1fr_0.9fr]">
+                <div id="productDetailsImage" class="flex min-h-[260px] items-center justify-center rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                <div>
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <span id="productDetailsCategory" class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Category</span>
+                        <span id="productDetailsStockBadge" class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">In Stock</span>
+                    </div>
+                    <p id="productDetailsPrice" class="mb-4 text-3xl font-extrabold text-green-600">P0.00</p>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="rounded-2xl bg-gray-50 p-4">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Brand</p>
+                            <p id="productDetailsBrand" class="mt-1 font-semibold text-gray-800">N/A</p>
+                        </div>
+                        <div class="rounded-2xl bg-gray-50 p-4">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Model Number</p>
+                            <p id="productDetailsModel" class="mt-1 font-semibold text-gray-800">N/A</p>
+                        </div>
+                        <div class="rounded-2xl bg-gray-50 p-4 sm:col-span-2">
+                            <p class="text-xs uppercase tracking-wide text-gray-500">Performance</p>
+                            <p id="productDetailsPerformance" class="mt-1 font-semibold text-gray-800">N/A</p>
+                        </div>
+                    </div>
+                    <div class="mt-5 rounded-2xl border border-gray-200 p-4">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Extra Specifications</p>
+                        <div id="productDetailsSpecs" class="mt-3 space-y-2 text-sm text-gray-700"></div>
+                    </div>
+                    <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                        <button id="productDetailsAddToCart" class="flex-1 rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">Add to Cart</button>
+                        <button onclick="closeProductDetails()" class="flex-1 rounded-2xl bg-gray-200 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-300">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Toast Notification -->
@@ -322,6 +384,7 @@
         let currentCategory = '';
         let currentMinPrice = 0;
         let currentMaxPrice = 50000;
+        let currentSearchQuery = '';
 
         function showProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); document.getElementById('profileModal').classList.add('flex'); }
         function closeProfileModal() { document.getElementById('profileModal').classList.remove('flex'); document.getElementById('profileModal').classList.add('hidden'); }
@@ -368,7 +431,23 @@
 
         function applyBudgetFilter() { const minPrice = document.getElementById('minPrice').value; const maxPrice = document.getElementById('maxPrice').value; currentMinPrice = minPrice ? parseInt(minPrice) : 0; currentMaxPrice = maxPrice ? parseInt(maxPrice) : 50000; loadProducts(); if(document.getElementById('filterSidebar').classList.contains('open')) toggleMobileFilter(); }
 
-        function clearFilters() { document.getElementById('minPrice').value = ''; document.getElementById('maxPrice').value = ''; currentMinPrice = 0; currentMaxPrice = 50000; currentCategory = ''; loadProducts(); document.querySelectorAll('.category-filter-btn').forEach(btn => btn.classList.remove('category-active', 'text-white', 'bg-blue-600')); if(document.querySelector('.category-filter-btn')) document.querySelector('.category-filter-btn').classList.add('category-active', 'text-white', 'bg-blue-600'); if(document.getElementById('filterSidebar').classList.contains('open')) toggleMobileFilter(); }
+        function clearFilters() { document.getElementById('minPrice').value = ''; document.getElementById('maxPrice').value = ''; const searchInput = document.getElementById('productSearch'); if (searchInput) searchInput.value = ''; currentMinPrice = 0; currentMaxPrice = 50000; currentCategory = ''; currentSearchQuery = ''; loadProducts(); document.querySelectorAll('.category-filter-btn').forEach(btn => btn.classList.remove('category-active', 'text-white', 'bg-blue-600')); if(document.querySelector('.category-filter-btn')) document.querySelector('.category-filter-btn').classList.add('category-active', 'text-white', 'bg-blue-600'); if(document.getElementById('filterSidebar').classList.contains('open')) toggleMobileFilter(); }
+
+        function getFilteredProducts() {
+            let filtered = [...allProducts];
+            const search = currentSearchQuery.trim().toLowerCase();
+            if (currentCategory) filtered = filtered.filter(p => p.category_id == currentCategory);
+            filtered = filtered.filter(p => parseFloat(p.price) >= currentMinPrice && parseFloat(p.price) <= currentMaxPrice);
+            if (search) filtered = filtered.filter(product => [product.name, product.brand, product.model_number, product.performance, product.category ? product.category.name : ''].some(value => String(value || '').toLowerCase().includes(search)));
+            return filtered;
+        }
+
+        function renderProducts(products) {
+            document.getElementById('productCount') && (document.getElementById('productCount').innerText = `${products.length} products`);
+            const container = document.getElementById('productsGrid');
+            if (products.length === 0) { container.innerHTML = '<div class="col-span-full text-center py-12 bg-white rounded-2xl"><svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-lg font-medium text-gray-900 mb-1">No products found</h3><p class="text-gray-500">Try adjusting your filters or search keywords</p></div>'; return; }
+            container.innerHTML = products.map(product => `<div class="product-card bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"><div class="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">${product.image ? `<img src="/storage/${product.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">` : `<div class="w-full h-full flex items-center justify-center"><svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`}${product.quantity < 10 && product.quantity > 0 ? `<div class="absolute top-3 right-3"><span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-1 rounded-full">Low Stock</span></div>` : ''}${product.quantity === 0 ? `<div class="absolute inset-0 bg-black/50 flex items-center justify-center"><span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Out of Stock</span></div>` : ''}</div><div class="p-4"><h3 class="font-bold text-gray-900 text-lg mb-1 truncate">${escapeHtml(product.name)}</h3><p class="text-sm text-gray-500 mb-1">${escapeHtml(product.brand || 'Unspecified brand')}</p><p class="text-2xl font-bold text-green-600 mb-2">P${parseFloat(product.price).toLocaleString()}</p><div class="flex items-center justify-between text-sm mb-4"><span class="text-gray-500">Stock: ${product.quantity} units</span><span class="text-blue-600 text-xs font-medium">${product.category ? escapeHtml(product.category.name) : 'No Category'}</span></div><div class="flex gap-2"><button onclick="showProductDetails(${product.id})" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-xl border border-blue-200 transition">View Details</button><button onclick="addToCartById(${product.id})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition ${product.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${product.quantity === 0 ? 'disabled' : ''}>Add to Cart</button></div></div></div>`).join('');
+        }
 
         async function loadProducts() {
             try {
@@ -376,6 +455,8 @@
                 let products = await res.json();
                 if (products.data) products = products.data;
                 allProducts = products;
+                renderProducts(getFilteredProducts());
+                return;
                 let filtered = [...allProducts];
                 if (currentCategory) filtered = filtered.filter(p => p.category_id == currentCategory);
                 filtered = filtered.filter(p => p.price >= currentMinPrice && p.price <= currentMaxPrice);
@@ -413,8 +494,40 @@
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); updateCartUI(); updateCartPage(); }
         function updateCartUI() { const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); document.getElementById('cartCount').innerText = totalItems; document.getElementById('mobileCartBadge').innerText = totalItems; document.getElementById('mobileCartBadge').classList.toggle('hidden', totalItems === 0); }
         function updateQuantity(productId, change) { const item = cart.find(i => i.id === productId); if (item) { const newQuantity = item.quantity + change; if (newQuantity <= 0) removeFromCart(productId); else if (newQuantity <= item.stock) { item.quantity = newQuantity; saveCart(); } else showToast('Not enough stock!', true); } }
+        function addToCartById(productId) { const product = allProducts.find(item => item.id === productId); if (!product) { showToast('Product not found.', true); return; } addToCart({ ...product, stock: product.quantity }); }
         function addToCart(product) { const existing = cart.find(i => i.id === product.id); if (existing) { if (existing.quantity + 1 <= product.stock) { existing.quantity++; saveCart(); showToast(`${product.name} added to cart!`); } else showToast('Not enough stock!', true); } else { cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, stock: product.quantity, quantity: 1 }); saveCart(); showToast(`${product.name} added to cart!`); } }
         function removeFromCart(productId) { cart = cart.filter(i => i.id !== productId); saveCart(); }
+        function closeProductDetails() { document.getElementById('productDetailsModal').classList.remove('flex'); document.getElementById('productDetailsModal').classList.add('hidden'); }
+        function formatSpecLabel(key) { return String(key || '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()); }
+        function showProductDetails(productId) {
+            const product = allProducts.find(item => item.id === productId);
+            if (!product) { showToast('Product details are unavailable.', true); return; }
+            document.getElementById('productDetailsTitle').innerText = product.name || 'Product Details';
+            document.getElementById('productDetailsCategory').innerText = product.category ? product.category.name : 'No Category';
+            document.getElementById('productDetailsPrice').innerText = `P${parseFloat(product.price || 0).toLocaleString()}`;
+            document.getElementById('productDetailsBrand').innerText = product.brand || 'N/A';
+            document.getElementById('productDetailsModel').innerText = product.model_number || 'N/A';
+            document.getElementById('productDetailsPerformance').innerText = product.performance || 'No performance details provided.';
+            const stockBadge = document.getElementById('productDetailsStockBadge');
+            if (product.quantity === 0) {
+                stockBadge.innerText = 'Out of Stock';
+                stockBadge.className = 'rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700';
+            } else if (product.quantity < 10) {
+                stockBadge.innerText = `Low Stock (${product.quantity})`;
+                stockBadge.className = 'rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700';
+            } else {
+                stockBadge.innerText = `${product.quantity} units available`;
+                stockBadge.className = 'rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700';
+            }
+            document.getElementById('productDetailsImage').innerHTML = product.image ? `<img src="/storage/${product.image}" alt="${escapeHtml(product.name)}" class="h-full w-full rounded-3xl object-cover">` : `<div class="flex h-full w-full items-center justify-center rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200"><svg class="h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2 1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path></svg></div>`;
+            document.getElementById('productDetailsSpecs').innerHTML = product.dynamic_fields && Object.keys(product.dynamic_fields).length ? Object.entries(product.dynamic_fields).map(([key, value]) => `<div class="flex items-start justify-between gap-4 rounded-xl bg-gray-50 px-3 py-2"><span class="font-medium text-gray-500">${escapeHtml(formatSpecLabel(key))}</span><span class="text-right font-semibold text-gray-800">${escapeHtml(value)}</span></div>`).join('') : '<p class="rounded-xl bg-gray-50 px-3 py-4 text-gray-500">No extra specifications available for this product yet.</p>';
+            const addButton = document.getElementById('productDetailsAddToCart');
+            addButton.disabled = product.quantity === 0;
+            addButton.className = `flex-1 rounded-2xl px-5 py-3 font-semibold text-white transition ${product.quantity === 0 ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`;
+            addButton.onclick = () => addToCartById(product.id);
+            document.getElementById('productDetailsModal').classList.remove('hidden');
+            document.getElementById('productDetailsModal').classList.add('flex');
+        }
         function closeCheckoutModal() { document.getElementById('checkoutModal').classList.remove('flex'); document.getElementById('checkoutModal').classList.add('hidden'); }
         async function checkout() { if (cart.length === 0) { showToast('Your cart is empty', true); return; } document.getElementById('checkoutModal').classList.remove('hidden'); document.getElementById('checkoutModal').classList.add('flex'); }
 
@@ -445,6 +558,8 @@
 
         const priceSlider = document.getElementById('priceSlider');
         if (priceSlider) priceSlider.addEventListener('input', function(e) { document.getElementById('maxPrice').value = e.target.value === '50000' ? '' : e.target.value; currentMaxPrice = parseInt(e.target.value); loadProducts(); });
+        const productSearch = document.getElementById('productSearch');
+        if (productSearch) productSearch.addEventListener('input', function(e) { currentSearchQuery = e.target.value; renderProducts(getFilteredProducts()); });
 
         document.addEventListener('DOMContentLoaded', () => { loadCategories(); loadProducts(); loadHomeCategories(); updateCartUI(); loadCustomerOrders(); showPage('home'); });
     </script>

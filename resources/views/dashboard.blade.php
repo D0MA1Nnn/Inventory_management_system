@@ -205,8 +205,19 @@
                     </a>
                 @endif
 
-                {{-- ADMIN ONLY --}}
-                @if(auth()->user()->role === 'admin')
+                {{-- ADMIN + MANAGER --}}
+                @if(in_array(auth()->user()->role, ['admin','manager']))
+                    <a href="{{ route('categories-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-sky-50 transition group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition">
+                                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Manage Categories</span>
+                        </div>
+                    </a>
+
                     <a href="{{ route('suppliers-ui') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-purple-50 transition group">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition">

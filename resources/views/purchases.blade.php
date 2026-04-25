@@ -4,76 +4,90 @@
 @section('content')
 
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900"></h1>
+    <div class="flex flex-col gap-1">
+        <h1 class="text-2xl font-bold text-gray-900"></h1>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="summary-card border-gray-200">
+            <p class="text-xs font-semibold uppercase text-gray-500">Available Products</p>
+            <p class="mt-2 text-2xl font-bold text-gray-900" id="totalProductsCount">0</p>
         </div>
-        <div class="flex items-center gap-3">
-            <select id="categoryFilter" class="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
+        <div class="summary-card border-blue-200">
+            <p class="text-xs font-semibold uppercase text-gray-500">Active Suppliers</p>
+            <p class="mt-2 text-2xl font-bold text-blue-600" id="totalSuppliersCount">0</p>
+        </div>
+        <div class="summary-card border-amber-200">
+            <p class="text-xs font-semibold uppercase text-gray-500">Pending Orders</p>
+            <p class="mt-2 text-2xl font-bold text-amber-600" id="pendingPurchasesCount">0</p>
+        </div>
+        <div class="summary-card border-green-200">
+            <p class="text-xs font-semibold uppercase text-gray-500">Completed Orders</p>
+            <p class="mt-2 text-2xl font-bold text-green-600" id="completedPurchasesCount">0</p>
+        </div>
+    </div>
+
+    <!-- Purchase Tabs -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Purchase sections">
+            <button type="button" class="purchase-tab active px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="buy" onclick="setPurchaseTab('buy')" role="tab" aria-selected="true">
+                Buy Products
+            </button>
+            <button type="button" class="purchase-tab relative px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="coming" onclick="setPurchaseTab('coming')" role="tab" aria-selected="false">
+                Coming Products
+                <span id="comingProductsBadge" class="tab-badge hidden">0</span>
+            </button>
+            <button type="button" class="purchase-tab px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="received" onclick="setPurchaseTab('received')" role="tab" aria-selected="false">
+                Received Products
+            </button>
+        </div>
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+            <label for="categoryFilter" class="text-xs font-semibold uppercase text-gray-500">Filter by Category</label>
+            <select id="categoryFilter" class="w-full sm:w-auto sm:min-w-56 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
                 <option value="">ALL CATEGORIES</option>
             </select>
         </div>
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-gray-900" id="totalProductsCount">0</p>
-            <p class="text-xs text-gray-500">Available Products</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-blue-600" id="totalSuppliersCount">0</p>
-            <p class="text-xs text-gray-500">Active Suppliers</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-amber-600" id="pendingPurchasesCount">0</p>
-            <p class="text-xs text-gray-500">Pending Orders</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-green-600" id="completedPurchasesCount">0</p>
-            <p class="text-xs text-gray-500">Completed Orders</p>
-        </div>
-    </div>
-
-    <!-- BUY PRODUCTS Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#1A1D2E] to-[#2D3047] px-6 py-4">
-            <h2 class="text-white font-semibold">Buy Products</h2>
-            <p class="text-gray-300 text-sm mt-0.5">Purchase products from your suppliers</p>
-        </div>
-        <div class="p-6">
-            <div id="buyGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-        </div>
-    </div>
-
-    <!-- COMING PRODUCTS Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#1A1D2E] to-[#2D3047] px-6 py-4">
-            <h2 class="text-white font-semibold">Coming Products</h2>
-            <p class="text-gray-300 text-sm mt-0.5">Products waiting to be received</p>
-        </div>
-        <div class="p-6">
-            <div id="comingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-        </div>
-    </div>
-
-    <!-- RECEIVED PRODUCTS Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#1A1D2E] to-[#2D3047] px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-white font-semibold">Received Products</h2>
-                    <p class="text-gray-300 text-sm mt-0.5">Latest received products</p>
-                </div>
-                <button onclick="openHistoryModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-xl transition shadow-sm">
-                    View All History
-                </button>
+    <!-- Purchase Tab Content -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <section id="buySection" class="purchase-section transition-opacity duration-200" data-tab-panel="buy" role="tabpanel">
+            <div class="section-header">
+                <h2 class="text-gray-900 font-semibold">Buy Products</h2>
+                <p class="text-gray-500 text-sm mt-0.5">Purchase products from your suppliers</p>
             </div>
-        </div>
-        <div class="p-6">
-            <div id="receivedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-        </div>
+            <div class="p-6">
+                <div id="buyGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
+
+        <section id="comingSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="coming" role="tabpanel">
+            <div class="section-header">
+                <h2 class="text-gray-900 font-semibold">Coming Products</h2>
+                <p class="text-gray-500 text-sm mt-0.5">Products waiting to be received</p>
+            </div>
+            <div class="p-6">
+                <div id="comingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
+
+        <section id="receivedSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="received" role="tabpanel">
+            <div class="section-header">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="text-gray-900 font-semibold">Received Products</h2>
+                        <p class="text-gray-500 text-sm mt-0.5">Latest received products</p>
+                    </div>
+                    <button onclick="openHistoryModal()" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition shadow-sm">
+                        View All History
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="receivedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
     </div>
 </div>
 
@@ -191,6 +205,56 @@
 .modal-bg.open {
     display: flex;
 }
+.summary-card {
+    background: #ffffff;
+    border-width: 1px;
+    border-left-width: 4px;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+.purchase-tab {
+    color: #4b5563;
+    background: transparent;
+}
+.purchase-tab:hover {
+    color: #111827;
+    background: #ffffff;
+}
+.purchase-tab.active {
+    color: #ffffff;
+    background: #1A1D2E;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+}
+.tab-badge {
+    position: absolute;
+    top: -0.45rem;
+    right: -0.45rem;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.35rem;
+    border-radius: 9999px;
+    background: #f59e0b;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+    transition: opacity 160ms ease, transform 160ms ease;
+    pointer-events: none;
+}
+.tab-badge.hidden {
+    display: none;
+}
+.tab-badge.badge-pop {
+    transform: scale(1.12);
+}
 </style>
 
 <script>
@@ -208,6 +272,45 @@
     let confirmCallback = null;
     let pendingReceiveCartKey = null;
     let pendingProductId = null;
+
+    function setPurchaseTab(activeTab) {
+        document.querySelectorAll('.purchase-tab').forEach(tab => {
+            const isActive = tab.dataset.tab === activeTab;
+            tab.classList.toggle('active', isActive);
+            tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        document.querySelectorAll('.purchase-section').forEach(section => {
+            const isActive = section.dataset.tabPanel === activeTab;
+            if (isActive) {
+                section.classList.remove('hidden');
+                requestAnimationFrame(() => section.classList.remove('opacity-0'));
+            } else {
+                section.classList.add('opacity-0');
+                setTimeout(() => {
+                    const activeButton = document.querySelector('.purchase-tab.active');
+                    if (activeButton && section.dataset.tabPanel !== activeButton.dataset.tab) {
+                        section.classList.add('hidden');
+                    }
+                }, 200);
+            }
+        });
+    }
+
+    function updateComingProductsBadge(count) {
+        const badge = document.getElementById('comingProductsBadge');
+        if (!badge) return;
+
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.toggle('hidden', count === 0);
+
+        if (count > 0) {
+            badge.classList.remove('badge-pop');
+            void badge.offsetWidth;
+            badge.classList.add('badge-pop');
+            setTimeout(() => badge.classList.remove('badge-pop'), 180);
+        }
+    }
 
     function openHistoryModal() {
         document.getElementById('historyModal').classList.add('open');
@@ -456,12 +559,12 @@
         products.forEach(product => {
             const isLowStock = product.quantity > 0 && product.quantity < 10;
             container.innerHTML += `
-                <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
                     <div class="relative h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                         <img src="${product.image ? '/storage/' + product.image : noImage150}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='${noImage150}'">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition duration-300"></div>
                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                            <span class="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-xl text-sm font-semibold text-gray-800 cursor-pointer hover:bg-white transition" onclick="showProductDetails(${product.id})">View Details</span>
+                            <span class="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-semibold text-gray-800 cursor-pointer hover:bg-white transition" onclick="showProductDetails(${product.id})">View Details</span>
                         </div>
                         <div class="absolute top-3 right-3">
                             <span class="px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
@@ -474,7 +577,7 @@
                             <span class="text-gray-500">Stock: ${product.quantity} units</span>
                             <span class="text-blue-600 font-medium">${product.category ? product.category.name : 'No Category'}</span>
                         </div>
-                        <button class="w-full bg-[#1A1D2E] hover:bg-[#2D3047] text-white font-semibold py-2.5 rounded-xl transition text-sm" onclick="showSupplierModal(${product.id})">Buy Now</button>
+                        <button class="w-full bg-[#1A1D2E] hover:bg-[#2D3047] text-white font-semibold py-2.5 rounded-lg transition text-sm" onclick="showSupplierModal(${product.id})">Buy Now</button>
                     </div>
                 </div>
             `;
@@ -589,6 +692,7 @@
             container.innerHTML = '';
             const pendingCount = Object.keys(products).length;
             document.getElementById('pendingPurchasesCount').innerText = pendingCount;
+            updateComingProductsBadge(pendingCount);
             if (pendingCount === 0) {
                 container.innerHTML = `<div class="col-span-full text-center py-12"><div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path></svg></div><h3 class="text-lg font-medium text-gray-900 mb-1">No coming products</h3><p class="text-gray-500">Purchase products to see them here</p></div>`;
                 return;
@@ -601,7 +705,7 @@
                     if (productDetail && productDetail.image) imageUrl = '/storage/' + productDetail.image;
                 }
                 container.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100">
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
                         <div class="relative h-32 overflow-hidden bg-gray-100"><img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.src='${noImage150}'"></div>
                         <div class="p-4">
                             <div class="space-y-1 text-sm">
@@ -611,7 +715,7 @@
                                 <p><span class="text-gray-500">Quantity:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
                                 <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(product.price * product.quantity).toLocaleString()}</strong></p>
                             </div>
-                            <button class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-xl transition text-sm" onclick='showReceiveConfirm("${key}", "${escapeHtml(product.product_name)}", ${product.quantity})'>Receive</button>
+                            <button class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm" onclick='showReceiveConfirm("${key}", "${escapeHtml(product.product_name)}", ${product.quantity})'>Receive</button>
                         </div>
                     </div>
                 `;
@@ -656,7 +760,7 @@
             }
             
             // Only show latest 4 received products
-            const latestProducts = productsArray.slice(-4).reverse();
+            const latestProducts = productsArray.slice(0, 4);
             
             latestProducts.forEach(product => {
                 let imageUrl = noImage150;
@@ -680,7 +784,7 @@
                 }
                 
                 container.innerHTML += `
-                    <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
                         <div class="relative h-32 overflow-hidden bg-gray-100">
                             <img src="${imageUrl}" class="w-full h-full object-cover opacity-75" onerror="this.src='${noImage150}'">
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span></div>
@@ -694,7 +798,7 @@
                                 <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(product.price * product.quantity).toLocaleString()}</strong></p>
                                 <p><span class="text-gray-500">Received:</span> <strong class="text-blue-600">${receivedDate}</strong></p>
                             </div>
-                            <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-xl transition text-sm" onclick="showProductDetails(${product.product_id})">View Details</button>
+                            <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-lg transition text-sm" onclick="showProductDetails(${product.product_id})">View Details</button>
                         </div>
                     </div>
                 `;
@@ -752,6 +856,7 @@
     loadProducts();
     loadComingProducts();
     loadReceivedProducts();
+    setPurchaseTab('buy');
     setInterval(() => { loadComingProducts(); loadReceivedProducts(); }, 30000);
 </script>
 @endsection

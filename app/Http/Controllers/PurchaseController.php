@@ -66,24 +66,19 @@ class PurchaseController extends Controller
         foreach ($purchases as $purchase) {
             $formatted[$purchase->id] = [
                 'product_id' => $purchase->product_id,
-                'product_name' => $purchase->product->name,
+                'product_name' => $purchase->product->name ?? 'N/A',
                 'supplier_id' => $purchase->supplier_id,
-                'supplier_name' => $purchase->supplier->name,
+                'supplier_name' => $purchase->supplier->name ?? 'N/A',
                 'price' => $purchase->price,
                 'quantity' => $purchase->quantity,
                 'category' => $purchase->product->category->name ?? 'N/A',
-                'product_image' => $purchase->product->image,
+                'product_image' => $purchase->product->image ?? null,
                 'total' => $purchase->total,
                 'added_at' => $purchase->created_at
             ];
         }
         
-        return response()->json(
-        \App\Models\Purchase::with(['product','supplier'])
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get()
-        );
+        return response()->json($formatted);
     }
 
     // Receive product (move from pending to received)
@@ -93,6 +88,10 @@ class PurchaseController extends Controller
         
         if (!$purchase) {
             return response()->json(['error' => 'Purchase not found'], 404);
+        }
+
+        if ($purchase->status !== 'pending') {
+            return response()->json(['error' => 'Purchase already received'], 422);
         }
         
         // Update product stock

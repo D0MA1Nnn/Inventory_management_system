@@ -81,6 +81,74 @@
             visibility: visible;
             pointer-events: auto;
         }
+        .summary-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left-width: 4px;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+        .tab-surface {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            padding: 0.75rem;
+        }
+        .tab-btn {
+            position: relative;
+            color: #4b5563;
+            background: transparent;
+        }
+        .tab-btn:hover {
+            color: #111827;
+            background: #ffffff;
+        }
+        .tab-btn.active {
+            color: #ffffff;
+            background: #1a1d2e;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+        }
+        .tab-badge {
+            position: absolute;
+            top: -0.45rem;
+            right: -0.45rem;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.35rem;
+            border-radius: 9999px;
+            background: #f59e0b;
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1.25rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            pointer-events: none;
+        }
+        .tab-badge.hidden {
+            display: none;
+        }
+        .filter-surface {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            padding: 0.75rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -138,10 +206,7 @@
                     <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                         <span class="text-sm font-medium">Purchases</span>
                     </a>
-                @endif
 
-                {{-- ADMIN ONLY --}}
-                @if((auth()->user()->role ?? '') === 'admin')
                     <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                         <span class="text-sm font-medium">Categories</span>
                     </a>
@@ -149,6 +214,10 @@
                     <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                         <span class="text-sm font-medium">Suppliers</span>
                     </a>
+                @endif
+
+                {{-- ADMIN ONLY --}}
+                @if((auth()->user()->role ?? '') === 'admin')
 
                     <a href="{{ route('staff-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                         <span class="text-sm font-medium">Staff</span>
@@ -156,6 +225,9 @@
 
                     <a href="{{ route('customers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
                         <span class="text-sm font-medium">Customers</span>
+                    </a>
+                    <a href="{{ route('admin.logs.index') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                        <span class="text-sm font-medium">Activity Logs</span>
                     </a>
                 @endif
 
@@ -374,6 +446,7 @@
                 let purchases = [];
                 if (purchaseRes.ok) {
                     purchases = await purchaseRes.json();
+                    purchases = Array.isArray(purchases) ? purchases : Object.values(purchases);
                 }
 
                 document.getElementById('pendingPurchasesBadge').innerText = purchases.length;
@@ -384,9 +457,9 @@
                     purchases.length > 0
                     ? purchases.slice(0,5).map(p => `
                         <div class="p-3 border-b">
-                            <p class="text-sm font-medium">${escapeHtml(p.product?.name)}</p>
+                            <p class="text-sm font-medium">${escapeHtml(p.product_name || p.product?.name || 'Unknown product')}</p>
                             <p class="text-xs text-gray-500">
-                                ${escapeHtml(p.supplier?.name)} • Qty: ${p.quantity}
+                                ${escapeHtml(p.supplier_name || p.supplier?.name || 'Unknown supplier')} - Qty: ${p.quantity}
                             </p>
                         </div>
                     `).join('')
@@ -444,3 +517,4 @@
     </script>
 </body>
 </html>
+

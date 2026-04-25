@@ -4,13 +4,12 @@
 @section('content')
 
 <div class="space-y-6">
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900"></h1>
         </div>
         <button onclick="openSaleModal()"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition shadow-sm">
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -18,30 +17,44 @@
         </button>
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-green-600" id="totalSales">₱0</p>
-            <p class="text-xs text-gray-500">Total Revenue</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-blue-600" id="totalOrders">0</p>
-            <p class="text-xs text-gray-500">Total Orders</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-purple-600" id="todaySales">₱0</p>
-            <p class="text-xs text-gray-500">Today's Sales</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-amber-600" id="averageOrder">₱0</p>
-            <p class="text-xs text-gray-500">Average Order</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <x-summary-card label="Total Sales" id="totalSalesCount" value="0" accent="gray" />
+        <x-summary-card label="Revenue" id="revenueTotal" value="₱0" accent="green" />
+        <x-summary-card label="Orders Today" id="ordersToday" value="0" accent="blue" />
+        <x-summary-card label="Completed Orders" id="completedOrders" value="0" accent="amber" />
+    </div>
+
+    <div class="tab-surface">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Sales tabs">
+            <x-tab-button active="true" tab="all" onclick="setSalesTab('all')">All Sales</x-tab-button>
+            <x-tab-button tab="pending" onclick="setSalesTab('pending')">Pending</x-tab-button>
+            <x-tab-button tab="completed" onclick="setSalesTab('completed')">Completed</x-tab-button>
         </div>
     </div>
+
+    <x-filter-bar>
+        <x-slot:search>
+            <div class="relative w-full max-w-xl">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                <input type="text" id="salesSearch" placeholder="Search product, customer, payment..." class="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </x-slot:search>
+        <x-slot:filters>
+            <label for="salesFromDate" class="text-xs font-semibold uppercase text-gray-500">From</label>
+            <input type="date" id="salesFromDate" class="px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applySalesFilters()">
+            <label for="salesToDate" class="text-xs font-semibold uppercase text-gray-500">To</label>
+            <input type="date" id="salesToDate" class="px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applySalesFilters()">
+        </x-slot:filters>
+    </x-filter-bar>
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Sales by Category Chart -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="section-card p-6">
             <h3 class="font-semibold text-gray-900 mb-4">Sales by Category</h3>
             <div id="categoryChart" class="space-y-3">
                 <div class="text-center text-gray-500 py-8">Loading chart...</div>
@@ -49,7 +62,7 @@
         </div>
 
         <!-- Recent Sales -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="section-card p-6">
             <h3 class="font-semibold text-gray-900 mb-4">Recent Transactions</h3>
             <div id="recentSalesList" class="space-y-3 max-h-[400px] overflow-y-auto">
                 <div class="text-center text-gray-500 py-8">Loading transactions...</div>
@@ -57,11 +70,10 @@
         </div>
     </div>
 
-    <!-- Sales History Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#1A1D2E] to-[#2D3047] px-6 py-4">
-            <h2 class="text-white font-semibold">Sales History</h2>
-            <p class="text-gray-300 text-sm mt-0.5">All sales transactions</p>
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="text-gray-900 font-semibold">Sales History</h2>
+            <p class="text-gray-500 text-sm mt-0.5">All sales transactions</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -72,16 +84,27 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Customer</th>
                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Qty</th>
                         <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="salesTableBody">
                     <tr>
-                        <td colspan="6" class="text-center py-8 text-gray-500">Loading sales...</td>
+                        <td colspan="7" class="text-center py-8 text-gray-500">Loading sales...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<div id="viewSaleModal" class="modal-bg" onclick="if(event.target===this)closeViewSaleModal()">
+    <div class="bg-white rounded-2xl w-[520px] max-w-[95%] shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <span class="text-lg font-bold text-gray-900">Sale Details</span>
+            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeViewSaleModal()">✕</button>
+        </div>
+        <div id="viewSaleContent" class="p-6"></div>
     </div>
 </div>
 
@@ -170,6 +193,50 @@
     const userRole = "{{ auth()->user()->role }}";
 
     let pendingDeleteId = null;
+    let allSalesData = [];
+    let currentSalesTab = 'all';
+    let currentSalesSearch = '';
+    let currentSalesFromDate = '';
+    let currentSalesToDate = '';
+
+    function setSalesTab(tab) {
+        currentSalesTab = tab;
+        document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+            const isActive = btn.dataset.tab === tab;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        applySalesFilters();
+    }
+
+    function applySalesFilters() {
+        currentSalesSearch = (document.getElementById('salesSearch')?.value || '').trim().toLowerCase();
+        currentSalesFromDate = document.getElementById('salesFromDate')?.value || '';
+        currentSalesToDate = document.getElementById('salesToDate')?.value || '';
+        updateSalesTable(getFilteredSales());
+    }
+
+    function getFilteredSales() {
+        return allSalesData.filter((sale) => {
+            const status = sale.status || 'completed';
+            const soldAt = sale.sold_at ? new Date(sale.sold_at) : null;
+            const searchable = [
+                sale.product?.name,
+                sale.customer_name,
+                sale.payment_method,
+                status,
+            ].filter(Boolean).join(' ').toLowerCase();
+
+            const matchesSearch = !currentSalesSearch || searchable.includes(currentSalesSearch);
+            const matchesTab = currentSalesTab === 'all' || status === currentSalesTab;
+            const fromDate = currentSalesFromDate ? new Date(`${currentSalesFromDate}T00:00:00`) : null;
+            const toDate = currentSalesToDate ? new Date(`${currentSalesToDate}T23:59:59`) : null;
+            const matchesFrom = !fromDate || (soldAt && soldAt >= fromDate);
+            const matchesTo = !toDate || (soldAt && soldAt <= toDate);
+
+            return matchesSearch && matchesTab && matchesFrom && matchesTo;
+        });
+    }
 
     function openSaleModal() {
         document.getElementById('saleModal').classList.add('open');
@@ -225,11 +292,12 @@
             const stats = await statsRes.json();
             const categoryData = await categoryRes.json();
             const recentSales = await recentRes.json();
+            allSalesData = sales || [];
             
-            updateStats(stats);
+            updateStats(stats, allSalesData);
             updateCategoryChart(categoryData);
             updateRecentSales(recentSales);
-            updateSalesTable(sales);
+            applySalesFilters();
             
         } catch (error) {
             console.error('Error loading sales:', error);
@@ -237,11 +305,14 @@
         }
     }
 
-    function updateStats(stats) {
-        document.getElementById('totalSales').innerText = '₱' + parseFloat(stats.total_sales || 0).toLocaleString();
-        document.getElementById('totalOrders').innerText = stats.total_orders || 0;
-        document.getElementById('todaySales').innerText = '₱' + parseFloat(stats.today_sales || 0).toLocaleString();
-        document.getElementById('averageOrder').innerText = '₱' + parseFloat(stats.average_order_value || 0).toLocaleString();
+    function updateStats(stats, sales) {
+        const todayKey = new Date().toDateString();
+        const ordersToday = (sales || []).filter(sale => new Date(sale.sold_at).toDateString() === todayKey).length;
+
+        document.getElementById('totalSalesCount').innerText = (sales || []).length;
+        document.getElementById('revenueTotal').innerText = '₱' + parseFloat(stats.total_sales || 0).toLocaleString();
+        document.getElementById('ordersToday').innerText = ordersToday;
+        document.getElementById('completedOrders').innerText = stats.total_orders || 0;
     }
 
     function updateCategoryChart(categoryData) {
@@ -297,7 +368,7 @@
         const tbody = document.getElementById('salesTableBody');
         
         if (sales.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No sales recorded yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No sales recorded yet</td></tr>';
             return;
         }
         
@@ -316,16 +387,44 @@
                 <td class="px-4 py-3 text-right text-sm text-gray-600">${sale.quantity}</td>
                 <td class="px-4 py-3 text-right font-semibold text-green-600">₱${parseFloat(sale.total_price).toLocaleString()}</td>
                 <td class="px-4 py-3 text-center">
-                    ${userRole !== 'staff' ? `
-                        <button onclick="showConfirmModal(${sale.id})" class="text-red-500 hover:text-red-700 transition">
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${sale.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}">${sale.status || 'completed'}</span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <button onclick="viewSale(${sale.id})" class="px-2.5 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition">View</button>
+                        ${userRole !== 'staff' ? `
+                        <button onclick="showConfirmModal(${sale.id})" class="px-2.5 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
                         </button>
-                    ` : ''}
+                        ` : ''}
+                    </div>
                 </td>
             </tr>
         `).join('');
+    }
+
+    function viewSale(saleId) {
+        const sale = allSalesData.find(item => item.id === saleId);
+        if (!sale) return;
+
+        document.getElementById('viewSaleContent').innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Product</p><p class="mt-1 text-gray-900 font-medium">${escapeHtml(sale.product?.name || 'N/A')}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Customer</p><p class="mt-1 text-gray-900 font-medium">${escapeHtml(sale.customer_name || '-')}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Quantity</p><p class="mt-1 text-gray-900 font-medium">${sale.quantity}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Total</p><p class="mt-1 text-green-600 font-semibold">₱${parseFloat(sale.total_price).toLocaleString()}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Status</p><p class="mt-1 text-gray-900 font-medium">${escapeHtml(sale.status || 'completed')}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-gray-500">Sold At</p><p class="mt-1 text-gray-900 font-medium">${new Date(sale.sold_at).toLocaleString()}</p></div>
+            </div>
+        `;
+
+        document.getElementById('viewSaleModal').classList.add('open');
+    }
+
+    function closeViewSaleModal() {
+        document.getElementById('viewSaleModal').classList.remove('open');
     }
 
     async function deleteSale() {
@@ -428,6 +527,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const salesSearch = document.getElementById('salesSearch');
+        if (salesSearch) {
+            salesSearch.addEventListener('input', applySalesFilters);
+        }
+
+        setSalesTab('all');
         loadSales();
     });
 </script>

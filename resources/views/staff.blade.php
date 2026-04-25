@@ -4,7 +4,6 @@
 @section('content')
 
 <div class="space-y-6">
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900"></h1>
@@ -12,7 +11,7 @@
 
         @if(auth()->user()->role === 'admin')
             <button onclick="openStaffModal()"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-sm">
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
                 
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -23,36 +22,58 @@
         @endif
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-gray-900" id="totalStaff">0</p>
-            <p class="text-xs text-gray-500">Total Staff</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-green-600" id="activeStaff">0</p>
-            <p class="text-xs text-gray-500">Active</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-amber-600" id="inactiveStaff">0</p>
-            <p class="text-xs text-gray-500">Inactive</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-red-600" id="suspendedStaff">0</p>
-            <p class="text-xs text-gray-500">Suspended</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-blue-600" id="adminStaff">0</p>
-            <p class="text-xs text-gray-500">Admins</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-purple-600" id="managerStaff">0</p>
-            <p class="text-xs text-gray-500">Managers</p>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <x-summary-card label="Total Staff" id="totalStaff" value="0" accent="gray" />
+        <x-summary-card label="Active Staff" id="activeStaff" value="0" accent="green" />
+        <x-summary-card label="Roles Count" id="rolesCount" value="0" accent="indigo" />
+    </div>
+
+    <div class="tab-surface">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Staff tabs">
+            <x-tab-button active="true" tab="all" onclick="setStaffTab('all')">All Staff</x-tab-button>
+            <x-tab-button tab="active" onclick="setStaffTab('active')">Active</x-tab-button>
+            <x-tab-button tab="inactive" onclick="setStaffTab('inactive')">Inactive</x-tab-button>
         </div>
     </div>
 
-    <!-- Staff Grid -->
-    <div id="staffContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <x-filter-bar>
+        <x-slot:search>
+            <div class="relative w-full max-w-xl">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                <input type="text" id="staffSearch" placeholder="Search name, email, role, position..." class="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </x-slot:search>
+        <x-slot:filters>
+            <label for="staffRoleFilter" class="text-xs font-semibold uppercase text-gray-500">Role</label>
+            <select id="staffRoleFilter" class="w-full sm:w-auto sm:min-w-36 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="staff">Staff</option>
+            </select>
+            <label for="staffStatusFilter" class="text-xs font-semibold uppercase text-gray-500">Status</label>
+            <select id="staffStatusFilter" class="w-full sm:w-auto sm:min-w-36 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+            </select>
+        </x-slot:filters>
+    </x-filter-bar>
+
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="text-gray-900 font-semibold">Team Directory</h2>
+            <p class="text-sm text-gray-500 mt-0.5">View and manage staff accounts and roles.</p>
+        </div>
+        <div class="p-6">
+            <div id="staffContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </div>
+    </div>
 </div>
 
 <!-- Staff Modal -->
@@ -192,6 +213,11 @@
 
 <script>
     let pendingDeleteId = null;
+    let allStaffData = [];
+    let currentStaffTab = 'all';
+    let currentStaffSearch = '';
+    let currentStaffRole = '';
+    let currentStaffStatus = '';
 
     function showToast(message, isError = false) {
         const toast = document.getElementById('successToast');
@@ -249,8 +275,9 @@
             const staff = await staffRes.json();
             const stats = await statsRes.json();
             
+            allStaffData = staff || [];
             updateStats(stats);
-            displayStaff(staff);
+            applyStaffFilters();
             
         } catch (error) {
             console.error('REAL ERROR:', error);
@@ -260,10 +287,43 @@
     function updateStats(stats) {
         document.getElementById('totalStaff').innerText = stats.total || 0;
         document.getElementById('activeStaff').innerText = stats.active || 0;
-        document.getElementById('inactiveStaff').innerText = stats.inactive || 0;
-        document.getElementById('suspendedStaff').innerText = stats.suspended || 0;
-        document.getElementById('adminStaff').innerText = stats.admin || 0;
-        document.getElementById('managerStaff').innerText = stats.manager || 0;
+        const rolesCount = [stats.admin, stats.manager, stats.staff].filter(v => (v || 0) > 0).length;
+        document.getElementById('rolesCount').innerText = rolesCount;
+    }
+
+    function setStaffTab(tab) {
+        currentStaffTab = tab;
+        document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+            const isActive = btn.dataset.tab === tab;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        applyStaffFilters();
+    }
+
+    function applyStaffFilters() {
+        currentStaffSearch = (document.getElementById('staffSearch')?.value || '').trim().toLowerCase();
+        currentStaffRole = document.getElementById('staffRoleFilter')?.value || '';
+        currentStaffStatus = document.getElementById('staffStatusFilter')?.value || '';
+
+        const filtered = allStaffData.filter(member => {
+            const status = member.status || 'active';
+            const searchable = [member.name, member.email, member.role, member.position, member.phone]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            const matchesSearch = !currentStaffSearch || searchable.includes(currentStaffSearch);
+            const matchesRole = !currentStaffRole || member.role === currentStaffRole;
+            const matchesStatus = !currentStaffStatus || status === currentStaffStatus;
+            const matchesTab = currentStaffTab === 'all'
+                || (currentStaffTab === 'active' && status === 'active')
+                || (currentStaffTab === 'inactive' && status !== 'active');
+
+            return matchesSearch && matchesRole && matchesStatus && matchesTab;
+        });
+
+        displayStaff(filtered);
     }
 
     function displayStaff(staff) {
@@ -563,6 +623,12 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+        const staffSearch = document.getElementById('staffSearch');
+        if (staffSearch) {
+            staffSearch.addEventListener('input', applyStaffFilters);
+        }
+
+        setStaffTab('all');
         loadStaff();
     });
 </script>

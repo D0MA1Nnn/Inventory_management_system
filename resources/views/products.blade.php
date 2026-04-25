@@ -4,47 +4,62 @@
 @section('content')
 
 <div class="space-y-6">
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900"></h1>
         </div>
-        <div class="flex items-center gap-3">
-            <select id="categoryFilter" class="px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterByCategory()">
-                <option value="">ALL CATEGORIES</option>
-            </select>
-            <button onclick="resetForm(); showForm()"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Product
-            </button>
-        </div>
+        <button onclick="resetForm(); showForm()"
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Product
+        </button>
     </div>
 
-    <!-- Stats Row -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-gray-900" id="totalProductsCount">0</p>
-            <p class="text-xs text-gray-500">Total Products</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-green-600" id="inStockCount">0</p>
-            <p class="text-xs text-gray-500">In Stock</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-amber-600" id="lowStockCount">0</p>
-            <p class="text-xs text-gray-500">Low Stock</p>
-        </div>
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p class="text-2xl font-bold text-blue-600" id="totalValueCount">₱0</p>
-            <p class="text-xs text-gray-500">Total Inventory Value</p>
+        <x-summary-card label="Total Products" id="totalProductsCount" value="0" accent="gray" />
+        <x-summary-card label="In Stock" id="inStockCount" value="0" accent="green" />
+        <x-summary-card label="Low Stock" id="lowStockCount" value="0" accent="amber" />
+        <x-summary-card label="Out Of Stock" id="outOfStockCount" value="0" accent="red" />
+    </div>
+
+    <div class="tab-surface">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Product tabs">
+            <x-tab-button active="true" tab="all" onclick="setProductTab('all')">All Products</x-tab-button>
+            <x-tab-button tab="low" onclick="setProductTab('low')">Low Stock</x-tab-button>
+            <x-tab-button tab="out" onclick="setProductTab('out')">Out Of Stock</x-tab-button>
         </div>
     </div>
 
-    <!-- Products Grid -->
-    <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <x-filter-bar>
+        <x-slot:search>
+            <div class="relative w-full max-w-xl">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                <input type="text" id="productSearch" placeholder="Search products, brand, model..." class="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </x-slot:search>
+        <x-slot:filters>
+            <label for="categoryFilter" class="text-xs font-semibold uppercase text-gray-500">Category</label>
+            <select id="categoryFilter" class="w-full sm:w-auto sm:min-w-52 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyFilters(true)">
+                <option value="">All Categories</option>
+            </select>
+        </x-slot:filters>
+    </x-filter-bar>
+
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="text-gray-900 font-semibold">Product Catalog</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Review inventory and keep product data up to date.</p>
+        </div>
+        <div class="p-6">
+            <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </div>
+    </div>
 </div>
 
 <!-- PRODUCT MODAL -->
@@ -179,6 +194,8 @@
 // Variables
 let pendingDeleteId = null;
 let currentFilter = '';
+let currentSearch = '';
+let currentStockTab = 'all';
 let allProductsData = [];
 
 // Local placeholder images
@@ -208,12 +225,80 @@ function updateStats(products) {
     const totalProducts = products.length;
     const inStock = products.filter(p => p.quantity > 0).length;
     const lowStock = products.filter(p => p.quantity > 0 && p.quantity < 10).length;
-    const totalValue = products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+    const outOfStock = products.filter(p => p.quantity <= 0).length;
     
     document.getElementById('totalProductsCount').innerText = totalProducts;
     document.getElementById('inStockCount').innerText = inStock;
     document.getElementById('lowStockCount').innerText = lowStock;
-    document.getElementById('totalValueCount').innerText = '₱' + totalValue.toLocaleString();
+    document.getElementById('outOfStockCount').innerText = outOfStock;
+}
+
+function setProductTab(tab) {
+    currentStockTab = tab;
+
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+        const isActive = btn.dataset.tab === tab;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    applyFilters();
+}
+
+function getFilteredProducts() {
+    return allProductsData.filter(product => {
+        const matchesCategory = !currentFilter || String(product.category_id) === String(currentFilter);
+        const matchesStockTab = currentStockTab === 'all'
+            || (currentStockTab === 'low' && product.quantity > 0 && product.quantity < 10)
+            || (currentStockTab === 'out' && product.quantity <= 0);
+
+        if (!matchesCategory || !matchesStockTab) {
+            return false;
+        }
+
+        if (!currentSearch) {
+            return true;
+        }
+
+        let dynamicFieldValues = [];
+        if (product.dynamic_fields) {
+            try {
+                const dynamicFields = typeof product.dynamic_fields === 'string'
+                    ? JSON.parse(product.dynamic_fields)
+                    : product.dynamic_fields;
+                dynamicFieldValues = Object.values(dynamicFields || {});
+            } catch (error) {
+                console.warn('Unable to parse product dynamic fields for search', error);
+            }
+        }
+
+        const searchableText = [
+            product.name,
+            product.brand,
+            product.model_number,
+            product.performance,
+            product.category ? product.category.name : '',
+            ...dynamicFieldValues,
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+        return searchableText.includes(currentSearch);
+    });
+}
+
+function applyFilters(showFeedback = false) {
+    currentFilter = document.getElementById('categoryFilter').value;
+    currentSearch = document.getElementById('productSearch').value.trim().toLowerCase();
+
+    const filteredProducts = getFilteredProducts();
+    updateStats(filteredProducts);
+    displayProducts(filteredProducts);
+
+    if (showFeedback) {
+        showToast(!currentFilter && !currentSearch ? 'Showing all products' : 'Filters applied');
+    }
 }
 
 // Update custom fields based on selected category
@@ -429,17 +514,7 @@ async function loadFilterCategories() {
 
 // Filter products by category
 function filterByCategory() {
-    const filterValue = document.getElementById('categoryFilter').value;
-    currentFilter = filterValue;
-    
-    if (!currentFilter) {
-        displayProducts(allProductsData);
-        showToast('Showing all products');
-    } else {
-        const filtered = allProductsData.filter(p => p.category_id == currentFilter);
-        displayProducts(filtered);
-        showToast('Filtering products...');
-    }
+    applyFilters(true);
 }
 
 // Load categories for product form
@@ -475,8 +550,7 @@ async function loadProducts() {
         }
         
         allProductsData = products;
-        updateStats(products);
-        displayProducts(allProductsData);
+        applyFilters();
         
     } catch (error) {
         console.error('Error loading products:', error);
@@ -490,7 +564,16 @@ function displayProducts(products) {
     container.innerHTML = '';
     
     if (products.length === 0) {
-        let message = currentFilter ? 'No products found in this category. Click ADD PRODUCT to create one!' : 'No products yet. Click ADD PRODUCT to create one!';
+        let message = 'No products yet. Click ADD PRODUCT to create one!';
+
+        if (currentFilter && currentSearch) {
+            message = 'No products match the selected category and search.';
+        } else if (currentFilter) {
+            message = 'No products found in this category. Click ADD PRODUCT to create one!';
+        } else if (currentSearch) {
+            message = 'No products match your search.';
+        }
+
         container.innerHTML = `
             <div class="col-span-full text-center py-12">
                 <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -522,7 +605,7 @@ function displayProducts(products) {
                         </div>`
                     }
                     <div class="absolute top-3 right-3">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">
                             ${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
                         </span>
                     </div>
@@ -534,14 +617,14 @@ function displayProducts(products) {
                         <span class="text-gray-500">Stock: ${product.quantity} units</span>
                         <span class="text-blue-600 text-xs font-medium">${product.category ? product.category.name : 'No Category'}</span>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick='showDetailsModal(${JSON.stringify(product)})' class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
-                            Details
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick='showDetailsModal(${JSON.stringify(product)})' class="px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition">
+                            View
                         </button>
-                        <button onclick="editProduct(${product.id})" class="flex-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">
+                        <button onclick="editProduct(${product.id})" class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                             Edit
                         </button>
-                        <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" class="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition">
+                        <button onclick="showConfirmModal(${product.id}, '${escapeHtml(product.name)}')" class="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -717,6 +800,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', saveProduct);
     }
+
+    const searchInput = document.getElementById('productSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => applyFilters());
+    }
+
+    setProductTab('all');
     
     const imageInput = document.getElementById('image');
     if (imageInput) {

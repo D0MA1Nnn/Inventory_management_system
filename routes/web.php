@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ProductPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
@@ -52,17 +53,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
     Route::get('/products-ui', fn() => view('products'))->name('products-ui');
-    Route::get('/categories-ui', fn() => view('categories'))->name('categories-ui');
-    Route::get('/suppliers-ui', fn() => view('suppliers'))->name('suppliers-ui');
+    Route::get('/categories-ui', fn() => view('categories'))
+        ->middleware('role:admin,manager')
+        ->name('categories-ui');
+    Route::get('/suppliers-ui', fn() => view('suppliers'))
+        ->middleware('role:admin,manager')
+        ->name('suppliers-ui');
 
-    Route::get('/purchases-ui', [PurchaseController::class, 'index'])->name('purchases-ui');
+    Route::get('/purchases-ui', [PurchaseController::class, 'index'])
+        ->middleware('role:admin,manager')
+        ->name('purchases-ui');
     Route::get('/sales-ui', [SaleController::class, 'index'])->name('sales-ui');
 
     Route::get('/staff-ui', [StaffController::class, 'index'])->name('staff-ui');
 
-    // 🔥 CUSTOMER DASHBOARD (ADMIN ONLY)
+    // CUSTOMER DASHBOARD (ADMIN ONLY)
     Route::get('/customers-ui', [CustomerController::class, 'index'])
         ->name('customers-ui')
+        ->middleware('admin');
+
+    Route::get('/admin/logs', [ActivityLogController::class, 'index'])
+        ->name('admin.logs.index')
         ->middleware('admin');
 });
 
@@ -73,9 +84,9 @@ Route::prefix('api')->group(function () {
     // CATEGORY
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
-    Route::post('/categories', [CategoryController::class, 'store'])->middleware('auth');
-    Route::put('/categories/{id}', [CategoryController::class, 'update'])->middleware('auth');
-    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->middleware('auth');
+    Route::post('/categories', [CategoryController::class, 'store'])->middleware(['auth', 'role:admin,manager']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->middleware(['auth', 'role:admin,manager']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->middleware(['auth', 'role:admin,manager']);
 
     // PRODUCT
     Route::get('/products', [ProductPageController::class, 'index']);
@@ -87,15 +98,16 @@ Route::prefix('api')->group(function () {
     // SUPPLIER
     Route::get('/suppliers', [SupplierController::class, 'index']);
     Route::get('/suppliers/{id}', [SupplierController::class, 'show']);
-    Route::post('/suppliers', [SupplierController::class, 'store'])->middleware('auth');
-    Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->middleware('auth');
-    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->middleware('auth');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->middleware(['auth', 'role:admin,manager']);
+    Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->middleware(['auth', 'role:admin,manager']);
+    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->middleware(['auth', 'role:admin,manager']);
 
     // PURCHASE
     Route::get('/purchase/products', [PurchaseController::class, 'getProducts']);
     Route::get('/purchase/product-suppliers/{productId}', [PurchaseController::class, 'getProductSuppliers']);
-    Route::post('/purchase/add-to-coming', [PurchaseController::class, 'addToComing'])->middleware('auth');
-    Route::post('/purchase/receive', [PurchaseController::class, 'receive'])->middleware('auth');
+    Route::post('/purchase/add-to-coming', [PurchaseController::class, 'addToComing'])->middleware(['auth', 'role:admin,manager']);
+    Route::post('/purchase/receive', [PurchaseController::class, 'receive'])->middleware(['auth', 'role:admin,manager']);
+    Route::get('/purchase/received', [PurchaseController::class, 'getReceived'])->middleware(['auth', 'role:admin,manager']);
 
     // SALES
     Route::get('/sales', [SaleController::class, 'getSales']);
@@ -130,5 +142,5 @@ Route::prefix('api')->group(function () {
     })->middleware('auth');
 
     Route::get('/purchase/coming', [PurchaseController::class, 'getComing'])
-    ->middleware('auth');
+    ->middleware(['auth', 'role:admin,manager']);
 });
