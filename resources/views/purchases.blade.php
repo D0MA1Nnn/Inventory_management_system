@@ -64,8 +64,10 @@
 
         <section id="comingSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="coming" role="tabpanel">
             <div class="section-header">
-                <h2 class="text-gray-900 font-semibold">Coming Products</h2>
-                <p class="text-gray-500 text-sm mt-0.5">Products waiting to be received</p>
+                <div>
+                    <h2 class="text-gray-900 font-semibold">Coming Products</h2>
+                    <p class="text-gray-500 text-sm mt-0.5">Products waiting to be received</p>
+                </div>
             </div>
             <div class="p-6">
                 <div id="comingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
@@ -151,7 +153,7 @@
             </div>
 
             <div id="supplierTotalPrice" class="bg-gray-50 p-4 rounded-xl text-center mb-6">
-                <span class="text-gray-500 text-xs uppercase tracking-wide">Total Price</span>
+                <span class="text-gray-500 text-xs uppercase tracking-wide">Total Price (Cost)</span>
                 <span class="text-green-600 text-2xl font-bold block">₱ 0.00</span>
             </div>
 
@@ -355,6 +357,8 @@
                     });
                 }
                 
+                const originalPrice = product.price;
+                
                 return `
                     <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
                         <div class="flex flex-col md:flex-row">
@@ -367,9 +371,9 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     <div><span class="text-gray-500 text-sm">Supplier:</span><br><strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></div>
                                     <div><span class="text-gray-500 text-sm">Product:</span><br><strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Unit Price:</span><br><strong class="text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</strong></div>
+                                    <div><span class="text-gray-500 text-sm">Original Price:</span><br><strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></div>
                                     <div><span class="text-gray-500 text-sm">Quantity:</span><br><strong class="text-gray-900">${product.quantity}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Total:</span><br><strong class="text-green-600">₱ ${(product.price * product.quantity).toLocaleString()}</strong></div>
+                                    <div><span class="text-gray-500 text-sm">Total Cost:</span><br><strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></div>
                                     <div><span class="text-gray-500 text-sm">Received:</span><br><strong class="text-blue-600">${receivedDate}</strong></div>
                                 </div>
                                 <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-xl transition text-sm" onclick="showProductDetails(${product.product_id}); closeHistoryModal();">View Product Details</button>
@@ -419,7 +423,6 @@
         return div.innerHTML;
     }
 
-    // Password confirmation functions
     function showPasswordModal(productId) {
         pendingProductId = productId;
         document.getElementById('passwordConfirmModal').classList.add('open');
@@ -435,7 +438,7 @@
         const password = document.getElementById('confirmPassword').value;
         
         if (!password) {
-            showToast('Please enter your password', true);
+            showSuccess('Please enter your password');
             return;
         }
         
@@ -453,36 +456,32 @@
             
             if (data.valid) {
                 closePasswordModal();
-                // Proceed to supplier modal
                 if (pendingProductId) {
                     proceedToSupplierModal(pendingProductId);
                 }
             } else {
-                showToast('Incorrect password. Please try again.', true);
+                showSuccess('Incorrect password. Please try again.');
                 document.getElementById('confirmPassword').value = '';
             }
         } catch (error) {
             console.error('Error verifying password:', error);
-            showToast('Error verifying password', true);
+            showSuccess('Error verifying password');
         }
     }
 
     document.getElementById('confirmPasswordBtn').onclick = verifyPasswordAndProceed;
 
-    // Modified showSupplierModal with role check
     async function showSupplierModal(productId) {
         if (allSuppliers.length === 0) {
             showSuccess('Loading suppliers, please wait...');
             await loadSuppliers();
         }
         
-        // Check if user is staff (not admin)
         if (userRole === 'staff') {
             showPasswordModal(productId);
             return;
         }
         
-        // Admin proceeds directly
         proceedToSupplierModal(productId);
     }
 
@@ -490,8 +489,10 @@
         currentBuyProduct = allProducts.find(p => p.id == productId);
         if (!currentBuyProduct) return;
 
+        const costPrice = currentBuyProduct.cost_price || currentBuyProduct.price;
+        
         document.getElementById('supplierProductName').innerText = currentBuyProduct.name;
-        document.getElementById('supplierProductPrice').innerText = `₱ ${parseFloat(currentBuyProduct.price).toLocaleString()}`;
+        document.getElementById('supplierProductPrice').innerText = `₱ ${parseFloat(costPrice).toLocaleString()}`;
         document.getElementById('supplierProductImage').src = currentBuyProduct.image ? '/storage/' + currentBuyProduct.image : noImage70;
 
         document.getElementById('supplierQuantity').value = '1';
@@ -558,6 +559,15 @@
 
         products.forEach(product => {
             const isLowStock = product.quantity > 0 && product.quantity < 10;
+            // FORCE use cost_price - if not set, use price but show warning
+            const purchasePrice = product.cost_price || product.price;
+            
+            // Debug log to check what price is being used
+            console.log('Product:', product.name);
+            console.log('Cost Price:', product.cost_price);
+            console.log('Selling Price:', product.price);
+            console.log('Using for purchase:', purchasePrice);
+            
             container.innerHTML += `
                 <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
                     <div class="relative h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
@@ -569,10 +579,17 @@
                         <div class="absolute top-3 right-3">
                             <span class="px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
                         </div>
+                        <div class="absolute bottom-3 left-3">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-600 text-white">Supplier Price</span>
+                        </div>
                     </div>
                     <div class="p-4">
                         <h3 class="font-bold text-gray-900 text-base mb-1 truncate">${escapeHtml(product.name)}</h3>
-                        <p class="text-xl font-bold text-green-600 mb-2">₱ ${parseFloat(product.price).toLocaleString()}</p>
+                        <div class="mb-2">
+                            <p class="text-2xl font-bold text-green-600">₱ ${parseFloat(purchasePrice).toLocaleString()}</p>
+                            ${product.price && product.price != purchasePrice ? `<p class="text-xs text-gray-400 line-through">Retail: ₱ ${parseFloat(product.price).toLocaleString()}</p>` : ''}
+                            ${!product.cost_price ? `<p class="text-xs text-amber-600">⚠️ No cost price set</p>` : ''}
+                        </div>
                         <div class="flex items-center justify-between text-xs mb-3">
                             <span class="text-gray-500">Stock: ${product.quantity} units</span>
                             <span class="text-blue-600 font-medium">${product.category ? product.category.name : 'No Category'}</span>
@@ -598,7 +615,7 @@
                     email: supplier.email,
                     address: supplier.address,
                     image: supplier.image,
-                    price: currentBuyProduct ? currentBuyProduct.price : 0
+                    price: currentBuyProduct ? (currentBuyProduct.cost_price || currentBuyProduct.price) : 0
                 });
             }
         });
@@ -613,7 +630,7 @@
             return;
         }
         suppliers.forEach(supplier => {
-            let supplierPrice = currentBuyProduct.price;
+            let supplierPrice = currentBuyProduct.cost_price || currentBuyProduct.price;
             container.innerHTML += `
                 <div onclick='selectSupplier(${supplier.id}, "${escapeHtml(supplier.name)}", ${supplierPrice})' class="supplier-option p-4 border border-gray-200 rounded-xl cursor-pointer transition-all hover:border-blue-400 hover:shadow-md" data-supplier-id="${supplier.id}">
                     <div class="flex justify-between items-center">
@@ -643,9 +660,9 @@
 
     function updateSupplierTotalPrice() {
         let quantity = parseInt(document.getElementById('supplierQuantity').value) || 0;
-        let price = selectedSupplier?.price || currentBuyProduct?.price || 0;
+        let price = selectedSupplier?.price || (currentBuyProduct?.cost_price || currentBuyProduct?.price || 0);
         let total = price * quantity;
-        document.getElementById('supplierTotalPrice').innerHTML = `<span class="text-gray-500 text-xs uppercase tracking-wide">Total Price</span><span class="text-green-600 text-2xl font-bold block">₱ ${total.toLocaleString()}</span>`;
+        document.getElementById('supplierTotalPrice').innerHTML = `<span class="text-gray-500 text-xs uppercase tracking-wide">Total Price (Cost)</span><span class="text-green-600 text-2xl font-bold block">₱ ${total.toLocaleString()}</span>`;
     }
 
     function incrementSupplierQuantity() {
@@ -670,17 +687,31 @@
         if (quantity < 1) { showSuccess('Invalid quantity'); return; }
         showConfirm(`Buy ${quantity} item(s) from ${selectedSupplier.name}?`, async () => {
             try {
+                const purchasePrice = currentBuyProduct.cost_price || currentBuyProduct.price;
+                
                 let res = await fetch('/api/purchase/add-to-coming', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ product_id: currentBuyProduct.id, supplier_id: selectedSupplier.id, quantity: quantity, price: currentBuyProduct.price })
+                    body: JSON.stringify({
+                        product_id: currentBuyProduct.id,
+                        supplier_id: selectedSupplier.id,
+                        quantity: quantity,
+                        price: purchasePrice
+                    })
                 });
                 if (res.ok) {
                     showSuccess('Added to coming products!');
                     document.getElementById('supplierModal').classList.remove('open');
                     loadComingProducts();
-                } else { showSuccess('Error adding product'); }
-            } catch (error) { showSuccess('Error occurred'); }
+                } else {
+                    const error = await res.json();
+                    console.error('Error:', error);
+                    showSuccess('Error adding product');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showSuccess('Error occurred');
+            }
         });
     }
 
@@ -704,16 +735,23 @@
                     let productDetail = allProducts.find(p => p.id == product.product_id);
                     if (productDetail && productDetail.image) imageUrl = '/storage/' + productDetail.image;
                 }
+                const originalPrice = product.price;
+                
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
-                        <div class="relative h-32 overflow-hidden bg-gray-100"><img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.src='${noImage150}'"></div>
+                        <div class="relative h-32 overflow-hidden bg-gray-100">
+                            <img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.src='${noImage150}'">
+                            <div class="absolute bottom-2 left-2">
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500 text-white">Pending</span>
+                            </div>
+                        </div>
                         <div class="p-4">
                             <div class="space-y-1 text-sm">
                                 <p><span class="text-gray-500">Supplier:</span> <strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></p>
                                 <p><span class="text-gray-500">Product:</span> <strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></p>
-                                <p><span class="text-gray-500">Unit Price:</span> <strong class="text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Original Price:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
                                 <p><span class="text-gray-500">Quantity:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
-                                <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(product.price * product.quantity).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Total Cost:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
                             </div>
                             <button class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm" onclick='showReceiveConfirm("${key}", "${escapeHtml(product.product_name)}", ${product.quantity})'>Receive</button>
                         </div>
@@ -759,7 +797,6 @@
                 return;
             }
             
-            // Only show latest 4 received products
             const latestProducts = productsArray.slice(0, 4);
             
             latestProducts.forEach(product => {
@@ -783,19 +820,23 @@
                     });
                 }
                 
+                const originalPrice = product.price;
+                
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
                         <div class="relative h-32 overflow-hidden bg-gray-100">
                             <img src="${imageUrl}" class="w-full h-full object-cover opacity-75" onerror="this.src='${noImage150}'">
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span></div>
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span>
+                            </div>
                         </div>
                         <div class="p-4">
                             <div class="space-y-1 text-sm">
                                 <p><span class="text-gray-500">Supplier:</span> <strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></p>
                                 <p><span class="text-gray-500">Product:</span> <strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></p>
-                                <p><span class="text-gray-500">Unit Price:</span> <strong class="text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Original Price:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
                                 <p><span class="text-gray-500">Quantity:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
-                                <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(product.price * product.quantity).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Total Cost:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
                                 <p><span class="text-gray-500">Received:</span> <strong class="text-blue-600">${receivedDate}</strong></p>
                             </div>
                             <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-lg transition text-sm" onclick="showProductDetails(${product.product_id})">View Details</button>
@@ -817,9 +858,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Brand</div><div class="text-sm font-medium text-gray-900">${escapeHtml(product.brand || 'N/A')}</div></div>
                     <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Model Number</div><div class="text-sm font-medium text-gray-900">${escapeHtml(product.model_number || 'N/A')}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Price</div><div class="text-lg font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div></div>
+                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Cost Price</div><div class="text-sm font-medium text-gray-900">₱ ${parseFloat(product.cost_price || product.price).toLocaleString()}</div></div>
+                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Selling Price</div><div class="text-lg font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div></div>
                     <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock</div><div class="text-sm font-medium text-gray-900">${product.quantity} units</div></div>
                     <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Category</div><div class="text-sm font-medium text-gray-900">${product.category ? product.category.name : 'N/A'}</div></div>
+                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Markup</div><div class="text-sm font-medium text-blue-600">${product.markup_percentage || 0}%</div></div>
                     <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Status</div><div class="text-sm font-medium ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</div></div>
                 </div>
                 ${product.performance ? `<div class="bg-gray-50 p-4 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-2">Performance</div><div class="text-sm text-gray-700 leading-relaxed">${escapeHtml(product.performance)}</div></div>` : ''}
@@ -833,7 +876,8 @@
             let res = await fetch('/api/categories');
             let categories = await res.json();
             let select = document.getElementById('categoryFilter');
-            categories.forEach(cat => { select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`; });
+            select.innerHTML = '<option value="">ALL CATEGORIES</option>';
+            categories.forEach(cat => { select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`; });
         } catch (error) { console.error('Error loading categories:', error); }
     }
 

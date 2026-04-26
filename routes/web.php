@@ -108,6 +108,7 @@ Route::prefix('api')->group(function () {
     Route::post('/purchase/add-to-coming', [PurchaseController::class, 'addToComing'])->middleware(['auth', 'role:admin,manager']);
     Route::post('/purchase/receive', [PurchaseController::class, 'receive'])->middleware(['auth', 'role:admin,manager']);
     Route::get('/purchase/received', [PurchaseController::class, 'getReceived'])->middleware(['auth', 'role:admin,manager']);
+    Route::get('/purchase/coming', [PurchaseController::class, 'getComing'])->middleware(['auth', 'role:admin,manager']);
 
     // SALES
     Route::get('/sales', [SaleController::class, 'getSales']);
@@ -126,7 +127,7 @@ Route::prefix('api')->group(function () {
     Route::put('/staff/{id}', [StaffController::class, 'update'])->middleware('auth');
     Route::delete('/staff/{id}', [StaffController::class, 'destroy'])->middleware('auth');
 
-    // 🔥 CUSTOMER APIs
+    // CUSTOMER APIs
     Route::get('/customers', [CustomerController::class, 'getCustomers'])
         ->middleware(['auth','admin']);
 
@@ -140,7 +141,4 @@ Route::prefix('api')->group(function () {
             'valid' => Hash::check($request->password, $user->password)
         ]);
     })->middleware('auth');
-
-    Route::get('/purchase/coming', [PurchaseController::class, 'getComing'])
-    ->middleware(['auth', 'role:admin,manager']);
 });

@@ -7,11 +7,28 @@ use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        Category::create(['name' => 'Electronics']);
-        Category::create(['name' => 'Food']);
-        Category::create(['name' => 'Clothing']);
-        Category::create(['name' => 'Office Supplies']);
+        $categories = [
+            'Processor',
+            'Motherboard',
+            'RAM',
+            'Graphics Card',
+            'Power Supply',
+            'SSD',
+            'HDD',
+            'CPU Cooler',
+            'Liquid Cooling',
+            'PC Case',
+            'Keyboard',
+            'Mouse',
+            'Monitor',
+            'UPS',
+            'WiFi Adapter'
+        ];
+
+        foreach ($categories as $cat) {
+            Category::create(['name' => $cat]);
+        }
     }
 }

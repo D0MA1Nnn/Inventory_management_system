@@ -357,7 +357,7 @@
             // Color palette for bars
             const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
             
-            // Create vertical bar chart HTML
+            // Create vertical bar chart HTML - bars grow UPWARD from bottom
             let html = `
                 <div class="flex items-end justify-around" style="min-height: 300px;">
             `;
@@ -372,7 +372,7 @@
                     <div class="flex flex-col items-center text-center" style="width: 80px;">
                         <div class="relative group">
                             <div class="w-12 bg-gray-200 rounded-t-lg overflow-hidden" style="height: 200px;">
-                                <div class="w-full rounded-t-lg transition-all duration-500" style="height: ${barHeight}%; background-color: ${color};"></div>
+                                <div class="w-full rounded-t-lg transition-all duration-500 absolute bottom-0" style="height: ${barHeight}%; background-color: ${color};"></div>
                             </div>
                             <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
                                 ${stock} units

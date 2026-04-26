@@ -4,19 +4,7 @@
 @section('content')
 
 <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900"></h1>
-        </div>
-        <button onclick="resetForm(); showForm()"
-                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add Product
-        </button>
-    </div>
-
+    <!-- Stats Row -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <x-summary-card label="Total Products" id="totalProductsCount" value="0" accent="gray" />
         <x-summary-card label="In Stock" id="inStockCount" value="0" accent="green" />
@@ -24,6 +12,19 @@
         <x-summary-card label="Out Of Stock" id="outOfStockCount" value="0" accent="red" />
     </div>
 
+    <!-- ADD PRODUCT BUTTON SECTION -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div></div>
+        <button onclick="resetForm(); showForm()"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add New Product
+        </button>
+    </div>
+
+    <!-- Tabs -->
     <div class="tab-surface">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Product tabs">
             <x-tab-button active="true" tab="all" onclick="setProductTab('all')">All Products</x-tab-button>
@@ -32,6 +33,7 @@
         </div>
     </div>
 
+    <!-- Filter Bar -->
     <x-filter-bar>
         <x-slot:search>
             <div class="relative w-full max-w-xl">
@@ -51,6 +53,7 @@
         </x-slot:filters>
     </x-filter-bar>
 
+    <!-- PRODUCT CARDS SECTION -->
     <div class="section-card">
         <div class="section-header">
             <h2 class="text-gray-900 font-semibold">Product Catalog</h2>
@@ -60,6 +63,7 @@
             <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
     </div>
+
 </div>
 
 <!-- PRODUCT MODAL -->
@@ -102,14 +106,27 @@
                     <h3 class="font-semibold text-gray-800 mb-3 text-base">Pricing & Inventory</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="mb-3">
-                            <label class="block text-gray-700 text-sm mb-1">Price *</label>
-                            <input type="number" id="price" required step="0.01" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
+                            <label class="block text-gray-700 text-sm mb-1">Cost Price (from supplier) *</label>
+                            <input type="number" id="cost_price" required step="0.01" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" placeholder="₱0.00">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Markup Percentage (%)</label>
+                            <input type="number" id="markup_percentage" step="0.01" value="0" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" placeholder="e.g., 25">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-sm mb-1">Selling Price *</label>
+                            <input type="number" id="price" required step="0.01" class="w-full border p-2 rounded bg-gray-100 focus:ring-2 focus:ring-blue-500" readonly placeholder="Auto-calculated">
                         </div>
                         
                         <div class="mb-3">
                             <label class="block text-gray-700 text-sm mb-1">Quantity *</label>
                             <input type="number" id="quantity" required class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Selling Price = Cost Price + (Cost Price × Markup Percentage ÷ 100)
                     </div>
                 </div>
                 
@@ -200,6 +217,26 @@ let allProductsData = [];
 
 // Local placeholder images
 const noImage600 = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'600\' height=\'200\' viewBox=\'0 0 600 200\'%3E%3Crect width=\'600\' height=\'200\' fill=\'%23cccccc\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666666\' font-size=\'20\'%3ENo Image%3C/text%3E%3C/svg%3E';
+
+function calculateSellingPrice() {
+    const costPrice = parseFloat(document.getElementById('cost_price').value) || 0;
+    const markup = parseFloat(document.getElementById('markup_percentage').value) || 0;
+    const sellingPrice = costPrice + (costPrice * markup / 100);
+    document.getElementById('price').value = sellingPrice.toFixed(2);
+}
+
+// Auto-calculate when cost price or markup changes
+document.addEventListener('DOMContentLoaded', function() {
+    const costPriceInput = document.getElementById('cost_price');
+    const markupInput = document.getElementById('markup_percentage');
+    
+    if (costPriceInput) {
+        costPriceInput.addEventListener('input', calculateSellingPrice);
+    }
+    if (markupInput) {
+        markupInput.addEventListener('input', calculateSellingPrice);
+    }
+});
 
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -383,6 +420,8 @@ function resetForm() {
     document.getElementById('name').value = '';
     document.getElementById('brand').value = '';
     document.getElementById('model_number').value = '';
+    document.getElementById('cost_price').value = '';
+    document.getElementById('markup_percentage').value = '0';
     document.getElementById('price').value = '';
     document.getElementById('quantity').value = '';
     document.getElementById('category_id').value = '';
@@ -430,6 +469,20 @@ function showDetailsModal(product) {
         `;
     }
     
+    // Show cost price and markup in details
+    if (product.cost_price) {
+        extraFieldsHtml += `
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Cost Price</div>
+                <div class="text-sm text-gray-900 font-medium">₱ ${parseFloat(product.cost_price).toLocaleString()}</div>
+            </div>
+            <div class="p-2.5 border-b border-gray-100">
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Markup</div>
+                <div class="text-sm text-gray-900 font-medium">${product.markup_percentage || 0}%</div>
+            </div>
+        `;
+    }
+    
     if (product.dynamic_fields) {
         const dynamicFields = typeof product.dynamic_fields === 'string' 
             ? JSON.parse(product.dynamic_fields) 
@@ -456,8 +509,8 @@ function showDetailsModal(product) {
         <div class="grid grid-cols-2 gap-0 px-4">
             ${extraFieldsHtml}
             <div class="p-2.5 border-b border-gray-100">
-                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Price</div>
-                <div class="text-sm text-gray-900 font-medium">₱ ${parseFloat(product.price).toLocaleString()}</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Selling Price</div>
+                <div class="text-sm text-gray-900 font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div>
             </div>
             <div class="p-2.5 border-b border-gray-100">
                 <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Stock</div>
@@ -592,6 +645,9 @@ function displayProducts(products) {
     products.forEach(product => {
         const formattedPrice = parseFloat(product.price).toFixed(2);
         const isLowStock = product.quantity > 0 && product.quantity < 10;
+        const markup = product.markup_percentage || 0;
+        const costPrice = product.cost_price || product.price;
+        const originalPrice = parseFloat(costPrice).toFixed(2);
 
         container.innerHTML += `
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
@@ -609,10 +665,21 @@ function displayProducts(products) {
                             ${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
                         </span>
                     </div>
+                    ${markup > 0 ? `
+                    <div class="absolute bottom-3 left-3">
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-600 text-white">
+                            +${markup}% Markup
+                        </span>
+                    </div>
+                    ` : ''}
                 </div>
                 <div class="p-4">
                     <h3 class="font-bold text-gray-900 text-lg mb-1 truncate">${escapeHtml(product.name)}</h3>
-                    <p class="text-2xl font-bold text-green-600 mb-2">₱ ${formattedPrice}</p>
+                    <div class="mb-2">
+                        <p class="text-xs text-gray-400 line-through">Original: ₱ ${originalPrice}</p>
+                        <p class="text-2xl font-bold text-green-600">₱ ${formattedPrice}</p>
+                        ${markup > 0 ? `<p class="text-xs text-blue-600">+${markup}% margin applied</p>` : ''}
+                    </div>
                     <div class="flex items-center justify-between text-sm mb-3">
                         <span class="text-gray-500">Stock: ${product.quantity} units</span>
                         <span class="text-blue-600 text-xs font-medium">${product.category ? product.category.name : 'No Category'}</span>
@@ -644,6 +711,8 @@ async function saveProduct(event) {
     formData.append('name', document.getElementById('name').value);
     formData.append('brand', document.getElementById('brand').value);
     formData.append('model_number', document.getElementById('model_number').value);
+    formData.append('cost_price', document.getElementById('cost_price').value);
+    formData.append('markup_percentage', document.getElementById('markup_percentage').value);
     formData.append('price', document.getElementById('price').value);
     formData.append('quantity', document.getElementById('quantity').value);
     formData.append('category_id', document.getElementById('category_id').value);
@@ -706,6 +775,8 @@ async function editProduct(id) {
         document.getElementById('name').value = product.name || '';
         document.getElementById('brand').value = product.brand || '';
         document.getElementById('model_number').value = product.model_number || '';
+        document.getElementById('cost_price').value = product.cost_price || '';
+        document.getElementById('markup_percentage').value = product.markup_percentage || 0;
         document.getElementById('price').value = product.price || '';
         document.getElementById('quantity').value = product.quantity || '';
         document.getElementById('category_id').value = product.category_id || '';

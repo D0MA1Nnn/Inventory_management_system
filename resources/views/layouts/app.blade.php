@@ -149,6 +149,31 @@
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
             padding: 0.75rem;
         }
+
+        /* Sidebar group styles */
+        .nav-group {
+            margin-bottom: 1.5rem;
+        }
+        .nav-group-title {
+            padding: 0.5rem 1.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+        }
+
+        /* Scrollbar styling */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -168,7 +193,7 @@
     <div class="flex h-screen overflow-hidden">
         
         <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="sidebar fixed md:relative w-72 bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col shadow-2xl overflow-y-auto scrollbar-thin z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <aside id="sidebar" class="sidebar fixed md:relative w-72 bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col shadow-2xl overflow-y-auto z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300">
             
             <!-- Logo Section -->
             <div class="flex items-center justify-between gap-3 px-6 py-6 border-b border-gray-700">
@@ -188,53 +213,105 @@
             
             <!-- Navigation Menu -->
             <nav class="flex-1 py-6">
-                <div class="px-4 mb-3">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Main Menu</p>
-                </div>
+                @php
+                    $userRole = auth()->user()->role ?? '';
+                @endphp
 
-                {{-- ALL USERS --}}
-                <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
-                    <span class="text-sm font-medium">Dashboard</span>
-                </a>
-
-                <a href="{{ route('products-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
-                    <span class="text-sm font-medium">Products</span>
-                </a>
-
-                {{-- ADMIN + MANAGER --}}
-                @if(in_array(auth()->user()->role ?? '', ['admin','manager']))
-                    <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
-                        <span class="text-sm font-medium">Purchases</span>
+                <!-- MAIN MENU -->
+                <div class="nav-group">
+                    <div class="nav-group-title">Main Menu</div>
+                    
+                    <!-- Dashboard -->
+                    <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Dashboard</span>
                     </a>
 
-                    <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                    <!-- Products -->
+                    <a href="{{ route('products-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Products</span>
+                    </a>
+
+                    <!-- Sales -->
+                    <a href="{{ route('sales-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Sales</span>
+                    </a>
+                </div>
+
+                <!-- INVENTORY MANAGEMENT -->
+                @if(in_array($userRole, ['admin', 'manager']))
+                <div class="nav-group">
+                    <div class="nav-group-title">Inventory Management</div>
+                    
+                    <!-- Categories -->
+                    <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
                         <span class="text-sm font-medium">Categories</span>
                     </a>
 
-                    <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                    <!-- Suppliers -->
+                    <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
                         <span class="text-sm font-medium">Suppliers</span>
                     </a>
+
+                    <!-- Purchases -->
+                    <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Purchases</span>
+                    </a>
+                </div>
                 @endif
 
-                {{-- ADMIN ONLY --}}
-                @if((auth()->user()->role ?? '') === 'admin')
-
-                    <a href="{{ route('staff-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
-                        <span class="text-sm font-medium">Staff</span>
-                    </a>
-
-                    <a href="{{ route('customers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+                <!-- PEOPLE MANAGEMENT -->
+                @if($userRole === 'admin')
+                <div class="nav-group">
+                    <div class="nav-group-title">People Management</div>
+                    
+                    <!-- Customers -->
+                    <a href="{{ route('customers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
                         <span class="text-sm font-medium">Customers</span>
                     </a>
-                    <a href="{{ route('admin.logs.index') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
+
+                    <!-- Staff -->
+                    <a href="{{ route('staff-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v4m0 4h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Staff</span>
+                    </a>
+                </div>
+
+                <!-- SYSTEM -->
+                <div class="nav-group">
+                    <div class="nav-group-title">System</div>
+                    
+                    <!-- Activity Logs -->
+                    <a href="{{ route('admin.logs.index') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                         <span class="text-sm font-medium">Activity Logs</span>
                     </a>
+                </div>
                 @endif
-
-                {{-- ALL USERS --}}
-                <a href="{{ route('sales-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white">
-                    <span class="text-sm font-medium">Sales</span>
-                </a>
             </nav>
             
             <!-- User Section at Bottom -->
@@ -242,7 +319,7 @@
                 <div class="user-dropdown relative">
                     <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 cursor-pointer">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">{{ auth()->user()->name[0] ?? 'G' }}</span>
+                            <span class="text-white font-bold text-sm">{{ substr(auth()->user()->name ?? 'G', 0, 1) }}</span>
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name ?? 'Guest' }}</p>
@@ -517,4 +594,3 @@
     </script>
 </body>
 </html>
-

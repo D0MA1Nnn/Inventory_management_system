@@ -30,7 +30,7 @@ class PurchaseController extends Controller
         return response()->json($product->suppliers);
     }
 
-    // Add to coming products
+    // Add to coming products - FIXED to use cost_price
     public function addToComing(Request $request)
     {
         $product = Product::find($request->product_id);
@@ -40,13 +40,15 @@ class PurchaseController extends Controller
             return response()->json(['error' => 'Product or supplier not found'], 404);
         }
         
-        $total = $product->price * $request->quantity;
+        // USE COST PRICE for purchase (not selling price)
+        $purchasePrice = $product->cost_price ?? $product->price;
+        $total = $purchasePrice * $request->quantity;
         
         $purchase = Purchase::create([
             'product_id' => $product->id,
             'supplier_id' => $supplier->id,
             'quantity' => $request->quantity,
-            'price' => $product->price,
+            'price' => $purchasePrice,  // Store cost price
             'total' => $total,
             'status' => 'pending'
         ]);
@@ -69,7 +71,7 @@ class PurchaseController extends Controller
                 'product_name' => $purchase->product->name ?? 'N/A',
                 'supplier_id' => $purchase->supplier_id,
                 'supplier_name' => $purchase->supplier->name ?? 'N/A',
-                'price' => $purchase->price,
+                'price' => $purchase->price,  // This is already cost price
                 'quantity' => $purchase->quantity,
                 'category' => $purchase->product->category->name ?? 'N/A',
                 'product_image' => $purchase->product->image ?? null,
@@ -124,7 +126,7 @@ class PurchaseController extends Controller
                 'product_name' => $purchase->product->name,
                 'supplier_id' => $purchase->supplier_id,
                 'supplier_name' => $purchase->supplier->name,
-                'price' => $purchase->price,
+                'price' => $purchase->price,  // This is cost price
                 'quantity' => $purchase->quantity,
                 'category' => $purchase->product->category->name ?? 'N/A',
                 'product_image' => $purchase->product->image,
@@ -134,5 +136,36 @@ class PurchaseController extends Controller
         }
         
         return response()->json($formatted);
+    }
+
+    // 🔥 NEW: Refresh all pending purchase prices to use current cost_price from products
+    public function refreshPrices()
+    {
+        try {
+            $purchases = Purchase::where('status', 'pending')->get();
+            $updated = 0;
+            
+            foreach ($purchases as $purchase) {
+                $product = Product::find($purchase->product_id);
+                if ($product && $product->cost_price && $product->cost_price > 0) {
+                    // Update with the correct cost price
+                    $purchase->price = $product->cost_price;
+                    $purchase->total = $product->cost_price * $purchase->quantity;
+                    $purchase->save();
+                    $updated++;
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully refreshed {$updated} purchase record(s)",
+                'updated' => $updated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

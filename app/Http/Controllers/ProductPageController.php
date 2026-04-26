@@ -11,7 +11,10 @@ class ProductPageController extends Controller
 {
     public function index()
     {
-        return Product::with('category')->get();
+        $products = Product::with('category')->get();
+        
+        // Make sure cost_price is included
+        return response()->json($products);
     }
 
     public function show($id)

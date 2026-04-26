@@ -9,12 +9,7 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900"></h1>
         </div>
-        <a href="{{ route('register') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add Customer
-        </a>
+        <!-- ADD CUSTOMER BUTTON REMOVED -->
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -64,12 +59,12 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Email</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Joined</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Status</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-gray-500">Actions</th>
+                        <!-- ACTIONS COLUMN REMOVED -->
                     </tr>
                 </thead>
                 <tbody id="customerTable">
                     <tr>
-                        <td colspan="5" class="text-center py-8 text-gray-500">Loading customers...</td>
+                        <td colspan="4" class="text-center py-8 text-gray-500">Loading customers...</td>
                     </tr>
                 </tbody>
             </table>
@@ -133,23 +128,16 @@ function getFilteredCustomers() {
 function renderCustomers(customers) {
     const tbody = document.getElementById('customerTable');
     if (!customers.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No customers found for the selected filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">No customers found for the selected filters.</td></tr>';
         return;
     }
 
     tbody.innerHTML = customers.map((customer) => `
-        <tr class="border-b hover:bg-gray-50 transition">
+        <tr class="border-b hover:bg-gray-50 transition cursor-pointer" onclick="viewCustomer(${customer.id})">
             <td class="px-4 py-3 text-sm font-medium text-gray-900">${escapeHtml(customer.name)}</td>
             <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(customer.email || '-')}</td>
             <td class="px-4 py-3 text-sm text-gray-600">${new Date(customer.created_at).toLocaleDateString()}</td>
             <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">Active</span></td>
-            <td class="px-4 py-3">
-                <div class="flex items-center justify-center gap-2">
-                    <button onclick="viewCustomer(${customer.id})" class="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition">View</button>
-                    <button disabled class="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Edit</button>
-                    <button disabled class="px-3 py-1.5 text-xs font-medium text-gray-400 bg-red-50 rounded-lg cursor-not-allowed">Delete</button>
-                </div>
-            </td>
         </tr>
     `).join('');
 }

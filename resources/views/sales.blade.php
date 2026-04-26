@@ -4,6 +4,14 @@
 @section('content')
 
 <div class="space-y-6">
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <x-summary-card label="Total Sales" id="totalSalesCount" value="0" accent="gray" />
+        <x-summary-card label="Revenue" id="revenueTotal" value="₱0" accent="green" />
+        <x-summary-card label="Orders Today" id="ordersToday" value="0" accent="blue" />
+        <x-summary-card label="Completed Orders" id="completedOrders" value="0" accent="amber" />
+    </div>
+
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900"></h1>
@@ -15,13 +23,6 @@
             </svg>
             New Sale
         </button>
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <x-summary-card label="Total Sales" id="totalSalesCount" value="0" accent="gray" />
-        <x-summary-card label="Revenue" id="revenueTotal" value="₱0" accent="green" />
-        <x-summary-card label="Orders Today" id="ordersToday" value="0" accent="blue" />
-        <x-summary-card label="Completed Orders" id="completedOrders" value="0" accent="amber" />
     </div>
 
     <div class="tab-surface">

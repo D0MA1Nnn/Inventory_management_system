@@ -4,19 +4,6 @@
 @section('content')
 
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900"></h1>
-        </div>
-        <button onclick="resetForm(); showForm()"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Add Category
-        </button>
-    </div>
 
     <!-- Stats Row -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -36,6 +23,19 @@
             <p class="text-xs font-semibold uppercase text-gray-500">Total Products</p>
             <p class="mt-2 text-2xl font-bold text-green-600" id="totalProductsInCategories">0</p>
         </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900"></h1>
+        </div>
+        <button onclick="resetForm(); showForm()"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Category
+        </button>
     </div>
 
     <!-- Categories Grid -->
