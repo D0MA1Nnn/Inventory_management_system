@@ -3,48 +3,35 @@
 @section('title', 'Purchases')
 @section('content')
 
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
     <div class="flex flex-col gap-1">
-        <h1 class="text-2xl font-bold text-gray-900"></h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900"></h1>
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="summary-card border-gray-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Available Products</p>
-            <p class="mt-2 text-2xl font-bold text-gray-900" id="totalProductsCount">0</p>
-        </div>
-        <div class="summary-card border-blue-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Active Suppliers</p>
-            <p class="mt-2 text-2xl font-bold text-blue-600" id="totalSuppliersCount">0</p>
-        </div>
-        <div class="summary-card border-amber-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Pending Orders</p>
-            <p class="mt-2 text-2xl font-bold text-amber-600" id="pendingPurchasesCount">0</p>
-        </div>
-        <div class="summary-card border-green-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Completed Orders</p>
-            <p class="mt-2 text-2xl font-bold text-green-600" id="completedPurchasesCount">0</p>
-        </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <x-summary-card label="Available Products" id="totalProductsCount" value="0" accent="gray" />
+        <x-summary-card label="Active Suppliers" id="totalSuppliersCount" value="0" accent="blue" />
+        <x-summary-card label="Pending Orders" id="pendingPurchasesCount" value="0" accent="amber" />
+        <x-summary-card label="Completed Orders" id="completedPurchasesCount" value="0" accent="green" />
     </div>
 
-    <!-- Purchase Tabs -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Purchase sections">
-            <button type="button" class="purchase-tab active px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="buy" onclick="setPurchaseTab('buy')" role="tab" aria-selected="true">
-                Buy Products
+    <!-- Purchase Tabs - Mobile friendly -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-2 sm:p-3">
+        <div class="grid grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Purchase sections">
+            <button type="button" class="purchase-tab active px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-md text-xs sm:text-sm font-semibold transition-all duration-200" data-tab="buy" onclick="setPurchaseTab('buy')" role="tab" aria-selected="true">
+                Buy
             </button>
-            <button type="button" class="purchase-tab relative px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="coming" onclick="setPurchaseTab('coming')" role="tab" aria-selected="false">
-                Coming Products
+            <button type="button" class="purchase-tab relative px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-md text-xs sm:text-sm font-semibold transition-all duration-200" data-tab="coming" onclick="setPurchaseTab('coming')" role="tab" aria-selected="false">
+                Coming
                 <span id="comingProductsBadge" class="tab-badge hidden">0</span>
             </button>
-            <button type="button" class="purchase-tab px-4 py-2.5 rounded-md text-sm font-semibold transition-all duration-200" data-tab="received" onclick="setPurchaseTab('received')" role="tab" aria-selected="false">
-                Received Products
+            <button type="button" class="purchase-tab px-2 sm:px-4 py-1.5 sm:py-2.5 rounded-md text-xs sm:text-sm font-semibold transition-all duration-200" data-tab="received" onclick="setPurchaseTab('received')" role="tab" aria-selected="false">
+                Received
             </button>
         </div>
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
-            <label for="categoryFilter" class="text-xs font-semibold uppercase text-gray-500">Filter by Category</label>
-            <select id="categoryFilter" class="w-full sm:w-auto sm:min-w-56 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
+        <div class="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+            <label for="categoryFilter" class="text-[10px] sm:text-xs font-semibold uppercase text-gray-500">Filter by Category</label>
+            <select id="categoryFilter" class="w-full sm:w-auto sm:min-w-56 px-3 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterProducts()">
                 <option value="">ALL CATEGORIES</option>
             </select>
         </div>
@@ -52,145 +39,153 @@
 
     <!-- Purchase Tab Content -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <!-- Buy Section -->
         <section id="buySection" class="purchase-section transition-opacity duration-200" data-tab-panel="buy" role="tabpanel">
-            <div class="section-header">
-                <h2 class="text-gray-900 font-semibold">Buy Products</h2>
-                <p class="text-gray-500 text-sm mt-0.5">Purchase products from your suppliers</p>
+            <div class="section-header px-4 sm:px-6 py-3 sm:py-4">
+                <h2 class="text-gray-900 font-semibold text-base sm:text-lg">Buy Products</h2>
+                <p class="text-gray-500 text-xs sm:text-sm mt-0.5">Purchase products from your suppliers</p>
             </div>
-            <div class="p-6">
-                <div id="buyGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            <div class="p-3 sm:p-6">
+                <div id="buyGrid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"></div>
+                <div id="buyPagination" class="mt-4 flex justify-center"></div>
             </div>
         </section>
 
+        <!-- Coming Products Section -->
         <section id="comingSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="coming" role="tabpanel">
-            <div class="section-header">
-                <div>
-                    <h2 class="text-gray-900 font-semibold">Coming Products</h2>
-                    <p class="text-gray-500 text-sm mt-0.5">Products waiting to be received</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div id="comingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-            </div>
-        </section>
-
-        <section id="receivedSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="received" role="tabpanel">
-            <div class="section-header">
+            <div class="section-header px-4 sm:px-6 py-3 sm:py-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h2 class="text-gray-900 font-semibold">Received Products</h2>
-                        <p class="text-gray-500 text-sm mt-0.5">Latest received products</p>
+                        <h2 class="text-gray-900 font-semibold text-base sm:text-lg">Coming Products</h2>
+                        <p class="text-gray-500 text-xs sm:text-sm mt-0.5">Products waiting to be received</p>
                     </div>
-                    <button onclick="openHistoryModal()" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition shadow-sm">
+                </div>
+            </div>
+            <div class="p-3 sm:p-6">
+                <div id="comingGrid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"></div>
+                <div id="comingPagination" class="mt-4 flex justify-center"></div>
+            </div>
+        </section>
+
+        <!-- Received Products Section -->
+        <section id="receivedSection" class="purchase-section hidden opacity-0 transition-opacity duration-200" data-tab-panel="received" role="tabpanel">
+            <div class="section-header px-4 sm:px-6 py-3 sm:py-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h2 class="text-gray-900 font-semibold text-base sm:text-lg">Received Products</h2>
+                        <p class="text-gray-500 text-xs sm:text-sm mt-0.5">Latest received products</p>
+                    </div>
+                    <button onclick="openHistoryModal()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs sm:text-sm font-medium rounded-lg transition shadow-sm">
                         View All History
                     </button>
                 </div>
             </div>
-            <div class="p-6">
-                <div id="receivedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            <div class="p-3 sm:p-6">
+                <div id="receivedGrid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"></div>
+                <div id="receivedPagination" class="mt-4 flex justify-center"></div>
             </div>
         </section>
     </div>
 </div>
 
-<!-- HISTORY MODAL -->
+<!-- HISTORY MODAL - Responsive -->
 <div id="historyModal" class="modal-bg" onclick="if(event.target===this)closeHistoryModal()">
-    <div class="bg-white rounded-2xl w-[900px] max-w-[95%] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-        <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
-            <span class="text-xl font-bold text-gray-900">Purchase History</span>
-            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeHistoryModal()">✕</button>
+    <div class="bg-white rounded-2xl w-[95%] sm:w-[900px] max-w-[95%] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+            <span class="text-base sm:text-xl font-bold text-gray-900">Purchase History</span>
+            <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeHistoryModal()">✕</button>
         </div>
-        <div class="overflow-y-auto flex-1 p-6">
-            <div id="historyList" class="space-y-4">
-                <div class="text-center text-gray-500 py-8">Loading history...</div>
+        <div class="overflow-y-auto flex-1 p-4 sm:p-6">
+            <div id="historyList" class="space-y-3 sm:space-y-4">
+                <div class="text-center text-gray-500 py-8 text-sm">Loading history...</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- DETAIL MODAL -->
+<!-- DETAIL MODAL - Responsive -->
 <div id="detailModal" class="modal-bg" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="bg-white rounded-2xl w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="h-48 overflow-hidden rounded-t-2xl">
+    <div class="bg-white rounded-2xl w-[95%] sm:w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="h-32 sm:h-40 md:h-48 overflow-hidden rounded-t-2xl">
             <img id="modalImage" src="" class="w-full h-full object-cover">
         </div>
-        <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
-            <span id="modalName" class="text-xl font-bold text-gray-900"></span>
-            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="document.getElementById('detailModal').classList.remove('open')">✕</button>
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+            <span id="modalName" class="text-base sm:text-xl font-bold text-gray-900"></span>
+            <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="document.getElementById('detailModal').classList.remove('open')">✕</button>
         </div>
-        <div id="modalContent" class="p-6"></div>
+        <div id="modalContent" class="p-4 sm:p-6"></div>
     </div>
 </div>
 
-<!-- SUPPLIER SELECTION MODAL -->
+<!-- SUPPLIER SELECTION MODAL - Responsive -->
 <div id="supplierModal" class="modal-bg" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="bg-white rounded-2xl w-[500px] max-w-[95%] shadow-2xl">
-        <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
-            <span class="text-xl font-bold text-gray-900">Select Supplier</span>
-            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="document.getElementById('supplierModal').classList.remove('open')">✕</button>
+    <div class="bg-white rounded-2xl w-[95%] sm:w-[500px] max-w-[95%] shadow-2xl">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+            <span class="text-base sm:text-xl font-bold text-gray-900">Select Supplier</span>
+            <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="document.getElementById('supplierModal').classList.remove('open')">✕</button>
         </div>
-        <div class="p-6">
-            <div class="flex gap-4 mb-6 pb-4 border-b border-gray-200">
-                <img id="supplierProductImage" src="" class="w-20 h-20 object-cover rounded-xl shadow-md">
+        <div class="p-4 sm:p-6">
+            <div class="flex gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200">
+                <img id="supplierProductImage" src="" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl shadow-md">
                 <div>
-                    <div id="supplierProductName" class="font-bold text-lg mb-1"></div>
-                    <div id="supplierProductPrice" class="text-green-600 font-semibold text-base"></div>
+                    <div id="supplierProductName" class="font-bold text-base sm:text-lg mb-1"></div>
+                    <div id="supplierProductPrice" class="text-green-600 font-semibold text-sm sm:text-base"></div>
                 </div>
             </div>
 
-            <div class="mb-4">
-                <label class="block text-gray-500 text-xs font-semibold mb-2 uppercase tracking-wide">Choose Supplier</label>
+            <div class="mb-3 sm:mb-4">
+                <label class="block text-gray-500 text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2 uppercase tracking-wide">Choose Supplier</label>
                 <div id="supplierList" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto"></div>
             </div>
 
-            <div class="mb-4">
-                <label class="block text-gray-500 text-xs font-semibold mb-2 uppercase tracking-wide">Quantity</label>
-                <div class="flex items-center gap-3">
-                    <button onclick="decrementSupplierQuantity()" class="w-10 h-10 bg-gray-100 border rounded-xl cursor-pointer font-bold hover:bg-gray-200 transition">-</button>
-                    <input type="number" id="supplierQuantity" value="1" min="1" class="flex-1 p-3 border border-gray-300 rounded-xl text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="incrementSupplierQuantity()" class="w-10 h-10 bg-gray-100 border rounded-xl cursor-pointer font-bold hover:bg-gray-200 transition">+</button>
+            <div class="mb-3 sm:mb-4">
+                <label class="block text-gray-500 text-[10px] sm:text-xs font-semibold mb-1 sm:mb-2 uppercase tracking-wide">Quantity</label>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="decrementSupplierQuantity()" class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 border rounded-xl cursor-pointer font-bold hover:bg-gray-200 transition text-sm">-</button>
+                    <input type="number" id="supplierQuantity" value="1" min="1" class="flex-1 p-2 sm:p-3 border border-gray-300 rounded-xl text-center text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="incrementSupplierQuantity()" class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 border rounded-xl cursor-pointer font-bold hover:bg-gray-200 transition text-sm">+</button>
                 </div>
             </div>
 
-            <div id="supplierTotalPrice" class="bg-gray-50 p-4 rounded-xl text-center mb-6">
-                <span class="text-gray-500 text-xs uppercase tracking-wide">Total Price (Cost)</span>
-                <span class="text-green-600 text-2xl font-bold block">₱ 0.00</span>
+            <div id="supplierTotalPrice" class="bg-gray-50 p-3 sm:p-4 rounded-xl text-center mb-4 sm:mb-6">
+                <span class="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide">Total Price (Cost)</span>
+                <span class="text-green-600 text-xl sm:text-2xl font-bold block">₱ 0.00</span>
             </div>
 
-            <button id="confirmSupplierBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Select Supplier First</button>
+            <button id="confirmSupplierBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 sm:py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-sm" disabled>Select Supplier First</button>
         </div>
     </div>
 </div>
 
-<!-- CONFIRMATION MODAL -->
+<!-- CONFIRMATION MODAL - Responsive -->
 <div id="confirmModal" class="modal-bg">
-    <div class="bg-white rounded-2xl w-[350px] max-w-[90%] text-center p-6 shadow-2xl">
-        <div class="text-6xl mb-4">⚠️</div>
-        <div class="text-lg font-bold mb-2 text-gray-900">Confirm Action</div>
-        <div id="confirmMessage" class="text-sm text-gray-600 mb-5 leading-relaxed">Are you sure?</div>
+    <div class="bg-white rounded-2xl w-[90%] sm:w-[350px] max-w-[90%] text-center p-5 sm:p-6 shadow-2xl">
+        <div class="text-5xl sm:text-6xl mb-4">⚠️</div>
+        <div class="text-base sm:text-lg font-bold mb-2 text-gray-900">Confirm Action</div>
+        <div id="confirmMessage" class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5 leading-relaxed">Are you sure?</div>
         <div class="flex gap-3">
-            <button onclick="closeConfirm()" class="flex-1 py-3 bg-gray-200 rounded-xl cursor-pointer text-sm font-semibold text-gray-700 hover:bg-gray-300 transition">Cancel</button>
-            <button id="confirmYesBtn" class="flex-1 py-3 bg-green-600 rounded-xl cursor-pointer text-sm font-semibold text-white hover:bg-green-700 transition">Yes</button>
+            <button onclick="closeConfirm()" class="flex-1 py-2 sm:py-3 bg-gray-200 rounded-xl cursor-pointer text-sm font-semibold text-gray-700 hover:bg-gray-300 transition">Cancel</button>
+            <button id="confirmYesBtn" class="flex-1 py-2 sm:py-3 bg-green-600 rounded-xl cursor-pointer text-sm font-semibold text-white hover:bg-green-700 transition">Yes</button>
         </div>
     </div>
 </div>
 
-<!-- Password Confirmation Modal for Staff -->
+<!-- Password Confirmation Modal for Staff - Responsive -->
 <div id="passwordConfirmModal" class="modal-bg" onclick="if(event.target===this)closePasswordModal()">
-    <div class="bg-white rounded-2xl w-[400px] max-w-[90%] text-center p-6 shadow-2xl">
-        <div class="text-6xl mb-4">🔒</div>
-        <div class="text-lg font-bold mb-2 text-gray-900">Confirm Password</div>
-        <p class="text-sm text-gray-600 mb-4">Please enter your password to complete this purchase</p>
-        <input type="password" id="confirmPassword" class="w-full border border-gray-300 rounded-xl p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
+    <div class="bg-white rounded-2xl w-[90%] sm:w-[400px] max-w-[90%] text-center p-5 sm:p-6 shadow-2xl">
+        <div class="text-5xl sm:text-6xl mb-4">🔒</div>
+        <div class="text-base sm:text-lg font-bold mb-2 text-gray-900">Confirm Password</div>
+        <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Please enter your password to complete this purchase</p>
+        <input type="password" id="confirmPassword" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 mb-3 sm:mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Enter your password">
         <div class="flex gap-3">
-            <button onclick="closePasswordModal()" class="flex-1 py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition">Cancel</button>
-            <button id="confirmPasswordBtn" class="flex-1 py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition">Confirm</button>
+            <button onclick="closePasswordModal()" class="flex-1 py-2 sm:py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition text-sm">Cancel</button>
+            <button id="confirmPasswordBtn" class="flex-1 py-2 sm:py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition text-sm">Confirm</button>
         </div>
     </div>
 </div>
 
 <!-- SUCCESS TOAST -->
-<div id="successToast" class="fixed bottom-5 right-5 bg-green-600 text-white py-3 px-5 rounded-xl text-sm z-[300] hidden shadow-lg">
+<div id="successToast" class="fixed bottom-5 right-5 bg-green-600 text-white py-2 sm:py-3 px-3 sm:px-5 rounded-xl text-xs sm:text-sm z-[300] hidden shadow-lg">
     Success!
 </div>
 
@@ -274,6 +269,47 @@
     let confirmCallback = null;
     let pendingReceiveCartKey = null;
     let pendingProductId = null;
+    let currentBuyPage = 1;
+    let currentComingPage = 1;
+    let currentReceivedPage = 1;
+    const PURCHASES_PER_PAGE = 16;
+
+    function renderPagination(containerId, totalItems, currentPage, perPage, pageKey) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+        container.innerHTML = `
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button type="button" onclick="changePage('${pageKey}', ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Prev</button>
+                ${pages.map(page => `<button type="button" onclick="changePage('${pageKey}', ${page})" class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border ${page === currentPage ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}">${page}</button>`).join('')}
+                <button type="button" onclick="changePage('${pageKey}', ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Next</button>
+            </div>
+        `;
+    }
+
+    function changePage(pageKey, page) {
+        if (pageKey === 'buy') {
+            const categoryId = document.getElementById('categoryFilter').value;
+            const filtered = !categoryId ? allProducts : allProducts.filter(p => p.category_id == categoryId);
+            currentBuyPage = Math.max(1, Math.min(page, Math.ceil(Math.max(1, filtered.length) / PURCHASES_PER_PAGE)));
+            displayProducts(filtered);
+            return;
+        }
+        if (pageKey === 'coming') {
+            currentComingPage = Math.max(1, page);
+            loadComingProducts();
+            return;
+        }
+        if (pageKey === 'received') {
+            currentReceivedPage = Math.max(1, page);
+            loadReceivedProducts();
+        }
+    }
 
     function setPurchaseTab(activeTab) {
         document.querySelectorAll('.purchase-tab').forEach(tab => {
@@ -332,7 +368,7 @@
             const productsArray = Object.values(products);
             
             if (productsArray.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-8">No received products found</div>';
+                container.innerHTML = '<div class="text-center text-gray-500 py-8 text-sm">No received products found</div>';
                 return;
             }
             
@@ -360,23 +396,23 @@
                 const originalPrice = product.price;
                 
                 return `
-                    <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
+                    <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
                         <div class="flex flex-col md:flex-row">
-                            <div class="relative w-full md:w-48 h-32 md:h-auto overflow-hidden bg-gray-100">
+                            <div class="relative w-full md:w-40 h-24 md:h-auto overflow-hidden bg-gray-100">
                                 <img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.src='${noImage150}'">
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center md:hidden"><span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span></div>
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center md:hidden"><span class="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">RECEIVED</span></div>
                             </div>
-                            <div class="flex-1 p-4">
+                            <div class="flex-1 p-3 sm:p-4">
                                 <div class="hidden md:block float-right"><span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span></div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div><span class="text-gray-500 text-sm">Supplier:</span><br><strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Product:</span><br><strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Original Price:</span><br><strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Quantity:</span><br><strong class="text-gray-900">${product.quantity}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Total Cost:</span><br><strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></div>
-                                    <div><span class="text-gray-500 text-sm">Received:</span><br><strong class="text-blue-600">${receivedDate}</strong></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Supplier:</span><br><strong class="text-gray-900 text-xs sm:text-sm">${escapeHtml(product.supplier_name)}</strong></div>
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Product:</span><br><strong class="text-gray-900 text-xs sm:text-sm">${escapeHtml(product.product_name)}</strong></div>
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Original Price:</span><br><strong class="text-green-600 text-xs sm:text-sm">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></div>
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Quantity:</span><br><strong class="text-gray-900 text-xs sm:text-sm">${product.quantity}</strong></div>
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Total Cost:</span><br><strong class="text-green-600 text-xs sm:text-sm">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></div>
+                                    <div><span class="text-gray-500 text-[10px] sm:text-sm">Received:</span><br><strong class="text-blue-600 text-xs sm:text-sm">${receivedDate}</strong></div>
                                 </div>
-                                <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-xl transition text-sm" onclick="showProductDetails(${product.product_id}); closeHistoryModal();">View Product Details</button>
+                                <button class="w-full mt-3 sm:mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-1.5 sm:py-2 rounded-xl transition text-xs sm:text-sm" onclick="showProductDetails(${product.product_id}); closeHistoryModal();">View Product Details</button>
                             </div>
                         </div>
                     </div>
@@ -384,7 +420,7 @@
             }).join('');
         } catch (error) {
             console.error('Error loading history:', error);
-            document.getElementById('historyList').innerHTML = '<div class="text-center text-red-500 py-8">Error loading history</div>';
+            document.getElementById('historyList').innerHTML = '<div class="text-center text-red-500 py-8 text-sm">Error loading history</div>';
         }
     }
 
@@ -553,52 +589,48 @@
         container.innerHTML = '';
 
         if (products.length === 0) {
-            container.innerHTML = `<div class="col-span-full text-center py-12"><div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><h3 class="text-lg font-medium text-gray-900 mb-1">No products available</h3><p class="text-gray-500">Add products to start purchasing</p></div>`;
+            renderPagination('buyPagination', 0, 1, PURCHASES_PER_PAGE, 'buy');
+            container.innerHTML = `<div class="col-span-full text-center py-8 sm:py-12"><div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><h3 class="text-base sm:text-lg font-medium text-gray-900 mb-1">No products available</h3><p class="text-xs sm:text-sm text-gray-500">Add products to start purchasing</p></div>`;
             return;
         }
-
-        products.forEach(product => {
+        const totalPages = Math.max(1, Math.ceil(products.length / PURCHASES_PER_PAGE));
+        currentBuyPage = Math.min(currentBuyPage, totalPages);
+        const pageItems = products.slice((currentBuyPage - 1) * PURCHASES_PER_PAGE, currentBuyPage * PURCHASES_PER_PAGE);
+        pageItems.forEach(product => {
             const isLowStock = product.quantity > 0 && product.quantity < 10;
-            // FORCE use cost_price - if not set, use price but show warning
             const purchasePrice = product.cost_price || product.price;
             
-            // Debug log to check what price is being used
-            console.log('Product:', product.name);
-            console.log('Cost Price:', product.cost_price);
-            console.log('Selling Price:', product.price);
-            console.log('Using for purchase:', purchasePrice);
-            
             container.innerHTML += `
-                <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
-                    <div class="relative h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                <div class="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
+                    <div class="relative h-28 sm:h-32 md:h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                         <img src="${product.image ? '/storage/' + product.image : noImage150}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='${noImage150}'">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition duration-300"></div>
                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                            <span class="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-semibold text-gray-800 cursor-pointer hover:bg-white transition" onclick="showProductDetails(${product.id})">View Details</span>
+                            <span class="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] sm:text-sm font-semibold text-gray-800 cursor-pointer hover:bg-white transition" onclick="showProductDetails(${product.id})">View</span>
                         </div>
-                        <div class="absolute top-3 right-3">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">${product.quantity > 0 ? (isLowStock ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
+                        <div class="absolute top-2 right-2">
+                            <span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold rounded-full ${product.quantity > 0 ? (isLowStock ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') : 'bg-red-100 text-red-700'}">${product.quantity > 0 ? (isLowStock ? 'Low' : 'In Stock') : 'Out'}</span>
                         </div>
-                        <div class="absolute bottom-3 left-3">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-600 text-white">Supplier Price</span>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold rounded-full bg-blue-600 text-white">Cost</span>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-gray-900 text-base mb-1 truncate">${escapeHtml(product.name)}</h3>
-                        <div class="mb-2">
-                            <p class="text-2xl font-bold text-green-600">₱ ${parseFloat(purchasePrice).toLocaleString()}</p>
-                            ${product.price && product.price != purchasePrice ? `<p class="text-xs text-gray-400 line-through">Retail: ₱ ${parseFloat(product.price).toLocaleString()}</p>` : ''}
-                            ${!product.cost_price ? `<p class="text-xs text-amber-600">⚠️ No cost price set</p>` : ''}
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-bold text-gray-900 text-sm sm:text-base mb-1 truncate">${escapeHtml(product.name)}</h3>
+                        <div class="mb-1 sm:mb-2">
+                            <p class="text-base sm:text-xl md:text-2xl font-bold text-green-600">₱ ${parseFloat(purchasePrice).toLocaleString()}</p>
+                            ${product.markup_percentage > 0 ? `<p class="text-[10px] sm:text-xs text-gray-400 line-through">Retail: ₱ ${parseFloat(product.price).toLocaleString()}</p>` : ''}
                         </div>
-                        <div class="flex items-center justify-between text-xs mb-3">
-                            <span class="text-gray-500">Stock: ${product.quantity} units</span>
+                        <div class="flex items-center justify-between text-[10px] sm:text-xs mb-2 sm:mb-3">
+                            <span class="text-gray-500">Stock: ${product.quantity}</span>
                             <span class="text-blue-600 font-medium">${product.category ? product.category.name : 'No Category'}</span>
                         </div>
-                        <button class="w-full bg-[#1A1D2E] hover:bg-[#2D3047] text-white font-semibold py-2.5 rounded-lg transition text-sm" onclick="showSupplierModal(${product.id})">Buy Now</button>
+                        <button class="w-full bg-[#1A1D2E] hover:bg-[#2D3047] text-white font-semibold py-1.5 sm:py-2 rounded-lg transition text-xs sm:text-sm" onclick="showSupplierModal(${product.id})">Buy Now</button>
                     </div>
                 </div>
             `;
         });
+        renderPagination('buyPagination', products.length, currentBuyPage, PURCHASES_PER_PAGE, 'buy');
     }
 
     function getProductSuppliers(productId) {
@@ -626,16 +658,16 @@
         let container = document.getElementById('supplierList');
         container.innerHTML = '';
         if (suppliers.length === 0) {
-            container.innerHTML = `<div class="p-8 text-center bg-gray-50 rounded-xl"><svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p class="text-gray-500">No suppliers available for this product.</p><p class="text-sm text-gray-400 mt-1">Please add this product to a supplier first.</p></div>`;
+            container.innerHTML = `<div class="p-6 sm:p-8 text-center bg-gray-50 rounded-xl"><svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><p class="text-gray-500 text-sm">No suppliers available for this product.</p><p class="text-xs text-gray-400 mt-1">Please add this product to a supplier first.</p></div>`;
             return;
         }
         suppliers.forEach(supplier => {
             let supplierPrice = currentBuyProduct.cost_price || currentBuyProduct.price;
             container.innerHTML += `
-                <div onclick='selectSupplier(${supplier.id}, "${escapeHtml(supplier.name)}", ${supplierPrice})' class="supplier-option p-4 border border-gray-200 rounded-xl cursor-pointer transition-all hover:border-blue-400 hover:shadow-md" data-supplier-id="${supplier.id}">
+                <div onclick='selectSupplier(${supplier.id}, "${escapeHtml(supplier.name)}", ${supplierPrice})' class="supplier-option p-3 sm:p-4 border border-gray-200 rounded-xl cursor-pointer transition-all hover:border-blue-400 hover:shadow-md" data-supplier-id="${supplier.id}">
                     <div class="flex justify-between items-center">
-                        <div><div class="font-semibold text-gray-900">${escapeHtml(supplier.name)}</div><div class="text-xs text-gray-500 mt-1">📞 ${supplier.contact_number || 'N/A'} | ✉️ ${supplier.email || 'N/A'}</div></div>
-                        <div class="text-right"><div class="font-bold text-lg text-green-600">₱ ${parseFloat(supplierPrice).toLocaleString()}</div></div>
+                        <div><div class="font-semibold text-gray-900 text-sm">${escapeHtml(supplier.name)}</div><div class="text-[10px] sm:text-xs text-gray-500 mt-1">📞 ${supplier.contact_number || 'N/A'}</div></div>
+                        <div class="text-right"><div class="font-bold text-base sm:text-lg text-green-600">₱ ${parseFloat(supplierPrice).toLocaleString()}</div></div>
                     </div>
                 </div>
             `;
@@ -662,7 +694,7 @@
         let quantity = parseInt(document.getElementById('supplierQuantity').value) || 0;
         let price = selectedSupplier?.price || (currentBuyProduct?.cost_price || currentBuyProduct?.price || 0);
         let total = price * quantity;
-        document.getElementById('supplierTotalPrice').innerHTML = `<span class="text-gray-500 text-xs uppercase tracking-wide">Total Price (Cost)</span><span class="text-green-600 text-2xl font-bold block">₱ ${total.toLocaleString()}</span>`;
+        document.getElementById('supplierTotalPrice').innerHTML = `<span class="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide">Total Price (Cost)</span><span class="text-green-600 text-xl sm:text-2xl font-bold block">₱ ${total.toLocaleString()}</span>`;
     }
 
     function incrementSupplierQuantity() {
@@ -725,10 +757,15 @@
             document.getElementById('pendingPurchasesCount').innerText = pendingCount;
             updateComingProductsBadge(pendingCount);
             if (pendingCount === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12"><div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path></svg></div><h3 class="text-lg font-medium text-gray-900 mb-1">No coming products</h3><p class="text-gray-500">Purchase products to see them here</p></div>`;
+                renderPagination('comingPagination', 0, 1, PURCHASES_PER_PAGE, 'coming');
+                container.innerHTML = `<div class="col-span-full text-center py-8 sm:py-12"><div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path></svg></div><h3 class="text-base sm:text-lg font-medium text-gray-900 mb-1">No coming products</h3><p class="text-xs sm:text-sm text-gray-500">Purchase products to see them here</p></div>`;
                 return;
             }
-            for (let [key, product] of Object.entries(products)) {
+            const entries = Object.entries(products);
+            const totalPages = Math.max(1, Math.ceil(entries.length / PURCHASES_PER_PAGE));
+            currentComingPage = Math.min(currentComingPage, totalPages);
+            const pageEntries = entries.slice((currentComingPage - 1) * PURCHASES_PER_PAGE, currentComingPage * PURCHASES_PER_PAGE);
+            for (let [key, product] of pageEntries) {
                 let imageUrl = noImage150;
                 if (product.product_image) imageUrl = '/storage/' + product.product_image;
                 else if (product.product_id) {
@@ -738,26 +775,27 @@
                 const originalPrice = product.price;
                 
                 container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
-                        <div class="relative h-32 overflow-hidden bg-gray-100">
+                    <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
+                        <div class="relative h-24 sm:h-28 md:h-32 overflow-hidden bg-gray-100">
                             <img src="${imageUrl}" class="w-full h-full object-cover" onerror="this.src='${noImage150}'">
                             <div class="absolute bottom-2 left-2">
-                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500 text-white">Pending</span>
+                                <span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold rounded-full bg-amber-500 text-white">Pending</span>
                             </div>
                         </div>
-                        <div class="p-4">
-                            <div class="space-y-1 text-sm">
+                        <div class="p-3 sm:p-4">
+                            <div class="space-y-1 text-xs sm:text-sm">
                                 <p><span class="text-gray-500">Supplier:</span> <strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></p>
                                 <p><span class="text-gray-500">Product:</span> <strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></p>
-                                <p><span class="text-gray-500">Original Price:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
-                                <p><span class="text-gray-500">Quantity:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
-                                <p><span class="text-gray-500">Total Cost:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Original:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Qty:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
+                                <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
                             </div>
-                            <button class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm" onclick='showReceiveConfirm("${key}", "${escapeHtml(product.product_name)}", ${product.quantity})'>Receive</button>
+                            <button class="w-full mt-2 sm:mt-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 sm:py-2 rounded-lg transition text-xs sm:text-sm" onclick='showReceiveConfirm("${key}", "${escapeHtml(product.product_name)}", ${product.quantity})'>Receive</button>
                         </div>
                     </div>
                 `;
             }
+            renderPagination('comingPagination', entries.length, currentComingPage, PURCHASES_PER_PAGE, 'coming');
         } catch (error) { console.error('Error loading coming products:', error); }
     }
 
@@ -793,13 +831,14 @@
             document.getElementById('completedPurchasesCount').innerText = completedCount;
             
             if (completedCount === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12"><div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-lg font-medium text-gray-900 mb-1">No received products</h3><p class="text-gray-500">Received products will appear here</p></div>`;
+                renderPagination('receivedPagination', 0, 1, PURCHASES_PER_PAGE, 'received');
+                container.innerHTML = `<div class="col-span-full text-center py-8 sm:py-12"><div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-base sm:text-lg font-medium text-gray-900 mb-1">No received products</h3><p class="text-xs sm:text-sm text-gray-500">Received products will appear here</p></div>`;
                 return;
             }
-            
-            const latestProducts = productsArray.slice(0, 4);
-            
-            latestProducts.forEach(product => {
+            const totalPages = Math.max(1, Math.ceil(productsArray.length / PURCHASES_PER_PAGE));
+            currentReceivedPage = Math.min(currentReceivedPage, totalPages);
+            const pageItems = productsArray.slice((currentReceivedPage - 1) * PURCHASES_PER_PAGE, currentReceivedPage * PURCHASES_PER_PAGE);
+            pageItems.forEach(product => {
                 let imageUrl = noImage150;
                 if (product.product_image) imageUrl = '/storage/' + product.product_image;
                 else if (product.product_id) {
@@ -823,27 +862,28 @@
                 const originalPrice = product.price;
                 
                 container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
-                        <div class="relative h-32 overflow-hidden bg-gray-100">
+                    <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200">
+                        <div class="relative h-24 sm:h-28 md:h-32 overflow-hidden bg-gray-100">
                             <img src="${imageUrl}" class="w-full h-full object-cover opacity-75" onerror="this.src='${noImage150}'">
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">RECEIVED</span>
+                                <span class="bg-green-600 text-white text-[9px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">RECEIVED</span>
                             </div>
                         </div>
-                        <div class="p-4">
-                            <div class="space-y-1 text-sm">
+                        <div class="p-3 sm:p-4">
+                            <div class="space-y-1 text-xs sm:text-sm">
                                 <p><span class="text-gray-500">Supplier:</span> <strong class="text-gray-900">${escapeHtml(product.supplier_name)}</strong></p>
                                 <p><span class="text-gray-500">Product:</span> <strong class="text-gray-900">${escapeHtml(product.product_name)}</strong></p>
-                                <p><span class="text-gray-500">Original Price:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
-                                <p><span class="text-gray-500">Quantity:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
-                                <p><span class="text-gray-500">Total Cost:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
-                                <p><span class="text-gray-500">Received:</span> <strong class="text-blue-600">${receivedDate}</strong></p>
+                                <p><span class="text-gray-500">Original:</span> <strong class="text-green-600">₱ ${parseFloat(originalPrice).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Qty:</span> <strong class="text-gray-900">${product.quantity}</strong></p>
+                                <p><span class="text-gray-500">Total:</span> <strong class="text-green-600">₱ ${(originalPrice * product.quantity).toLocaleString()}</strong></p>
+                                <p><span class="text-gray-500">Received:</span> <strong class="text-blue-600 text-[10px]">${receivedDate.substring(0, 10)}</strong></p>
                             </div>
-                            <button class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 rounded-lg transition text-sm" onclick="showProductDetails(${product.product_id})">View Details</button>
+                            <button class="w-full mt-2 sm:mt-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-1.5 sm:py-2 rounded-lg transition text-xs sm:text-sm" onclick="showProductDetails(${product.product_id})">View Details</button>
                         </div>
                     </div>
                 `;
             });
+            renderPagination('receivedPagination', productsArray.length, currentReceivedPage, PURCHASES_PER_PAGE, 'received');
         } catch (error) { console.error('Error loading received products:', error); }
     }
 
@@ -854,18 +894,18 @@
         document.getElementById('modalImage').src = product.image ? '/storage/' + product.image : noImage600;
         let modalContent = document.getElementById('modalContent');
         modalContent.innerHTML = `
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Brand</div><div class="text-sm font-medium text-gray-900">${escapeHtml(product.brand || 'N/A')}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Model Number</div><div class="text-sm font-medium text-gray-900">${escapeHtml(product.model_number || 'N/A')}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Cost Price</div><div class="text-sm font-medium text-gray-900">₱ ${parseFloat(product.cost_price || product.price).toLocaleString()}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Selling Price</div><div class="text-lg font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock</div><div class="text-sm font-medium text-gray-900">${product.quantity} units</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Category</div><div class="text-sm font-medium text-gray-900">${product.category ? product.category.name : 'N/A'}</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Markup</div><div class="text-sm font-medium text-blue-600">${product.markup_percentage || 0}%</div></div>
-                    <div class="bg-gray-50 p-3 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Status</div><div class="text-sm font-medium ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</div></div>
+            <div class="space-y-3 sm:space-y-4">
+                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Brand</div><div class="text-xs sm:text-sm font-medium text-gray-900">${escapeHtml(product.brand || 'N/A')}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Model</div><div class="text-xs sm:text-sm font-medium text-gray-900">${escapeHtml(product.model_number || 'N/A')}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Cost Price</div><div class="text-xs sm:text-sm font-medium text-gray-900">₱ ${parseFloat(product.cost_price || product.price).toLocaleString()}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Selling Price</div><div class="text-xs sm:text-sm font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Stock</div><div class="text-xs sm:text-sm font-medium text-gray-900">${product.quantity} units</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Category</div><div class="text-xs sm:text-sm font-medium text-gray-900">${product.category ? product.category.name : 'N/A'}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Markup</div><div class="text-xs sm:text-sm font-medium text-blue-600">${product.markup_percentage || 0}%</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Status</div><div class="text-xs sm:text-sm font-medium ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}">${product.quantity > 0 ? 'In Stock' : 'Out of Stock'}</div></div>
                 </div>
-                ${product.performance ? `<div class="bg-gray-50 p-4 rounded-xl"><div class="text-xs text-gray-500 uppercase tracking-wide mb-2">Performance</div><div class="text-sm text-gray-700 leading-relaxed">${escapeHtml(product.performance)}</div></div>` : ''}
+                ${product.performance ? `<div class="bg-gray-50 p-3 sm:p-4 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Performance</div><div class="text-xs sm:text-sm text-gray-700 leading-relaxed">${escapeHtml(product.performance)}</div></div>` : ''}
             </div>
         `;
         document.getElementById('detailModal').classList.add('open');
@@ -883,6 +923,7 @@
 
     function filterProducts() {
         let categoryId = document.getElementById('categoryFilter').value;
+        currentBuyPage = 1;
         if (!categoryId) { displayProducts(allProducts); } 
         else { let filtered = allProducts.filter(p => p.category_id == categoryId); displayProducts(filtered); }
     }

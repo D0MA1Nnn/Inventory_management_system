@@ -31,5 +31,5 @@
 
 <div {{ $attributes->merge(['class' => "summary-card {$cardAccentClass}"]) }}>
     <p class="text-xs font-semibold uppercase text-gray-500">{{ $label }}</p>
-    <p @if($id) id="{{ $id }}" @endif class="mt-2 {{ $valueClassName }}">{{ $value }}</p>
+    <p @if($id) id="{{ $id }}" @endif class="mt-2 {{ $valueClassName }} text-right">{{ $value }}</p>
 </div>

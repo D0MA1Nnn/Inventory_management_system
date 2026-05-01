@@ -3,87 +3,76 @@
 @section('title', 'Categories')
 @section('content')
 
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="summary-card border-gray-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Total Categories</p>
-            <p class="mt-2 text-2xl font-bold text-gray-900" id="totalCategoriesCount">0</p>
-        </div>
-        <div class="summary-card border-blue-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">With Products</p>
-            <p class="mt-2 text-2xl font-bold text-blue-600" id="categoriesWithProducts">0</p>
-        </div>
-        <div class="summary-card border-indigo-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Custom Fields</p>
-            <p class="mt-2 text-2xl font-bold text-indigo-600" id="totalCustomFields">0</p>
-        </div>
-        <div class="summary-card border-green-200">
-            <p class="text-xs font-semibold uppercase text-gray-500">Total Products</p>
-            <p class="mt-2 text-2xl font-bold text-green-600" id="totalProductsInCategories">0</p>
-        </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <x-summary-card label="Total Categories" id="totalCategoriesCount" value="0" accent="gray" />
+        <x-summary-card label="With Products" id="categoriesWithProducts" value="0" accent="blue" />
+        <x-summary-card label="Custom Fields" id="totalCustomFields" value="0" accent="indigo" />
+        <x-summary-card label="Total Products" id="totalProductsInCategories" value="0" accent="green" />
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900"></h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900"></h1>
         </div>
         <button onclick="resetForm(); showForm()"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm text-sm sm:text-base">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
             Add Category
         </button>
     </div>
 
-    <!-- Categories Grid -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="section-header">
-            <h2 class="text-gray-900 font-semibold">Category Library</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Review, edit, and maintain product categories.</p>
+    <!-- Categories Grid - 2 cards per row on mobile, 3 on tablet, 4 on desktop -->
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="section-header px-4 sm:px-6 py-3 sm:py-4">
+            <h2 class="text-gray-900 font-semibold text-base sm:text-lg">Category Library</h2>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Review, edit, and maintain product categories.</p>
         </div>
-        <div class="p-6">
-            <div id="categoryContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        <div class="p-3 sm:p-6">
+            <div id="categoryContainer" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"></div>
+            <div id="categoriesPagination" class="mt-4 flex justify-center"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+<!-- MODAL - Responsive -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
     <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
             <div>
-                <h2 class="text-xl font-bold text-gray-900" id="modalTitle">Add Category</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Set the category name, image, and product fields.</p>
+                <h2 class="text-base sm:text-xl font-bold text-gray-900" id="modalTitle">Add Category</h2>
+                <p class="text-[10px] sm:text-sm text-gray-500 mt-0.5">Set the category name, image, and product fields.</p>
             </div>
-            <button type="button" onclick="hideForm()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            <button type="button" onclick="hideForm()" class="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl leading-none">&times;</button>
         </div>
         <form id="categoryForm" enctype="multipart/form-data">
-            <div class="p-6 max-h-[70vh] overflow-y-auto">
+            <div class="p-4 sm:p-6 max-h-[70vh] overflow-y-auto">
                 <input type="hidden" id="category_id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4">
                     <div>
-                        <label for="name" class="block text-xs font-semibold uppercase text-gray-500 mb-2">Category Name</label>
+                        <label for="name" class="block text-[10px] sm:text-xs font-semibold uppercase text-gray-500 mb-1 sm:mb-2">Category Name</label>
                         <input type="text" id="name" placeholder="Category Name" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                     </div>
                     <div>
-                        <label for="image" class="block text-xs font-semibold uppercase text-gray-500 mb-2">Category Image</label>
+                        <label for="image" class="block text-[10px] sm:text-xs font-semibold uppercase text-gray-500 mb-1 sm:mb-2">Category Image</label>
                         <input type="file" id="image" accept="image/*" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
-                <img id="preview" class="hidden h-28 w-full max-w-xs mx-auto mb-4 rounded-lg object-cover border border-gray-200">
+                <img id="preview" class="hidden h-20 sm:h-28 w-full max-w-xs mx-auto mb-4 rounded-lg object-cover border border-gray-200">
             
                 <!-- Field Schema Builder -->
-                <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div class="border border-gray-200 rounded-xl p-3 sm:p-4 bg-gray-50">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 sm:mb-4">
                         <div>
-                            <h3 class="font-semibold text-gray-900">Product Fields</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Define fields shown when adding products under this category.</p>
+                            <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Product Fields</h3>
+                            <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Define fields shown when adding products under this category.</p>
                         </div>
-                        <button type="button" onclick="addField()" class="inline-flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-100 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <button type="button" onclick="addField()" class="inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:py-2 bg-white border border-gray-300 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg hover:bg-gray-100 transition">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Add Field
                         </button>
                     </div>
@@ -94,37 +83,64 @@
                 </div>
             </div>
             
-            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <button type="button" onclick="hideForm()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition">Save Category</button>
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 bg-gray-50">
+                <button type="button" onclick="hideForm()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition text-sm">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition text-sm">Save Category</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- CONFIRMATION MODAL -->
+<!-- CONFIRMATION MODAL - Responsive -->
 <div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white p-6 rounded-xl w-full max-w-sm text-center shadow-2xl">
-        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white p-5 sm:p-6 rounded-xl w-full max-w-sm text-center shadow-2xl">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
             </svg>
         </div>
-        <h3 class="text-xl font-bold mb-2 text-gray-900">Confirm Delete</h3>
-        <p class="text-gray-600 mb-5 text-sm leading-relaxed" id="confirmMessage">Are you sure you want to delete this category?</p>
+        <h3 class="text-base sm:text-xl font-bold mb-2 text-gray-900">Confirm Delete</h3>
+        <p class="text-gray-600 mb-4 sm:mb-5 text-xs sm:text-sm leading-relaxed" id="confirmMessage">Are you sure you want to delete this category?</p>
         <div class="flex justify-center gap-3">
-            <button onclick="hideConfirmModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition">Cancel</button>
-            <button id="confirmButton" class="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition">Delete</button>
+            <button onclick="hideConfirmModal()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition text-sm">Cancel</button>
+            <button id="confirmButton" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition text-sm">Delete</button>
         </div>
     </div>
 </div>
 
 <!-- TOAST NOTIFICATION -->
-<div id="toast" class="hidden fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-sm font-medium">
+<div id="toast" class="hidden fixed bottom-4 right-4 bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg z-50 text-xs sm:text-sm font-medium">
     <span id="toastMessage"></span>
 </div>
+
 <script>
 let pendingDeleteId = null;
+let currentCategoriesPage = 1;
+const CATEGORIES_PER_PAGE = 16;
+
+function renderPagination(containerId, totalItems, currentPage, perPage, pageKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+    container.innerHTML = `
+        <div class="flex items-center gap-1 sm:gap-2">
+            <button type="button" onclick="changePage('${pageKey}', ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Prev</button>
+            ${pages.map(page => `<button type="button" onclick="changePage('${pageKey}', ${page})" class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border ${page === currentPage ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}">${page}</button>`).join('')}
+            <button type="button" onclick="changePage('${pageKey}', ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Next</button>
+        </div>
+    `;
+}
+
+function changePage(pageKey, page) {
+    if (pageKey !== 'categories') return;
+    currentCategoriesPage = Math.max(1, page);
+    loadCategories();
+}
 
 function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -151,22 +167,22 @@ function addField(fieldData = null) {
     const defaultField = fieldData || { name: '', label: '', type: 'text', required: false, options: '' };
     
     const fieldDiv = document.createElement('div');
-    fieldDiv.className = 'field-item bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
+    fieldDiv.className = 'field-item bg-white p-3 sm:p-4 rounded-lg border border-gray-200 shadow-sm';
     
     fieldDiv.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
-                <label class="text-xs font-semibold uppercase text-gray-500">Field Name</label>
+                <label class="text-[10px] sm:text-xs font-semibold uppercase text-gray-500">Field Name</label>
                 <input type="text" class="field-name w-full border border-gray-300 px-3 py-2 rounded-lg text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., socket_chipset" value="${escapeHtml(defaultField.name || '')}">
             </div>
             <div>
-                <label class="text-xs font-semibold uppercase text-gray-500">Display Label</label>
+                <label class="text-[10px] sm:text-xs font-semibold uppercase text-gray-500">Display Label</label>
                 <input type="text" class="field-label w-full border border-gray-300 px-3 py-2 rounded-lg text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Socket / Chipset" value="${escapeHtml(defaultField.label || '')}">
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-                <label class="text-xs font-semibold uppercase text-gray-500">Field Type</label>
+                <label class="text-[10px] sm:text-xs font-semibold uppercase text-gray-500">Field Type</label>
                 <select class="field-type w-full border border-gray-300 px-3 py-2 rounded-lg text-sm mt-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="text" ${defaultField.type === 'text' ? 'selected' : ''}>Text</option>
                     <option value="textarea" ${defaultField.type === 'textarea' ? 'selected' : ''}>Textarea</option>
@@ -175,15 +191,15 @@ function addField(fieldData = null) {
                 </select>
             </div>
             <div class="flex items-end justify-between">
-                <label class="flex items-center gap-2 text-sm text-gray-700">
+                <label class="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
                     <input type="checkbox" class="field-required" ${defaultField.required ? 'checked' : ''}>
-                    <span class="text-xs font-medium">Required</span>
+                    <span class="text-[10px] sm:text-xs font-medium">Required</span>
                 </label>
-                <button type="button" onclick="this.closest('.field-item').remove()" class="text-red-600 text-sm font-semibold hover:text-red-700">Remove</button>
+                <button type="button" onclick="this.closest('.field-item').remove()" class="text-red-600 text-xs sm:text-sm font-semibold hover:text-red-700">Remove</button>
             </div>
         </div>
         <div class="field-options-container mt-2" style="display: ${defaultField.type === 'select' ? 'block' : 'none'}">
-            <label class="text-xs font-semibold uppercase text-gray-500">Options</label>
+            <label class="text-[10px] sm:text-xs font-semibold uppercase text-gray-500">Options</label>
             <input type="text" class="field-options w-full border border-gray-300 px-3 py-2 rounded-lg text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Option 1, Option 2, Option 3" value="${escapeHtml(defaultField.options || '')}">
         </div>
     `;
@@ -272,16 +288,17 @@ async function loadCategories() {
         let totalProducts = 0;
         
         if (categories.length === 0) {
+            renderPagination('categoriesPagination', 0, 1, CATEGORIES_PER_PAGE, 'categories');
             container.innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="col-span-full text-center py-8 sm:py-12">
+                    <div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No categories yet</h3>
-                    <p class="text-gray-500 mb-4">Click the Add Category button to create your first category</p>
-                    <button onclick="resetForm(); showForm()" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition">Add Category</button>
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-1">No categories yet</h3>
+                    <p class="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Click the Add Category button to create your first category</p>
+                    <button onclick="resetForm(); showForm()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition text-sm">Add Category</button>
                 </div>
             `;
             document.getElementById('totalCategoriesCount').innerText = 0;
@@ -290,10 +307,12 @@ async function loadCategories() {
             document.getElementById('totalProductsInCategories').innerText = 0;
             return;
         }
-        
-        categories.forEach(cat => {
+        const totalPages = Math.max(1, Math.ceil(categories.length / CATEGORIES_PER_PAGE));
+        currentCategoriesPage = Math.min(currentCategoriesPage, totalPages);
+        const pageItems = categories.slice((currentCategoriesPage - 1) * CATEGORIES_PER_PAGE, currentCategoriesPage * CATEGORIES_PER_PAGE);
+
+        pageItems.forEach(cat => {
             const formattedId = 'CA' + String(cat.id).padStart(3, '0');
-            // Use products_count from the API response
             const productCount = cat.products_count || 0;
             totalProducts += productCount;
             if (productCount > 0) categoriesWithProducts++;
@@ -308,48 +327,48 @@ async function loadCategories() {
             }
             
             container.innerHTML += `
-                <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
-                    <div class="relative h-36 overflow-hidden bg-gray-100">
+                <div class="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
+                    <div class="relative h-28 sm:h-32 md:h-36 overflow-hidden bg-gray-100">
                         ${cat.image
                             ? `<img src="/storage/${cat.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
                             : `<div class="w-full h-full bg-gray-900 flex items-center justify-center">
-                                <svg class="w-16 h-16 text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6h16M4 12h16M4 18h16"></path>
                                 </svg>
                                </div>`
                         }
-                        <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="editCategory(${cat.id})" class="p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition" title="Edit category">
-                                <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editCategory(${cat.id})" class="p-1.5 bg-white rounded-lg shadow-md hover:bg-gray-100 transition" title="Edit category">
+                                <svg class="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
                                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                 </svg>
                             </button>
-                            <button onclick="showConfirmModal(${cat.id}, '${escapeHtml(cat.name)}')" class="p-2 bg-white rounded-lg shadow-md hover:bg-red-50 transition" title="Delete category">
-                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button onclick="showConfirmModal(${cat.id}, '${escapeHtml(cat.name)}')" class="p-1.5 bg-white rounded-lg shadow-md hover:bg-red-50 transition" title="Delete category">
+                                <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                             </button>
                         </div>
-                        <div class="absolute bottom-3 left-3">
-                            <span class="px-2 py-1 bg-white/95 backdrop-blur-sm rounded-md text-gray-800 text-xs font-bold shadow-sm">${formattedId}</span>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="px-1.5 py-0.5 bg-white/95 backdrop-blur-sm rounded-md text-gray-800 text-[10px] sm:text-xs font-bold shadow-sm">${formattedId}</span>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-gray-900 text-base mb-1 truncate">${escapeHtml(cat.name)}</h3>
-                        <div class="flex items-center justify-between gap-3 mt-4">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-bold text-gray-900 text-sm sm:text-base mb-1 truncate">${escapeHtml(cat.name)}</h3>
+                        <div class="flex items-center justify-between gap-2 mt-2 sm:mt-3">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                 </svg>
-                                <span class="text-sm text-gray-600">${productCount} products</span>
+                                <span class="text-xs sm:text-sm text-gray-600">${productCount} products</span>
                             </div>
                             ${fieldsCount > 0 ? `
-                            <div class="flex items-center gap-1 px-2 py-1 bg-indigo-50 rounded-full">
-                                <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 rounded-full">
+                                <svg class="w-2.5 h-2.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <span class="text-xs font-semibold text-indigo-700">${fieldsCount} fields</span>
+                                <span class="text-[10px] sm:text-xs font-semibold text-indigo-700">${fieldsCount}</span>
                             </div>
                             ` : ''}
                         </div>
@@ -357,6 +376,7 @@ async function loadCategories() {
                 </div>
             `;
         });
+        renderPagination('categoriesPagination', categories.length, currentCategoriesPage, CATEGORIES_PER_PAGE, 'categories');
         
         document.getElementById('totalCategoriesCount').innerText = categories.length;
         document.getElementById('categoriesWithProducts').innerText = categoriesWithProducts;
@@ -447,6 +467,7 @@ async function saveCategory(event) {
             showToast(`Category ${action} successfully!`);
             hideForm();
             resetForm();
+            currentCategoriesPage = 1;
             await loadCategories();
         } else {
             const error = await res.text();
@@ -470,6 +491,7 @@ async function deleteCategory() {
         if (res.ok) {
             showToast('Category deleted successfully!');
             hideConfirmModal();
+            currentCategoriesPage = 1;
             await loadCategories();
         } else {
             showToast('Error deleting category', true);
@@ -543,4 +565,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 @endsection
-

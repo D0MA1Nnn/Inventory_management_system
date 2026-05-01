@@ -93,6 +93,73 @@ class ProductSeeder extends Seeder
             ]
         ]);
 
+        Product::create([
+            'name' => 'Intel Core i9-13900K',
+            'brand' => 'Intel',
+            'model_number' => 'i9-13900K',
+            'price' => 32000,
+            'quantity' => 5,
+            'category_id' => 1,
+            'performance' => '24 cores • Boost 5.8GHz • 36MB Cache',
+            'dynamic_fields' => [
+                'socket' => 'LGA1700',
+                'cores_threads' => '24 / 32'
+            ]
+        ]);
+
+        Product::create([
+            'name' => 'AMD Ryzen 9 5900X',
+            'brand' => 'AMD',
+            'model_number' => '5900X',
+            'price' => 21000,
+            'quantity' => 7,
+            'category_id' => 1,
+            'performance' => '12 cores • Boost 4.8GHz',
+            'dynamic_fields' => [
+                'socket' => 'AM4',
+                'cores_threads' => '12 / 24'
+            ]
+        ]);
+
+        Product::create([
+            'name' => 'Intel Core i5-13400',
+            'brand' => 'Intel',
+            'model_number' => 'i5-13400',
+            'price' => 12500,
+            'quantity' => 10,
+            'category_id' => 1,
+            'performance' => '10 cores • Boost 4.6GHz',
+            'dynamic_fields' => [
+                'socket' => 'LGA1700'
+            ]
+        ]);
+
+        Product::create([
+            'name' => 'AMD Ryzen 5 7600',
+            'brand' => 'AMD',
+            'model_number' => '7600',
+            'price' => 14000,
+            'quantity' => 9,
+            'category_id' => 1,
+            'performance' => '6 cores • Boost 5.1GHz',
+            'dynamic_fields' => [
+                'socket' => 'AM5'
+            ]
+        ]);
+
+        Product::create([
+            'name' => 'Intel Pentium Gold G6400',
+            'brand' => 'Intel',
+            'model_number' => 'G6400',
+            'price' => 3500,
+            'quantity' => 20,
+            'category_id' => 1,
+            'performance' => '2 cores • Budget CPU',
+            'dynamic_fields' => [
+                'socket' => 'LGA1200'
+            ]
+        ]);
+
         // ======================
         // MOTHERBOARDS
         // ======================
@@ -175,6 +242,175 @@ class ProductSeeder extends Seeder
                 'chipset' => 'A320',
                 'ram_support' => 'DDR4 3200'
             ]
+        ]);
+
+        Product::create([
+            'name' => 'ASRock B550 Steel Legend',
+            'brand' => 'ASRock',
+            'model_number' => 'B550 Steel Legend',
+            'price' => 8500,
+            'quantity' => 10,
+            'category_id' => 2,
+            'performance' => 'B550 • PCIe 4.0',
+            'dynamic_fields' => ['socket' => 'AM4']
+        ]);
+
+        Product::create([
+            'name' => 'Gigabyte Z790 AORUS Elite',
+            'brand' => 'Gigabyte',
+            'model_number' => 'Z790',
+            'price' => 16000,
+            'quantity' => 6,
+            'category_id' => 2,
+            'performance' => 'Z790 • DDR5',
+            'dynamic_fields' => ['socket' => 'LGA1700']
+        ]);
+
+        Product::create([
+            'name' => 'MSI MAG B660 Tomahawk',
+            'brand' => 'MSI',
+            'model_number' => 'B660 Tomahawk',
+            'price' => 9500,
+            'quantity' => 8,
+            'category_id' => 2,
+            'performance' => 'B660 Gaming',
+            'dynamic_fields' => ['socket' => 'LGA1700']
+        ]);
+
+        Product::create([
+            'name' => 'ASUS TUF Gaming B550',
+            'brand' => 'ASUS',
+            'model_number' => 'B550 TUF',
+            'price' => 9000,
+            'quantity' => 9,
+            'category_id' => 2,
+            'performance' => 'Durable board',
+            'dynamic_fields' => ['socket' => 'AM4']
+        ]);
+
+        Product::create([
+            'name' => 'Biostar A520MH',
+            'brand' => 'Biostar',
+            'model_number' => 'A520MH',
+            'price' => 3500,
+            'quantity' => 15,
+            'category_id' => 2,
+            'performance' => 'Budget motherboard',
+            'dynamic_fields' => ['socket' => 'AM4']
+        ]);
+
+        // ======================
+        // RAM PRODUCTS
+        // ======================
+
+        Product::create([
+            'name' => 'Corsair Vengeance 8GB DDR4',
+            'brand' => 'Corsair',
+            'model_number' => '8GB DDR4',
+            'price' => 1800,
+            'quantity' => 25,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '8GB']
+        ]);
+
+        Product::create([
+            'name' => 'Corsair Vengeance 16GB DDR4',
+            'brand' => 'Corsair',
+            'model_number' => '16GB DDR4',
+            'price' => 3200,
+            'quantity' => 20,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '16GB']
+        ]);
+
+        Product::create([
+            'name' => 'G.Skill Ripjaws 16GB DDR4',
+            'brand' => 'G.Skill',
+            'model_number' => 'Ripjaws 16GB',
+            'price' => 3400,
+            'quantity' => 15,
+            'category_id' => 3,
+            'performance' => 'DDR4 3600MHz',
+            'dynamic_fields' => ['capacity' => '16GB']
+        ]);
+
+        Product::create([
+            'name' => 'Kingston Fury 8GB DDR4',
+            'brand' => 'Kingston',
+            'model_number' => 'Fury 8GB',
+            'price' => 1700,
+            'quantity' => 30,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '8GB']
+        ]);
+
+        Product::create([
+            'name' => 'Kingston Fury 16GB DDR4',
+            'brand' => 'Kingston',
+            'model_number' => 'Fury 16GB',
+            'price' => 3000,
+            'quantity' => 20,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '16GB']
+        ]);
+
+        Product::create([
+            'name' => 'Team Elite 8GB DDR4',
+            'brand' => 'TeamGroup',
+            'model_number' => 'Elite 8GB',
+            'price' => 1600,
+            'quantity' => 25,
+            'category_id' => 3,
+            'performance' => 'DDR4 2666MHz',
+            'dynamic_fields' => ['capacity' => '8GB']
+        ]);
+
+        Product::create([
+            'name' => 'Team Elite 16GB DDR4',
+            'brand' => 'TeamGroup',
+            'model_number' => 'Elite 16GB',
+            'price' => 2900,
+            'quantity' => 18,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '16GB']
+        ]);
+
+        Product::create([
+            'name' => 'ADATA XPG 16GB DDR4',
+            'brand' => 'ADATA',
+            'model_number' => 'XPG 16GB',
+            'price' => 3500,
+            'quantity' => 14,
+            'category_id' => 3,
+            'performance' => 'DDR4 3600MHz RGB',
+            'dynamic_fields' => ['capacity' => '16GB']
+        ]);
+
+        Product::create([
+            'name' => 'Crucial 8GB DDR4',
+            'brand' => 'Crucial',
+            'model_number' => '8GB DDR4',
+            'price' => 1500,
+            'quantity' => 35,
+            'category_id' => 3,
+            'performance' => 'DDR4 2666MHz',
+            'dynamic_fields' => ['capacity' => '8GB']
+        ]);
+
+        Product::create([
+            'name' => 'Crucial 16GB DDR4',
+            'brand' => 'Crucial',
+            'model_number' => '16GB DDR4',
+            'price' => 2800,
+            'quantity' => 22,
+            'category_id' => 3,
+            'performance' => 'DDR4 3200MHz',
+            'dynamic_fields' => ['capacity' => '16GB']
         ]);
     }
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Register - JUSTRIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -20,7 +20,7 @@
         @keyframes slideInLeft {
             from {
                 opacity: 0;
-                transform: translateX(-50px);
+                transform: translateX(-30px);
             }
             to {
                 opacity: 1;
@@ -30,7 +30,7 @@
         @keyframes slideInRight {
             from {
                 opacity: 0;
-                transform: translateX(50px);
+                transform: translateX(30px);
             }
             to {
                 opacity: 1;
@@ -41,28 +41,36 @@
             animation: fadeIn 0.6s ease-out;
         }
         .animate-slideLeft {
-            animation: slideInLeft 0.6s ease-out;
+            animation: slideInLeft 0.5s ease-out;
         }
         .animate-slideRight {
-            animation: slideInRight 0.6s ease-out;
+            animation: slideInRight 0.5s ease-out;
         }
         .register-container {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
         .input-focus:focus {
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
             border-color: #667eea;
             outline: none;
         }
+        /* Better touch targets for mobile */
+        @media (max-width: 768px) {
+            button, a {
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
     </style>
 </head>
-<body class="register-container min-h-screen">
+<body class="register-container">
 
-    <div class="min-h-screen flex items-center justify-center px-4 py-12">
-        <div class="max-w-6xl w-full flex flex-col md:flex-row rounded-2xl overflow-hidden shadow-2xl">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8 md:py-12">
+        <div class="max-w-6xl w-full flex flex-col md:flex-row rounded-2xl overflow-hidden shadow-2xl mx-4 md:mx-0">
             
-            <!-- Left Side - Welcome Section -->
-            <div class="md:w-1/2 bg-gradient-to-br from-purple-800 to-indigo-900 p-8 md:p-12 flex flex-col justify-center animate-slideLeft">
+            <!-- Left Side - Welcome Section (Hidden on mobile, visible on tablet/desktop) -->
+            <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-purple-800 to-indigo-900 p-8 lg:p-12 flex-col justify-center animate-slideLeft">
                 <!-- Back Button -->
                 <div class="mb-6">
                     <a href="{{ url('/') }}" class="inline-flex items-center text-purple-200 hover:text-white transition group">
@@ -73,25 +81,25 @@
                     </a>
                 </div>
                 <div class="text-center md:text-left">
-                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Join JUSTRIX Today!</h1>
-                    <p class="text-purple-200 mb-8 leading-relaxed">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-4">Join JUSTRIX Today!</h1>
+                    <p class="text-purple-200 mb-8 leading-relaxed text-sm lg:text-base">
                         Create your account and start shopping with us today!
                     </p>
                     <div class="space-y-4">
                         <div class="flex items-center space-x-3 text-purple-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span class="text-sm">Easy and secure shopping</span>
                         </div>
                         <div class="flex items-center space-x-3 text-purple-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span class="text-sm">Wide selection of products</span>
                         </div>
                         <div class="flex items-center space-x-3 text-purple-200">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span class="text-sm">Fast and reliable delivery</span>
@@ -101,14 +109,24 @@
             </div>
             
             <!-- Right Side - Registration Form -->
-            <div class="md:w-1/2 bg-white p-8 md:p-12 animate-slideRight">
+            <div class="w-full md:w-1/2 bg-white p-6 sm:p-8 md:p-10 lg:p-12 animate-slideRight">
+                <!-- Mobile Back Button (visible only on mobile) -->
+                <div class="md:hidden mb-4">
+                    <a href="{{ url('/') }}" class="inline-flex items-center text-purple-600 hover:text-purple-700 transition">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span class="text-sm">Back</span>
+                    </a>
+                </div>
+                
                 <div class="max-w-md mx-auto">
-                    <div class="text-center mb-8">
+                    <div class="text-center mb-6 md:mb-8">
                         <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
-                        <p class="text-gray-500 text-sm">Fill in your details to get started</p>
+                        <p class="text-gray-500 text-xs md:text-sm">Fill in your details to get started</p>
                     </div>
                     
-                    <form method="POST" action="{{ route('register') }}" class="space-y-5">
+                    <form method="POST" action="{{ route('register') }}" class="space-y-4 md:space-y-5">
                         @csrf
                         
                         <!-- Name Field -->
@@ -121,7 +139,7 @@
                                     </svg>
                                 </div>
                                 <input type="text" name="name" value="{{ old('name') }}" required
-                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition"
+                                    class="w-full pl-10 pr-3 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition text-sm md:text-base"
                                     placeholder="John Doe">
                             </div>
                             @error('name')
@@ -139,7 +157,7 @@
                                     </svg>
                                 </div>
                                 <input type="email" name="email" value="{{ old('email') }}" required
-                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition"
+                                    class="w-full pl-10 pr-3 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition text-sm md:text-base"
                                     placeholder="you@example.com">
                             </div>
                             @error('email')
@@ -157,7 +175,7 @@
                                     </svg>
                                 </div>
                                 <input type="password" name="password" required
-                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition"
+                                    class="w-full pl-10 pr-3 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition text-sm md:text-base"
                                     placeholder="••••••••">
                             </div>
                             @error('password')
@@ -175,30 +193,30 @@
                                     </svg>
                                 </div>
                                 <input type="password" name="password_confirmation" required
-                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition"
+                                    class="w-full pl-10 pr-3 py-2.5 md:py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition text-sm md:text-base"
                                     placeholder="••••••••">
                             </div>
                         </div>
                         
                         <!-- Submit Button -->
                         <button type="submit" 
-                            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md mt-6">
+                            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2.5 md:py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md mt-4 md:mt-6 text-sm md:text-base">
                             Create Account
                         </button>
                         
                         <!-- Divider -->
-                        <div class="relative my-6">
+                        <div class="relative my-5 md:my-6">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-gray-300"></div>
                             </div>
                             <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-white text-gray-500">Already have an account?</span>
+                                <span class="px-2 bg-white text-gray-500 text-xs md:text-sm">Already have an account?</span>
                             </div>
                         </div>
                         
                         <!-- Login Link -->
                         <p class="text-center">
-                            <a href="{{ route('login') }}" class="text-purple-600 hover:text-purple-700 font-semibold hover:underline">
+                            <a href="{{ route('login') }}" class="text-purple-600 hover:text-purple-700 font-semibold hover:underline text-sm md:text-base">
                                 Sign in to your account
                             </a>
                         </p>
@@ -210,8 +228,7 @@
     
     <!-- Footer -->
     <div class="text-center py-4">
-        <p class="text-purple-200 text-sm">&copy; 2024 JUSTRIX. All rights reserved.</p>
+        <p class="text-purple-200 text-xs md:text-sm">&copy; 2026 JUSTRIX. All rights reserved.</p>
     </div>
-    
 </body>
 </html>

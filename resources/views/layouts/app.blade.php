@@ -55,32 +55,69 @@
             visibility: visible;
             transform: translateY(0);
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
             .main-content {
                 margin-left: 0 !important;
             }
         }
-        .notification-badge {
-            animation: pulse 0.5s ease-in-out;
+        
+        /* Mobile bottom sheet for notifications */
+        .mobile-bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 1.5rem 1.5rem 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+        .mobile-bottom-sheet.open {
+            transform: translateY(0);
         }
-        .notification-dropdown {
-            display: inline-block;
-        }
-        .notification-dropdown .dropdown-panel {
-            transition: opacity 0.2s ease, visibility 0.2s ease;
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            pointer-events: none;
+            transition: all 0.3s ease;
         }
-        .notification-dropdown:hover .dropdown-panel {
+        .mobile-overlay.active {
             opacity: 1;
             visibility: visible;
-            pointer-events: auto;
         }
+        
+        /* Desktop dropdown */
+        @media (min-width: 768px) {
+            .desktop-dropdown {
+                position: absolute;
+                right: 0;
+                top: 100%;
+                margin-top: 0.5rem;
+                width: 320px;
+                background: white;
+                border-radius: 0.75rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 50;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.2s ease;
+            }
+            .notification-trigger:hover .desktop-dropdown {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        
         .summary-card {
             background: #ffffff;
             border: 1px solid #e5e7eb;
@@ -150,7 +187,6 @@
             padding: 0.75rem;
         }
 
-        /* Sidebar group styles */
         .nav-group {
             margin-bottom: 1.5rem;
         }
@@ -163,7 +199,6 @@
             color: #6b7280;
         }
 
-        /* Scrollbar styling */
         .sidebar::-webkit-scrollbar {
             width: 4px;
         }
@@ -174,21 +209,69 @@
             background: #4b5563;
             border-radius: 4px;
         }
+
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1a1d2e 0%, #2d3047 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+        }
+        .scroll-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .scroll-top-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        @media (max-width: 768px) {
+            .scroll-top-btn {
+                bottom: 80px;
+                right: 16px;
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
 
+    <!-- Mobile Overlay for Notifications -->
+    <div id="mobileNotificationOverlay" class="mobile-overlay" onclick="closeAllMobileSheets()"></div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" class="scroll-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
     <!-- Mobile Menu Button -->
-    <div class="fixed top-4 left-4 z-50 md:hidden">
+    <div class="fixed top-4 left-3 z-50 md:hidden">
         <button id="menuToggle" class="p-2 bg-[#1A1D2E] text-white rounded-xl shadow-lg">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
         </button>
     </div>
 
-    <!-- Mobile Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden sidebar-overlay"></div>
+    <!-- Mobile Overlay for Sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden sidebar-overlay"></div>
 
     <div class="flex h-screen overflow-hidden">
         
@@ -217,11 +300,9 @@
                     $userRole = auth()->user()->role ?? '';
                 @endphp
 
-                <!-- MAIN MENU -->
                 <div class="nav-group">
                     <div class="nav-group-title">Main Menu</div>
                     
-                    <!-- Dashboard -->
                     <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -229,7 +310,6 @@
                         <span class="text-sm font-medium">Dashboard</span>
                     </a>
 
-                    <!-- Products -->
                     <a href="{{ route('products-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -237,7 +317,6 @@
                         <span class="text-sm font-medium">Products</span>
                     </a>
 
-                    <!-- Sales -->
                     <a href="{{ route('sales-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -246,12 +325,10 @@
                     </a>
                 </div>
 
-                <!-- INVENTORY MANAGEMENT -->
                 @if(in_array($userRole, ['admin', 'manager']))
                 <div class="nav-group">
                     <div class="nav-group-title">Inventory Management</div>
                     
-                    <!-- Categories -->
                     <a href="{{ route('categories-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -259,7 +336,6 @@
                         <span class="text-sm font-medium">Categories</span>
                     </a>
 
-                    <!-- Suppliers -->
                     <a href="{{ route('suppliers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -267,7 +343,6 @@
                         <span class="text-sm font-medium">Suppliers</span>
                     </a>
 
-                    <!-- Purchases -->
                     <a href="{{ route('purchases-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
@@ -277,12 +352,10 @@
                 </div>
                 @endif
 
-                <!-- PEOPLE MANAGEMENT -->
                 @if($userRole === 'admin')
                 <div class="nav-group">
                     <div class="nav-group-title">People Management</div>
                     
-                    <!-- Customers -->
                     <a href="{{ route('customers-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -290,7 +363,6 @@
                         <span class="text-sm font-medium">Customers</span>
                     </a>
 
-                    <!-- Staff -->
                     <a href="{{ route('staff-ui') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v4m0 4h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"></path>
@@ -299,11 +371,9 @@
                     </a>
                 </div>
 
-                <!-- SYSTEM -->
                 <div class="nav-group">
                     <div class="nav-group-title">System</div>
                     
-                    <!-- Activity Logs -->
                     <a href="{{ route('admin.logs.index') }}" class="sidebar-item flex items-center gap-3 px-6 py-3 mx-2 rounded-lg text-gray-300 hover:text-white transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -314,7 +384,6 @@
                 @endif
             </nav>
             
-            <!-- User Section at Bottom -->
             <div class="border-t border-gray-700 p-4">
                 <div class="user-dropdown relative">
                     <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 cursor-pointer">
@@ -344,75 +413,68 @@
         </aside>
         
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto main-content w-full">
-            <!-- Top Header -->
+        <main class="flex-1 overflow-y-auto main-content w-full" id="mainContent">
             <div class="bg-white shadow-sm sticky top-0 z-10">
                 <div class="px-4 sm:px-8 py-4 flex items-center justify-between">
-                    <div class="min-w-0">
+                    <div class="min-w-0 pl-10 md:pl-0">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800 truncate">@yield('title', 'Dashboard')</h1>
                         <p class="text-xs sm:text-sm text-gray-500 mt-0.5 truncate">Welcome back, {{ auth()->user()->name ?? 'Guest' }}</p>
                     </div>
                     
-                    <!-- Notifications -->
+                    <!-- Notification Icons -->
                     <div class="flex items-center gap-2 sm:gap-4">
-                        <!-- Low Stock Notification -->
-                        <div class="relative notification-dropdown">
-                            <div class="relative">
-                                <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                    <span id="lowStockBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
-                                </button>
-                            </div>
-                            <div id="lowStockDropdown" class="dropdown-panel absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg z-50 border border-gray-100">
+                        <!-- Low Stock -->
+                        <div class="relative notification-trigger">
+                            <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100" onclick="if(window.innerWidth < 768) { openMobileSheet('lowStockSheet'); }">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <span id="lowStockBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
+                            </button>
+                            <div class="desktop-dropdown hidden md:block">
                                 <div class="p-3 border-b bg-gray-50 rounded-t-xl">
                                     <h3 class="font-semibold text-gray-800">Low Stock Alerts</h3>
                                     <p class="text-xs text-gray-500">Products with stock below 10 units</p>
                                 </div>
-                                <div id="lowStockList" class="max-h-80 overflow-y-auto">
+                                <div id="lowStockListDesktop" class="max-h-80 overflow-y-auto">
                                     <div class="p-4 text-center text-gray-500">Loading...</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Pending Purchases Notification -->
-                        <div class="relative notification-dropdown">
-                            <div class="relative">
-                                <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
-                                    </svg>
-                                    <span id="pendingPurchasesBadge" class="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
-                                </button>
-                            </div>
-                            <div id="pendingPurchasesDropdown" class="dropdown-panel absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg z-50 border border-gray-100">
+                        <!-- Pending Purchases -->
+                        <div class="relative notification-trigger">
+                            <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100" onclick="if(window.innerWidth < 768) { openMobileSheet('pendingPurchasesSheet'); }">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6"></path>
+                                </svg>
+                                <span id="pendingPurchasesBadge" class="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
+                            </button>
+                            <div class="desktop-dropdown hidden md:block">
                                 <div class="p-3 border-b bg-gray-50 rounded-t-xl">
                                     <h3 class="font-semibold text-gray-800">Pending Purchases</h3>
                                     <p class="text-xs text-gray-500">Products waiting to be received</p>
                                 </div>
-                                <div id="pendingPurchasesList" class="max-h-80 overflow-y-auto">
+                                <div id="pendingPurchasesListDesktop" class="max-h-80 overflow-y-auto">
                                     <div class="p-4 text-center text-gray-500">Loading...</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Today's Sales Notification -->
-                        <div class="relative notification-dropdown">
-                            <div class="relative">
-                                <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span id="todaySalesBadge" class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
-                                </button>
-                            </div>
-                            <div id="todaySalesDropdown" class="dropdown-panel absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg z-50 border border-gray-100">
+                        <!-- Today's Sales -->
+                        <div class="relative notification-trigger">
+                            <button class="relative p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100" onclick="if(window.innerWidth < 768) { openMobileSheet('todaySalesSheet'); }">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span id="todaySalesBadge" class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 hidden">0</span>
+                            </button>
+                            <div class="desktop-dropdown hidden md:block">
                                 <div class="p-3 border-b bg-gray-50 rounded-t-xl">
                                     <h3 class="font-semibold text-gray-800">Today's Sales</h3>
                                     <p class="text-xs text-gray-500">Recent transactions today</p>
                                 </div>
-                                <div id="todaySalesList" class="max-h-80 overflow-y-auto">
+                                <div id="todaySalesListDesktop" class="max-h-80 overflow-y-auto">
                                     <div class="p-4 text-center text-gray-500">Loading...</div>
                                 </div>
                             </div>
@@ -421,18 +483,156 @@
                 </div>
             </div>
             
-            <!-- Page Content -->
             <div class="p-4 sm:p-6 md:p-8">
                 @yield('content')
             </div>
         </main>
     </div>
-    
+
+    <!-- Mobile Bottom Sheets -->
+    <div id="lowStockSheet" class="mobile-bottom-sheet">
+        <div class="sticky top-0 bg-white border-b px-4 py-3 rounded-t-2xl">
+            <div>
+                <h3 class="font-semibold text-gray-800">Low Stock Alerts</h3>
+                <p class="text-xs text-gray-500">Products with stock below 10 units</p>
+            </div>
+        </div>
+        <div id="lowStockListMobile" class="max-h-[60vh] overflow-y-auto">
+            <div class="p-4 text-center text-gray-500">Loading...</div>
+        </div>
+        <div class="sticky bottom-0 bg-gray-50 border-t p-3">
+            <button onclick="closeMobileSheet('lowStockSheet')" class="w-full py-2 text-sm text-gray-600 bg-gray-200 rounded-lg">Close</button>
+        </div>
+    </div>
+
+    <div id="pendingPurchasesSheet" class="mobile-bottom-sheet">
+        <div class="sticky top-0 bg-white border-b px-4 py-3 rounded-t-2xl">
+            <div>
+                <h3 class="font-semibold text-gray-800">Pending Purchases</h3>
+                <p class="text-xs text-gray-500">Products waiting to be received</p>
+            </div>
+        </div>
+        <div id="pendingPurchasesListMobile" class="max-h-[60vh] overflow-y-auto">
+            <div class="p-4 text-center text-gray-500">Loading...</div>
+        </div>
+        <div class="sticky bottom-0 bg-gray-50 border-t p-3">
+            <button onclick="closeMobileSheet('pendingPurchasesSheet')" class="w-full py-2 text-sm text-gray-600 bg-gray-200 rounded-lg">Close</button>
+        </div>
+    </div>
+
+    <div id="todaySalesSheet" class="mobile-bottom-sheet">
+        <div class="sticky top-0 bg-white border-b px-4 py-3 rounded-t-2xl">
+            <div>
+                <h3 class="font-semibold text-gray-800">Today's Sales</h3>
+                <p class="text-xs text-gray-500">Recent transactions today</p>
+            </div>
+        </div>
+        <div id="todaySalesListMobile" class="max-h-[60vh] overflow-y-auto">
+            <div class="p-4 text-center text-gray-500">Loading...</div>
+        </div>
+        <div class="sticky bottom-0 bg-gray-50 border-t p-3">
+            <button onclick="closeMobileSheet('todaySalesSheet')" class="w-full py-2 text-sm text-gray-600 bg-gray-200 rounded-lg">Close</button>
+        </div>
+    </div>
+
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
         @csrf
     </form>
     
     <script>
+        // Mobile bottom sheet functions - FIXED
+        function openMobileSheet(sheetId) {
+            // Only for mobile/tablet (screen width < 768px)
+            if (window.innerWidth >= 768) return;
+            
+            const overlay = document.getElementById('mobileNotificationOverlay');
+            const sheet = document.getElementById(sheetId);
+            
+            if (sheet) {
+                sheet.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeMobileSheet(sheetId) {
+            // Only for mobile/tablet (screen width < 768px)
+            if (window.innerWidth >= 768) return;
+            
+            const overlay = document.getElementById('mobileNotificationOverlay');
+            const sheet = document.getElementById(sheetId);
+            
+            if (sheet) {
+                sheet.classList.remove('open');
+            }
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function closeAllMobileSheets() {
+            // Only for mobile/tablet (screen width < 768px)
+            if (window.innerWidth >= 768) return;
+            
+            const sheets = document.querySelectorAll('.mobile-bottom-sheet');
+            const overlay = document.getElementById('mobileNotificationOverlay');
+            
+            sheets.forEach(sheet => {
+                sheet.classList.remove('open');
+            });
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Update mobile lists with desktop content
+        function updateMobileLists() {
+            const lowStockDesktop = document.getElementById('lowStockListDesktop');
+            const lowStockMobile = document.getElementById('lowStockListMobile');
+            const pendingDesktop = document.getElementById('pendingPurchasesListDesktop');
+            const pendingMobile = document.getElementById('pendingPurchasesListMobile');
+            const salesDesktop = document.getElementById('todaySalesListDesktop');
+            const salesMobile = document.getElementById('todaySalesListMobile');
+            
+            if (lowStockDesktop && lowStockMobile) {
+                lowStockMobile.innerHTML = lowStockDesktop.innerHTML;
+            }
+            if (pendingDesktop && pendingMobile) {
+                pendingMobile.innerHTML = pendingDesktop.innerHTML;
+            }
+            if (salesDesktop && salesMobile) {
+                salesMobile.innerHTML = salesDesktop.innerHTML;
+            }
+        }
+        
+        // Scroll to Top Button functionality
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const mainContent = document.getElementById('mainContent');
+        
+        function checkScroll() {
+            const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            const mainScrollPosition = mainContent ? mainContent.scrollTop : 0;
+            const totalScroll = scrollPosition + mainScrollPosition;
+            
+            if (totalScroll > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        }
+        
+        window.addEventListener('scroll', checkScroll);
+        if (mainContent) {
+            mainContent.addEventListener('scroll', checkScroll);
+        }
+        
+        if (scrollTopBtn) {
+            scrollTopBtn.onclick = function() {
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                if (mainContent) {
+                    mainContent.scrollTo({top: 0, behavior: 'smooth'});
+                }
+            };
+        }
+        
         let lastNotificationHash = '';
 
         function playNotificationSound() {
@@ -444,19 +644,19 @@
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const closeSidebar = document.getElementById('closeSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
         
         function openSidebar() {
             sidebar.classList.remove('-translate-x-full');
             sidebar.classList.add('translate-x-0');
-            overlay.classList.remove('hidden');
+            sidebarOverlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
         
         function closeSidebarFunc() {
             sidebar.classList.add('-translate-x-full');
             sidebar.classList.remove('translate-x-0');
-            overlay.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
             document.body.style.overflow = '';
         }
         
@@ -466,11 +666,10 @@
         if (closeSidebar) {
             closeSidebar.addEventListener('click', closeSidebarFunc);
         }
-        if (overlay) {
-            overlay.addEventListener('click', closeSidebarFunc);
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebarFunc);
         }
         
-        // Set active link based on current URL
         function setActiveLink() {
             const currentUrl = window.location.pathname;
             const navLinks = document.querySelectorAll('.sidebar-item');
@@ -487,17 +686,15 @@
         document.addEventListener('DOMContentLoaded', setActiveLink);
         window.addEventListener('popstate', setActiveLink);
         
-        // Close sidebar on window resize (if screen becomes desktop)
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 768) {
                 closeSidebarFunc();
+                closeAllMobileSheets();
             }
         });
         
-        // Load notifications data
         async function loadNotifications() {
             try {
-                // ================= LOW STOCK =================
                 const productsRes = await fetch('/api/products');
                 let products = await productsRes.json();
                 if (products.data) products = products.data;
@@ -507,8 +704,7 @@
                 document.getElementById('lowStockBadge').innerText = lowStock.length;
                 document.getElementById('lowStockBadge').classList.toggle('hidden', lowStock.length === 0);
 
-                document.getElementById('lowStockList').innerHTML =
-                    lowStock.length > 0
+                const lowStockHtml = lowStock.length > 0
                     ? lowStock.map(p => `
                         <div class="p-3 border-b">
                             <p class="text-sm font-medium">${escapeHtml(p.name)}</p>
@@ -516,8 +712,10 @@
                         </div>
                     `).join('')
                     : '<div class="p-4 text-center text-gray-500">No low stock</div>';
+                
+                document.getElementById('lowStockListDesktop').innerHTML = lowStockHtml;
+                document.getElementById('lowStockListMobile').innerHTML = lowStockHtml;
 
-                // ================= PENDING PURCHASES =================
                 const purchaseRes = await fetch('/api/purchase/coming');
 
                 let purchases = [];
@@ -527,11 +725,9 @@
                 }
 
                 document.getElementById('pendingPurchasesBadge').innerText = purchases.length;
-                document.getElementById('pendingPurchasesBadge')
-                    .classList.toggle('hidden', purchases.length === 0);
+                document.getElementById('pendingPurchasesBadge').classList.toggle('hidden', purchases.length === 0);
 
-                document.getElementById('pendingPurchasesList').innerHTML =
-                    purchases.length > 0
+                const purchasesHtml = purchases.length > 0
                     ? purchases.slice(0,5).map(p => `
                         <div class="p-3 border-b">
                             <p class="text-sm font-medium">${escapeHtml(p.product_name || p.product?.name || 'Unknown product')}</p>
@@ -541,8 +737,10 @@
                         </div>
                     `).join('')
                     : '<div class="p-4 text-center text-gray-500">No pending purchases</div>';
+                
+                document.getElementById('pendingPurchasesListDesktop').innerHTML = purchasesHtml;
+                document.getElementById('pendingPurchasesListMobile').innerHTML = purchasesHtml;
 
-                // ================= TODAY SALES =================
                 const salesRes = await fetch('/api/sales');
                 const sales = await salesRes.json();
 
@@ -550,11 +748,9 @@
                 const todaySales = sales.filter(s => new Date(s.sold_at).toDateString() === today);
 
                 document.getElementById('todaySalesBadge').innerText = todaySales.length;
-                document.getElementById('todaySalesBadge')
-                    .classList.toggle('hidden', todaySales.length === 0);
+                document.getElementById('todaySalesBadge').classList.toggle('hidden', todaySales.length === 0);
 
-                document.getElementById('todaySalesList').innerHTML =
-                    todaySales.length > 0
+                const salesHtml = todaySales.length > 0
                     ? todaySales.slice(0,5).map(s => `
                         <div class="p-3 border-b">
                             <p class="text-sm font-medium">${escapeHtml(s.product?.name)}</p>
@@ -562,6 +758,9 @@
                         </div>
                     `).join('')
                     : '<div class="p-4 text-center text-gray-500">No sales today</div>';
+                
+                document.getElementById('todaySalesListDesktop').innerHTML = salesHtml;
+                document.getElementById('todaySalesListMobile').innerHTML = salesHtml;
 
                 const currentHash = JSON.stringify({
                     lowStockCount: lowStock.length,
@@ -589,7 +788,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadNotifications();
-            setInterval(loadNotifications, 5000); // every 5 seconds
+            setInterval(loadNotifications, 30000);
+            setTimeout(checkScroll, 100);
         });
     </script>
 </body>

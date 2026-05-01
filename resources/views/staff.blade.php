@@ -3,123 +3,127 @@
 @section('title', 'Staff Management')
 @section('content')
 
-<div class="space-y-6">
-
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <x-summary-card label="Total Staff" id="totalStaff" value="0" accent="gray" />
-        <x-summary-card label="Active Staff" id="activeStaff" value="0" accent="green" />
-        <x-summary-card label="Roles Count" id="rolesCount" value="0" accent="indigo" />
+<div class="space-y-4 sm:space-y-6">
+    <!-- Stats Row - All in one row (flex instead of grid) -->
+    <div class="flex flex-wrap gap-3 sm:gap-4">
+        <div class="flex-1 min-w-[100px]">
+            <x-summary-card label="Total Staff" id="totalStaff" value="0" accent="gray" />
+        </div>
+        <div class="flex-1 min-w-[100px]">
+            <x-summary-card label="Active Staff" id="activeStaff" value="0" accent="green" />
+        </div>
+        <div class="flex-1 min-w-[100px]">
+            <x-summary-card label="Roles Count" id="rolesCount" value="0" accent="indigo" />
+        </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900"></h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900"></h1>
         </div>
 
         @if(auth()->user()->role === 'admin')
             <button onclick="openStaffModal()"
-                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm">
-                
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-lg transition shadow-sm text-sm sm:text-base">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-
                 Add Staff
             </button>
         @endif
     </div>
 
+    <!-- Tabs - Mobile friendly -->
     <div class="tab-surface">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Staff tabs">
-            <x-tab-button active="true" tab="all" onclick="setStaffTab('all')">All Staff</x-tab-button>
+        <div class="grid grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="Staff tabs">
+            <x-tab-button active="true" tab="all" onclick="setStaffTab('all')">All</x-tab-button>
             <x-tab-button tab="active" onclick="setStaffTab('active')">Active</x-tab-button>
             <x-tab-button tab="inactive" onclick="setStaffTab('inactive')">Inactive</x-tab-button>
         </div>
     </div>
 
-    <x-filter-bar>
-        <x-slot:search>
-            <div class="relative w-full max-w-xl">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </span>
-                <input type="text" id="staffSearch" placeholder="Search name, email, role, position..." class="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-        </x-slot:search>
-        <x-slot:filters>
-            <label for="staffRoleFilter" class="text-xs font-semibold uppercase text-gray-500">Role</label>
-            <select id="staffRoleFilter" class="w-full sm:w-auto sm:min-w-36 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
+    <!-- Filter Bar - All filters in one row -->
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </span>
+            <input type="text" id="staffSearch" placeholder="Search name, email, role..." class="w-full pl-9 sm:pl-10 pr-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex gap-2 sm:gap-3">
+            <select id="staffRoleFilter" class="w-full sm:w-36 px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
                 <option value="">All Roles</option>
                 <option value="admin">Admin</option>
                 <option value="manager">Manager</option>
                 <option value="staff">Staff</option>
             </select>
-            <label for="staffStatusFilter" class="text-xs font-semibold uppercase text-gray-500">Status</label>
-            <select id="staffStatusFilter" class="w-full sm:w-auto sm:min-w-36 px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
+            <select id="staffStatusFilter" class="w-full sm:w-36 px-3 py-2 sm:py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyStaffFilters()">
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="suspended">Suspended</option>
             </select>
-        </x-slot:filters>
-    </x-filter-bar>
-
-    <div class="section-card">
-        <div class="section-header">
-            <h2 class="text-gray-900 font-semibold">Team Directory</h2>
-            <p class="text-sm text-gray-500 mt-0.5">View and manage staff accounts and roles.</p>
         </div>
-        <div class="p-6">
-            <div id="staffContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </div>
+
+    <!-- Staff Cards Grid - 2 cards per row on mobile -->
+    <div class="section-card">
+        <div class="section-header px-4 sm:px-6 py-3 sm:py-4">
+            <h2 class="text-gray-900 font-semibold text-base sm:text-lg">Team Directory</h2>
+            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">View and manage staff accounts and roles.</p>
+        </div>
+        <div class="p-3 sm:p-6">
+            <div id="staffContainer" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"></div>
+            <div id="staffPagination" class="mt-4 flex justify-center"></div>
         </div>
     </div>
 </div>
 
-<!-- Staff Modal -->
+<!-- Staff Modal - Responsive -->
 <div id="staffModal" class="modal-bg" onclick="if(event.target===this)closeStaffModal()">
-    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
-            <span id="modalTitle" class="text-xl font-bold text-gray-900">Add Staff</span>
-            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeStaffModal()">✕</button>
+    <div class="bg-white rounded-2xl w-[95%] sm:w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+            <span id="modalTitle" class="text-base sm:text-xl font-bold text-gray-900">Add Staff</span>
+            <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeStaffModal()">✕</button>
         </div>
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <form id="staffForm" enctype="multipart/form-data">
                 <input type="hidden" id="staff_id">
                 @csrf
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div class="col-span-2">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Profile Image</label>
-                        <div class="flex items-center gap-4">
-                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden" id="profilePreviewContainer">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1 sm:mb-2">Profile Image</label>
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden" id="profilePreviewContainer">
                                 <img id="profilePreview" src="" class="w-full h-full object-cover hidden">
-                                <span id="noImageText" class="text-gray-400 text-sm">No Image</span>
+                                <span id="noImageText" class="text-gray-400 text-xs sm:text-sm">No Image</span>
                             </div>
-                            <input type="file" id="profile_image" accept="image/*" class="flex-1 border border-gray-300 rounded-xl p-2 text-sm">
+                            <input type="file" id="profile_image" accept="image/*" class="flex-1 border border-gray-300 rounded-xl p-2 text-xs sm:text-sm">
                         </div>
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Full Name *</label>
-                        <input type="text" id="name" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Full Name *</label>
+                        <input type="text" id="name" required class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Email *</label>
-                        <input type="email" id="email" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Email *</label>
+                        <input type="email" id="email" required class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Password</label>
-                        <input type="password" id="password" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Leave blank to keep current">
-                        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Password</label>
+                        <input type="password" id="password" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Leave blank to keep current">
+                        <p class="text-[10px] text-gray-500 mt-1">Minimum 8 characters</p>
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Role *</label>
-                        <select id="role" name="role" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Role *</label>
+                        <select id="role" name="role" required class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="staff">Staff</option>
                             <option value="manager">Manager</option>
                             <option value="admin">Admin</option>
@@ -127,28 +131,28 @@
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Phone Number</label>
-                        <input type="text" id="phone" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Phone Number</label>
+                        <input type="text" id="phone" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Position</label>
-                        <input type="text" id="position" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Position</label>
+                        <input type="text" id="position" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Salary (₱)</label>
-                        <input type="number" id="salary" step="0.01" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Salary (₱)</label>
+                        <input type="number" id="salary" step="0.01" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Hire Date</label>
-                        <input type="date" id="hire_date" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Hire Date</label>
+                        <input type="date" id="hire_date" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="col-span-2 md:col-span-1">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Status *</label>
-                        <select id="status" name="status" required class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Status *</label>
+                        <select id="status" name="status" required class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                             <option value="suspended">Suspended</option>
@@ -156,46 +160,46 @@
                     </div>
                     
                     <div class="col-span-2">
-                        <label class="block text-gray-700 text-sm font-semibold mb-2">Address</label>
-                        <textarea id="address" rows="2" class="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <label class="block text-gray-700 text-xs sm:text-sm font-semibold mb-1">Address</label>
+                        <textarea id="address" rows="2" class="w-full border border-gray-300 rounded-xl p-2 sm:p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
                 </div>
                 
-                <div class="flex gap-3 mt-6 pt-4 border-t">
-                    <button type="button" onclick="closeStaffModal()" class="flex-1 py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition">Cancel</button>
-                    <button type="submit" class="flex-1 py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition">Save Staff</button>
+                <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6 pt-4 border-t">
+                    <button type="button" onclick="closeStaffModal()" class="flex-1 py-2 sm:py-3 bg-gray-200 rounded-xl font-semibold hover:bg-gray-300 transition text-sm">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 sm:py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition text-sm">Save Staff</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- View Staff Modal -->
+<!-- View Staff Modal - Responsive -->
 <div id="viewStaffModal" class="modal-bg" onclick="if(event.target===this)closeViewModal()">
-    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b">
-            <span id="viewTitle" class="text-xl font-bold text-gray-900">Staff Details</span>
-            <button class="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeViewModal()">✕</button>
+    <div class="bg-white rounded-2xl w-[95%] sm:w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+            <span id="viewTitle" class="text-base sm:text-xl font-bold text-gray-900">Staff Details</span>
+            <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeViewModal()">✕</button>
         </div>
-        <div id="viewContent" class="p-6"></div>
+        <div id="viewContent" class="p-4 sm:p-6"></div>
     </div>
 </div>
 
-<!-- Confirmation Modal -->
+<!-- Confirmation Modal - Responsive -->
 <div id="confirmModal" class="modal-bg">
-    <div class="bg-white rounded-2xl w-[350px] max-w-[90%] text-center p-6 shadow-2xl">
-        <div class="text-6xl mb-4">⚠️</div>
-        <div class="text-lg font-bold mb-2 text-gray-900">Confirm Delete</div>
-        <div id="confirmMessage" class="text-sm text-gray-600 mb-5">Are you sure you want to delete this staff member?</div>
+    <div class="bg-white rounded-2xl w-[90%] sm:w-[350px] max-w-[90%] text-center p-5 sm:p-6 shadow-2xl">
+        <div class="text-5xl sm:text-6xl mb-4">⚠️</div>
+        <div class="text-base sm:text-lg font-bold mb-2 text-gray-900">Confirm Delete</div>
+        <div id="confirmMessage" class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5">Are you sure you want to delete this staff member?</div>
         <div class="flex gap-3">
-            <button onclick="closeConfirmModal()" class="flex-1 py-3 bg-gray-200 rounded-xl cursor-pointer text-sm font-semibold text-gray-700 hover:bg-gray-300 transition">Cancel</button>
-            <button id="confirmDeleteBtn" class="flex-1 py-3 bg-red-600 rounded-xl cursor-pointer text-sm font-semibold text-white hover:bg-red-700 transition">Delete</button>
+            <button onclick="closeConfirmModal()" class="flex-1 py-2 sm:py-3 bg-gray-200 rounded-xl cursor-pointer text-sm font-semibold text-gray-700 hover:bg-gray-300 transition">Cancel</button>
+            <button id="confirmDeleteBtn" class="flex-1 py-2 sm:py-3 bg-red-600 rounded-xl cursor-pointer text-sm font-semibold text-white hover:bg-red-700 transition">Delete</button>
         </div>
     </div>
 </div>
 
 <!-- Success Toast -->
-<div id="successToast" class="fixed bottom-5 right-5 bg-green-600 text-white py-3 px-5 rounded-xl text-sm z-[300] hidden shadow-lg">Success!</div>
+<div id="successToast" class="fixed bottom-5 right-5 bg-green-600 text-white py-2 sm:py-3 px-3 sm:px-5 rounded-xl text-xs sm:text-sm z-[300] hidden shadow-lg">Success!</div>
 
 <style>
 .modal-bg {
@@ -219,6 +223,8 @@
     let currentStaffSearch = '';
     let currentStaffRole = '';
     let currentStaffStatus = '';
+    let currentStaffPage = 1;
+    const STAFF_PER_PAGE = 16;
 
     function showToast(message, isError = false) {
         const toast = document.getElementById('successToast');
@@ -299,15 +305,29 @@
             btn.classList.toggle('active', isActive);
             btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
-        applyStaffFilters();
+        applyStaffFilters(true);
     }
 
-    function applyStaffFilters() {
-        currentStaffSearch = (document.getElementById('staffSearch')?.value || '').trim().toLowerCase();
-        currentStaffRole = document.getElementById('staffRoleFilter')?.value || '';
-        currentStaffStatus = document.getElementById('staffStatusFilter')?.value || '';
+    function renderPagination(containerId, totalItems, currentPage, perPage, pageKey) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+        container.innerHTML = `
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button type="button" onclick="changePage('${pageKey}', ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Prev</button>
+                ${pages.map(page => `<button type="button" onclick="changePage('${pageKey}', ${page})" class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border ${page === currentPage ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}">${page}</button>`).join('')}
+                <button type="button" onclick="changePage('${pageKey}', ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Next</button>
+            </div>
+        `;
+    }
 
-        const filtered = allStaffData.filter(member => {
+    function getFilteredStaff() {
+        return allStaffData.filter(member => {
             const status = member.status || 'active';
             const searchable = [member.name, member.email, member.role, member.position, member.phone]
                 .filter(Boolean)
@@ -323,26 +343,46 @@
 
             return matchesSearch && matchesRole && matchesStatus && matchesTab;
         });
+    }
 
+    function changePage(pageKey, page) {
+        if (pageKey !== 'staff') return;
+        const filtered = getFilteredStaff();
+        const totalPages = Math.max(1, Math.ceil(filtered.length / STAFF_PER_PAGE));
+        currentStaffPage = Math.min(Math.max(1, page), totalPages);
         displayStaff(filtered);
+    }
+
+    function applyStaffFilters(resetPage = true) {
+        currentStaffSearch = (document.getElementById('staffSearch')?.value || '').trim().toLowerCase();
+        currentStaffRole = document.getElementById('staffRoleFilter')?.value || '';
+        currentStaffStatus = document.getElementById('staffStatusFilter')?.value || '';
+        if (resetPage) currentStaffPage = 1;
+        displayStaff(getFilteredStaff());
     }
 
     function displayStaff(staff) {
         const container = document.getElementById('staffContainer');
         
         if (!staff || staff.length === 0) {
+            renderPagination('staffPagination', 0, 1, STAFF_PER_PAGE, 'staff');
             container.innerHTML = `
-                <div class="col-span-full text-center py-12 bg-white rounded-2xl">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No staff members</h3>
-                    <p class="text-gray-500 mb-4">Click the Add Staff button to create your first staff account</p>
-                    <button onclick="openStaffModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Add Staff</button>
+                <div class="col-span-full text-center py-8 sm:py-12 bg-white rounded-2xl">
+                    <div class="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-1">No staff members</h3>
+                    <p class="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Click the Add Staff button to create your first staff account</p>
+                    <button onclick="openStaffModal()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">Add Staff</button>
                 </div>
             `;
             return;
         }
+        const totalPages = Math.max(1, Math.ceil(staff.length / STAFF_PER_PAGE));
+        currentStaffPage = Math.min(currentStaffPage, totalPages);
+        const pageItems = staff.slice((currentStaffPage - 1) * STAFF_PER_PAGE, currentStaffPage * STAFF_PER_PAGE);
         
         const statusColors = {
             active: 'bg-green-100 text-green-700',
@@ -356,64 +396,65 @@
             staff: 'bg-gray-100 text-gray-700'
         };
         
-        container.innerHTML = staff.map(member => `
-            <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-                <div class="relative h-32 overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500">
+        container.innerHTML = pageItems.map(member => `
+            <div class="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                <div class="relative h-20 sm:h-24 md:h-28 overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500">
                     <div class="absolute inset-0 flex items-center justify-center">
                         ${member.profile_image 
-                            ? `<img src="/storage/${member.profile_image}" class="w-20 h-20 rounded-full border-4 border-white object-cover shadow-lg">`
-                            : `<div class="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
-                                <span class="text-white font-bold text-2xl">${escapeHtml(member.name.charAt(0))}</span>
+                            ? `<img src="/storage/${member.profile_image}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 sm:border-4 border-white object-cover shadow-lg">`
+                            : `<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                                <span class="text-white font-bold text-lg sm:text-xl">${escapeHtml(member.name.charAt(0))}</span>
                                </div>`
                         }
                     </div>
-                    <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="viewStaff(${member.id})" class="p-2 bg-white rounded-xl shadow-md hover:bg-gray-100 transition">
-                            <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="viewStaff(${member.id})" class="p-1 sm:p-1.5 bg-white rounded-lg shadow-md hover:bg-gray-100 transition">
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                         </button>
-                        <button onclick="editStaff(${member.id})" class="p-2 bg-white rounded-xl shadow-md hover:bg-gray-100 transition">
-                            <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="editStaff(${member.id})" class="p-1 sm:p-1.5 bg-white rounded-lg shadow-md hover:bg-gray-100 transition">
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
                         </button>
-                        <button onclick="showConfirmModal(${member.id})" class="p-2 bg-white rounded-xl shadow-md hover:bg-red-50 transition">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="showConfirmModal(${member.id})" class="p-1 sm:p-1.5 bg-white rounded-lg shadow-md hover:bg-red-50 transition">
+                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
                         </button>
                     </div>
                 </div>
-                <div class="p-5">
-                    <h3 class="font-bold text-gray-900 text-lg mb-1">${escapeHtml(member.name)}</h3>
-                    <p class="text-sm text-gray-500 mb-2">${escapeHtml(member.email)}</p>
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${roleColors[member.role] || 'bg-gray-100 text-gray-700'}">${(member.role || 'staff').toUpperCase()}</span>
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[member.status] || 'bg-green-100 text-green-700'}">${(member.status || 'active').toUpperCase()}</span>
+                <div class="p-3 sm:p-4">
+                    <h3 class="font-bold text-gray-900 text-sm sm:text-base mb-0.5 truncate">${escapeHtml(member.name)}</h3>
+                    <p class="text-[10px] sm:text-xs text-gray-500 truncate">${escapeHtml(member.email)}</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        <span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold rounded-full ${roleColors[member.role] || 'bg-gray-100 text-gray-700'}">${(member.role || 'staff').toUpperCase()}</span>
+                        <span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold rounded-full ${statusColors[member.status] || 'bg-green-100 text-green-700'}">${(member.status || 'active').toUpperCase()}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500 mt-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                         </svg>
                         ${member.phone || 'No phone'}
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                         ${member.position || 'No position'}
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span class="text-xs text-gray-400">Joined ${new Date(member.created_at).toLocaleDateString()}</span>
-                        <button onclick="viewStaff(${member.id})" class="text-blue-600 text-sm font-medium hover:text-blue-700 transition">View Details →</button>
+                    <div class="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-[9px] sm:text-[10px] text-gray-400">Joined ${new Date(member.created_at).toLocaleDateString()}</span>
+                        <button onclick="viewStaff(${member.id})" class="text-blue-600 text-[10px] sm:text-xs font-medium hover:text-blue-700 transition">View →</button>
                     </div>
                 </div>
             </div>
         `).join('');
+        renderPagination('staffPagination', staff.length, currentStaffPage, STAFF_PER_PAGE, 'staff');
     }
 
     async function viewStaff(id) {
@@ -425,44 +466,44 @@
             
             document.getElementById('viewTitle').innerText = staff.name;
             document.getElementById('viewContent').innerHTML = `
-                <div class="flex flex-col items-center mb-6">
-                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-3">
+                <div class="flex flex-col items-center mb-4 sm:mb-6">
+                    <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-2 sm:mb-3">
                         ${staff.profile_image 
-                            ? `<img src="/storage/${staff.profile_image}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">`
-                            : `<span class="text-white font-bold text-4xl">${escapeHtml(staff.name.charAt(0))}</span>`
+                            ? `<img src="/storage/${staff.profile_image}" class="w-20 h-20 sm:w-28 sm:h-28 rounded-full object-cover border-2 sm:border-4 border-white shadow-lg">`
+                            : `<span class="text-white font-bold text-3xl sm:text-4xl">${escapeHtml(staff.name.charAt(0))}</span>`
                         }
                     </div>
-                    <h2 class="text-xl font-bold text-gray-900">${escapeHtml(staff.name)}</h2>
-                    <p class="text-gray-500">${escapeHtml(staff.email)}</p>
+                    <h2 class="text-base sm:text-xl font-bold text-gray-900">${escapeHtml(staff.name)}</h2>
+                    <p class="text-xs sm:text-sm text-gray-500">${escapeHtml(staff.email)}</p>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Role</label>
-                        <p class="font-medium text-gray-900">${(staff.role || 'staff').toUpperCase()}</p>
+                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Role</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm capitalize">${staff.role || 'staff'}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Status</label>
-                        <p class="font-medium text-gray-900 capitalize">${staff.status || 'active'}</p>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Status</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm capitalize">${staff.status || 'active'}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Phone</label>
-                        <p class="font-medium text-gray-900">${staff.phone || 'N/A'}</p>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Phone</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm">${staff.phone || 'N/A'}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Position</label>
-                        <p class="font-medium text-gray-900">${staff.position || 'N/A'}</p>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Position</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm">${staff.position || 'N/A'}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Salary</label>
-                        <p class="font-medium text-gray-900">${staff.salary ? '₱' + parseFloat(staff.salary).toLocaleString() : 'N/A'}</p>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Salary</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm">${staff.salary ? '₱' + parseFloat(staff.salary).toLocaleString() : 'N/A'}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Hire Date</label>
-                        <p class="font-medium text-gray-900">${staff.hire_date ? new Date(staff.hire_date).toLocaleDateString() : 'N/A'}</p>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Hire Date</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm">${staff.hire_date ? new Date(staff.hire_date).toLocaleDateString() : 'N/A'}</p>
                     </div>
-                    <div class="col-span-2 bg-gray-50 p-3 rounded-xl">
-                        <label class="text-xs text-gray-500 uppercase tracking-wide">Address</label>
-                        <p class="font-medium text-gray-900">${staff.address || 'N/A'}</p>
+                    <div class="col-span-2 bg-gray-50 p-2 sm:p-3 rounded-xl">
+                        <label class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide">Address</label>
+                        <p class="font-medium text-gray-900 text-xs sm:text-sm">${staff.address || 'N/A'}</p>
                     </div>
                 </div>
             `;
@@ -479,8 +520,6 @@
             if (!res.ok) throw new Error('Failed to load staff data');
             
             const staff = await res.json();
-            
-            console.log('Editing staff:', staff);
             
             document.getElementById('modalTitle').innerText = 'Edit Staff';
             document.getElementById('staff_id').value = staff.id;
@@ -537,12 +576,8 @@
         const staffId = document.getElementById('staff_id').value;
         const formData = new FormData();
         
-        // Get all form values - IMPORTANT: role must be captured
         const roleValue = document.getElementById('role').value;
         const statusValue = document.getElementById('status').value;
-        
-        console.log('Submitting - Role value:', roleValue);
-        console.log('Submitting - Status value:', statusValue);
         
         formData.append('name', document.getElementById('name').value);
         formData.append('email', document.getElementById('email').value);
@@ -626,7 +661,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const staffSearch = document.getElementById('staffSearch');
         if (staffSearch) {
-            staffSearch.addEventListener('input', applyStaffFilters);
+            staffSearch.addEventListener('input', () => applyStaffFilters(true));
         }
 
         setStaffTab('all');
