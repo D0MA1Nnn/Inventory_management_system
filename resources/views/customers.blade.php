@@ -9,7 +9,6 @@
         <div>
             <h1 class="text-xl sm:text-2xl font-bold text-gray-900"></h1>
         </div>
-        <!-- Add Customer button removed -->
     </div>
 
     <!-- Stats Row - All in one row using flex -->

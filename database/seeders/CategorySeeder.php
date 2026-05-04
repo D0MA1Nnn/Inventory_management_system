@@ -9,26 +9,20 @@ class CategorySeeder extends Seeder
 {
     public function run()
     {
-        $categories = [
-            'Processor',
-            'Motherboard',
-            'RAM',
-            'Graphics Card',
-            'Power Supply',
-            'SSD',
-            'HDD',
-            'CPU Cooler',
-            'Liquid Cooling',
-            'PC Case',
-            'Keyboard',
-            'Mouse',
-            'Monitor',
-            'UPS',
-            'WiFi Adapter'
-        ];
+        Category::create([
+            'name' => 'Processor',
+            'image' => 'categories/processors.jpg',
+        ]);
 
-        foreach ($categories as $cat) {
-            Category::create(['name' => $cat]);
-        }
+        Category::create([
+            'name' => 'Motherboard',
+            'image' => 'categories/motherboards.jpg',
+        ]);
+
+
+        Category::create([
+            'name' => 'Graphics Card',
+            'image' => 'categories/graphics_cards.jpg',
+        ]);
     }
 }
