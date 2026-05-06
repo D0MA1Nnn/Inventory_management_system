@@ -31,12 +31,14 @@ class ProductSeeder extends Seeder
             'name' => 'Intel Core i5-12400F',
             'brand' => 'Intel',
             'model_number' => 'i5-12400F',
-            'price' => 11000,
+            'price' => 15400,
+            'image' => null,
             'quantity' => 15,
             'category_id' => 1,
-            'image' => null,
             'performance' => 'Base: 2.5GHz • Boost: 4.4GHz • Cache: 18MB • TDP: 65W • No iGPU • Cooler Included',
             'dynamic_fields' => [
+                'cost_price' => 11000,
+                'markup_percentage' => 40,
                 'socket' => 'LGA 1700',
                 'cores_threads' => '6 / 12',
                 'base_boost_clock' => '2.5 / 4.4 GHz',
@@ -54,6 +56,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Base: 3.4GHz • Boost: 5.4GHz • Cache: 30MB • TDP: 125W • UHD 770 iGPU • No Cooler',
             'dynamic_fields' => [
+                'cost_price' => 16786,
+                'markup_percentage' => 40,
                 'socket' => 'LGA 1700',
                 'cores_threads' => '16 / 24',
                 'base_boost_clock' => '3.4 / 5.4 GHz',
@@ -71,6 +75,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Base: 3.7GHz • Boost: 4.6GHz • Cache: 32MB • TDP: 65W • No iGPU • Wraith Cooler',
             'dynamic_fields' => [
+                'cost_price' => 6786,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'cores_threads' => '6 / 12',
                 'base_boost_clock' => '3.7 / 4.6 GHz',
@@ -88,6 +94,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Base: 3.8GHz • Boost: 4.7GHz • Cache: 32MB • TDP: 105W • No iGPU • No Cooler',
             'dynamic_fields' => [
+                'cost_price' => 11071,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'cores_threads' => '8 / 16',
                 'base_boost_clock' => '3.8 / 4.7 GHz',
@@ -105,6 +113,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Base: 3.3GHz • Boost: 4.3GHz • Cache: 12MB • TDP: 60W • UHD 730 iGPU • Cooler Included',
             'dynamic_fields' => [
+                'cost_price' => 4857,
+                'markup_percentage' => 40,
                 'socket' => 'LGA 1700',
                 'cores_threads' => '4 / 8',
                 'base_boost_clock' => '3.3 / 4.3 GHz',
@@ -122,6 +132,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => '24 cores • Boost 5.8GHz • 36MB Cache',
             'dynamic_fields' => [
+                'cost_price' => 22857,
+                'markup_percentage' => 40,
                 'socket' => 'LGA1700',
                 'cores_threads' => '24 / 32'
             ]
@@ -137,6 +149,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => '12 cores • Boost 4.8GHz',
             'dynamic_fields' => [
+                'cost_price' => 15000,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'cores_threads' => '12 / 24'
             ]
@@ -152,6 +166,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => '10 cores • Boost 4.6GHz',
             'dynamic_fields' => [
+                'cost_price' => 8929,
+                'markup_percentage' => 40,
                 'socket' => 'LGA1700'
             ]
         ]);
@@ -166,6 +182,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => '6 cores • Boost 5.1GHz',
             'dynamic_fields' => [
+                'cost_price' => 10000,
+                'markup_percentage' => 40,
                 'socket' => 'AM5'
             ]
         ]);
@@ -180,6 +198,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => '2 cores • Budget CPU',
             'dynamic_fields' => [
+                'cost_price' => 2500,
+                'markup_percentage' => 40,
                 'socket' => 'LGA1200'
             ]
         ]);
@@ -198,6 +218,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Chipset: B660 • RAM Slots: 2 • Max RAM: 64GB • PCIe 4.0 • M.2 Slot • Basic VRM',
             'dynamic_fields' => [
+                'cost_price' => 4643,
+                'markup_percentage' => 40,
                 'socket' => 'LGA 1700',
                 'form_factor' => 'mATX',
                 'chipset' => 'B660',
@@ -215,6 +237,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Chipset: B550 • RAM Slots: 4 • Max RAM: 128GB • PCIe 4.0 • WiFi • M.2 Slots',
             'dynamic_fields' => [
+                'cost_price' => 5357,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'form_factor' => 'mATX',
                 'chipset' => 'B550',
@@ -232,6 +256,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Chipset: B450 • RAM Slots: 4 • Max RAM: 64GB • PCIe 3.0 • Budget Board',
             'dynamic_fields' => [
+                'cost_price' => 3714,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'form_factor' => 'mATX',
                 'chipset' => 'B450',
@@ -249,6 +275,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Chipset: Z690 • RAM Slots: 4 • Max RAM: 128GB • PCIe 5.0 • WiFi 6 • High-end VRM',
             'dynamic_fields' => [
+                'cost_price' => 12857,
+                'markup_percentage' => 40,
                 'socket' => 'LGA 1700',
                 'form_factor' => 'ATX',
                 'chipset' => 'Z690',
@@ -266,6 +294,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Chipset: A320 • RAM Slots: 2 • Max RAM: 32GB • PCIe 3.0 • Entry-level',
             'dynamic_fields' => [
+                'cost_price' => 2714,
+                'markup_percentage' => 40,
                 'socket' => 'AM4',
                 'form_factor' => 'mATX',
                 'chipset' => 'A320',
@@ -282,7 +312,11 @@ class ProductSeeder extends Seeder
             'category_id' => 2,
             'image' => null,
             'performance' => 'B550 • PCIe 4.0',
-            'dynamic_fields' => ['socket' => 'AM4']
+            'dynamic_fields' => [
+                'cost_price' => 6071,
+                'markup_percentage' => 40,
+                'socket' => 'AM4'
+            ]
         ]);
 
         $this->createProduct([
@@ -294,7 +328,11 @@ class ProductSeeder extends Seeder
             'category_id' => 2,
             'image' => null,
             'performance' => 'Z790 • DDR5',
-            'dynamic_fields' => ['socket' => 'LGA1700']
+            'dynamic_fields' => [
+                'cost_price' => 11429,
+                'markup_percentage' => 40,
+                'socket' => 'LGA1700'
+            ]
         ]);
 
         $this->createProduct([
@@ -306,7 +344,11 @@ class ProductSeeder extends Seeder
             'category_id' => 2,
             'image' => null,
             'performance' => 'B660 Gaming',
-            'dynamic_fields' => ['socket' => 'LGA1700']
+            'dynamic_fields' => [
+                'cost_price' => 6786,
+                'markup_percentage' => 40,
+                'socket' => 'LGA1700'
+            ]
         ]);
 
         $this->createProduct([
@@ -318,7 +360,11 @@ class ProductSeeder extends Seeder
             'category_id' => 2,
             'image' => null,
             'performance' => 'Durable board',
-            'dynamic_fields' => ['socket' => 'AM4']
+            'dynamic_fields' => [
+                'cost_price' => 6429,
+                'markup_percentage' => 40,
+                'socket' => 'AM4'
+            ]
         ]);
 
         $this->createProduct([
@@ -330,7 +376,11 @@ class ProductSeeder extends Seeder
             'category_id' => 2,
             'image' => null,
             'performance' => 'Budget motherboard',
-            'dynamic_fields' => ['socket' => 'AM4']
+            'dynamic_fields' => [
+                'cost_price' => 2500,
+                'markup_percentage' => 40,
+                'socket' => 'AM4'
+            ]
         ]);
 
         // ======================
@@ -347,6 +397,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 1.78GHz • VRAM: 12GB GDDR6 • TDP: 170W',
             'dynamic_fields' => [
+                'cost_price' => 12857,
+                'markup_percentage' => 40,
                 'vram' => '12GB',
                 'clock_speed' => '1.78GHz',
                 'power_consumption' => '170W'
@@ -363,6 +415,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 1.73GHz • VRAM: 8GB GDDR6 • TDP: 220W',
             'dynamic_fields' => [
+                'cost_price' => 17857,
+                'markup_percentage' => 40,
                 'vram' => '8GB',
                 'clock_speed' => '1.73GHz',
                 'power_consumption' => '220W'
@@ -379,6 +433,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 1.71GHz • VRAM: 10GB GDDR6X • TDP: 320W',
             'dynamic_fields' => [
+                'cost_price' => 25000,
+                'markup_percentage' => 40,
                 'vram' => '10GB',
                 'clock_speed' => '1.71GHz',
                 'power_consumption' => '320W'
@@ -395,6 +451,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.46GHz • VRAM: 8GB GDDR6 • TDP: 115W',
             'dynamic_fields' => [
+                'cost_price' => 14286,
+                'markup_percentage' => 40,
                 'vram' => '8GB',
                 'clock_speed' => '2.46GHz',
                 'power_consumption' => '115W'
@@ -411,6 +469,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.52GHz • VRAM: 24GB GDDR6X • TDP: 450W',
             'dynamic_fields' => [
+                'cost_price' => 64286,
+                'markup_percentage' => 40,
                 'vram' => '24GB',
                 'clock_speed' => '2.52GHz',
                 'power_consumption' => '450W'
@@ -427,6 +487,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.49GHz • VRAM: 8GB GDDR6 • TDP: 132W',
             'dynamic_fields' => [
+                'cost_price' => 11429,
+                'markup_percentage' => 40,
                 'vram' => '8GB',
                 'clock_speed' => '2.49GHz',
                 'power_consumption' => '132W'
@@ -443,6 +505,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.58GHz • VRAM: 12GB GDDR6 • TDP: 230W',
             'dynamic_fields' => [
+                'cost_price' => 15714,
+                'markup_percentage' => 40,
                 'vram' => '12GB',
                 'clock_speed' => '2.58GHz',
                 'power_consumption' => '230W'
@@ -459,6 +523,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.10GHz • VRAM: 16GB GDDR6 • TDP: 250W',
             'dynamic_fields' => [
+                'cost_price' => 21429,
+                'markup_percentage' => 40,
                 'vram' => '16GB',
                 'clock_speed' => '2.10GHz',
                 'power_consumption' => '250W'
@@ -475,6 +541,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 2.50GHz • VRAM: 24GB GDDR6 • TDP: 355W',
             'dynamic_fields' => [
+                'cost_price' => 42857,
+                'markup_percentage' => 40,
                 'vram' => '24GB',
                 'clock_speed' => '2.50GHz',
                 'power_consumption' => '355W'
@@ -491,6 +559,8 @@ class ProductSeeder extends Seeder
             'image' => null,
             'performance' => 'Boost: 1.78GHz • VRAM: 6GB GDDR6 • TDP: 125W',
             'dynamic_fields' => [
+                'cost_price' => 8571,
+                'markup_percentage' => 40,
                 'vram' => '6GB',
                 'clock_speed' => '1.78GHz',
                 'power_consumption' => '125W'

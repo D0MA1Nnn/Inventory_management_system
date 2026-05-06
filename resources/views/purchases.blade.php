@@ -525,7 +525,7 @@
         currentBuyProduct = allProducts.find(p => p.id == productId);
         if (!currentBuyProduct) return;
 
-        const costPrice = currentBuyProduct.cost_price || currentBuyProduct.price;
+        const costPrice = currentBuyProduct.dynamic_fields?.cost_price || currentBuyProduct.cost_price || currentBuyProduct.price;
         
         document.getElementById('supplierProductName').innerText = currentBuyProduct.name;
         document.getElementById('supplierProductPrice').innerText = `₱ ${parseFloat(costPrice).toLocaleString()}`;
@@ -598,7 +598,7 @@
         const pageItems = products.slice((currentBuyPage - 1) * PURCHASES_PER_PAGE, currentBuyPage * PURCHASES_PER_PAGE);
         pageItems.forEach(product => {
             const isLowStock = product.quantity > 0 && product.quantity < 10;
-            const purchasePrice = product.cost_price || product.price;
+            const purchasePrice = product.dynamic_fields?.cost_price || product.cost_price || product.price;
             
             container.innerHTML += `
                 <div class="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200">
@@ -647,7 +647,9 @@
                     email: supplier.email,
                     address: supplier.address,
                     image: supplier.image,
-                    price: currentBuyProduct ? (currentBuyProduct.cost_price || currentBuyProduct.price) : 0
+                    price: currentBuyProduct
+                    ? (currentBuyProduct.dynamic_fields?.cost_price || currentBuyProduct.cost_price || currentBuyProduct.price)
+                    : 0
                 });
             }
         });
@@ -662,8 +664,7 @@
             return;
         }
         suppliers.forEach(supplier => {
-            let supplierPrice = currentBuyProduct.cost_price || currentBuyProduct.price;
-            container.innerHTML += `
+            let supplierPrice = currentBuyProduct.dynamic_fields?.cost_price || currentBuyProduct.cost_price || currentBuyProduct.price; container.innerHTML += `
                 <div onclick='selectSupplier(${supplier.id}, "${escapeHtml(supplier.name)}", ${supplierPrice})' class="supplier-option p-3 sm:p-4 border border-gray-200 rounded-xl cursor-pointer transition-all hover:border-blue-400 hover:shadow-md" data-supplier-id="${supplier.id}">
                     <div class="flex justify-between items-center">
                         <div><div class="font-semibold text-gray-900 text-sm">${escapeHtml(supplier.name)}</div><div class="text-[10px] sm:text-xs text-gray-500 mt-1">📞 ${supplier.contact_number || 'N/A'}</div></div>
@@ -692,7 +693,14 @@
 
     function updateSupplierTotalPrice() {
         let quantity = parseInt(document.getElementById('supplierQuantity').value) || 0;
-        let price = selectedSupplier?.price || (currentBuyProduct?.cost_price || currentBuyProduct?.price || 0);
+        let price =
+            selectedSupplier?.price ||
+            (
+                currentBuyProduct?.dynamic_fields?.cost_price ||
+                currentBuyProduct?.cost_price ||
+                currentBuyProduct?.price ||
+                0
+            );
         let total = price * quantity;
         document.getElementById('supplierTotalPrice').innerHTML = `<span class="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide">Total Price (Cost)</span><span class="text-green-600 text-xl sm:text-2xl font-bold block">₱ ${total.toLocaleString()}</span>`;
     }
@@ -719,7 +727,7 @@
         if (quantity < 1) { showSuccess('Invalid quantity'); return; }
         showConfirm(`Buy ${quantity} item(s) from ${selectedSupplier.name}?`, async () => {
             try {
-                const purchasePrice = currentBuyProduct.cost_price || currentBuyProduct.price;
+                const purchasePrice = currentBuyProduct.dynamic_fields?.cost_price || currentBuyProduct.cost_price || currentBuyProduct.price;
                 
                 let res = await fetch('/api/purchase/add-to-coming', {
                     method: 'POST',
@@ -898,7 +906,7 @@
                 <div class="grid grid-cols-2 gap-2 sm:gap-4">
                     <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Brand</div><div class="text-xs sm:text-sm font-medium text-gray-900">${escapeHtml(product.brand || 'N/A')}</div></div>
                     <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Model</div><div class="text-xs sm:text-sm font-medium text-gray-900">${escapeHtml(product.model_number || 'N/A')}</div></div>
-                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Cost Price</div><div class="text-xs sm:text-sm font-medium text-gray-900">₱ ${parseFloat(product.cost_price || product.price).toLocaleString()}</div></div>
+                    <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Cost Price</div><div class="text-xs sm:text-sm font-medium text-gray-900">₱ ${parseFloat(product.dynamic_fields?.cost_price || product.cost_price || product.price).toLocaleString()}</div></div>
                     <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Selling Price</div><div class="text-xs sm:text-sm font-bold text-green-600">₱ ${parseFloat(product.price).toLocaleString()}</div></div>
                     <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Stock</div><div class="text-xs sm:text-sm font-medium text-gray-900">${product.quantity} units</div></div>
                     <div class="bg-gray-50 p-2 sm:p-3 rounded-xl"><div class="text-[9px] sm:text-xs text-gray-500 uppercase tracking-wide mb-1">Category</div><div class="text-xs sm:text-sm font-medium text-gray-900">${product.category ? product.category.name : 'N/A'}</div></div>

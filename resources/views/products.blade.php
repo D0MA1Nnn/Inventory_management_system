@@ -350,7 +350,7 @@ function applyFilters(resetPage = false, showFeedback = false) {
     }
 }
 
-async function updateDynamicFields() {
+async function updateDynamicFields(existingValues = null) {
     const categoryId = document.getElementById('category_id').value;
     const dynamicFields = document.getElementById('dynamicFields');
     const dynamicFieldsSection = document.getElementById('dynamicFieldsSection');
@@ -411,6 +411,15 @@ async function updateDynamicFields() {
         });
         
         dynamicFields.innerHTML = fieldsHtml;
+
+        if (existingValues && typeof existingValues === 'object') {
+            for (const [key, value] of Object.entries(existingValues)) {
+                const field = document.getElementById(key);
+                if (field && value !== null && value !== undefined) {
+                    field.value = String(value);
+                }
+            }
+        }
         
     } catch (error) {
         console.error('Error loading category fields:', error);
@@ -470,22 +479,25 @@ function showDetailsModal(product) {
         `;
     }
     
-    if (product.cost_price) {
+    const detailsCostPrice = product.cost_price ?? product.dynamic_fields?.cost_price;
+    const detailsMarkup = product.markup_percentage ?? product.dynamic_fields?.markup_percentage ?? 0;
+
+    if (detailsCostPrice) {
         extraFieldsHtml += `
             <div class="p-2 border-b border-gray-100">
                 <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Cost Price</div>
-                <div class="text-sm text-gray-900 font-medium">₱ ${parseFloat(product.cost_price).toLocaleString()}</div>
+                <div class="text-sm text-gray-900 font-medium">₱ ${parseFloat(detailsCostPrice).toLocaleString()}</div>
             </div>
             <div class="p-2 border-b border-gray-100">
                 <div class="text-[10px] text-gray-500 uppercase tracking-[0.3px] mb-1">Markup</div>
-                <div class="text-sm text-gray-900 font-medium">${product.markup_percentage || 0}%</div>
+                <div class="text-sm text-gray-900 font-medium">${detailsMarkup}%</div>
             </div>
         `;
     }
     
     if (product.dynamic_fields) {
-        const dynamicFields = typeof product.dynamic_fields === 'string' 
-            ? JSON.parse(product.dynamic_fields) 
+        const dynamicFields = typeof product.dynamic_fields === 'string'
+            ? JSON.parse(product.dynamic_fields)
             : product.dynamic_fields;
         
         for (const [key, value] of Object.entries(dynamicFields)) {
@@ -638,11 +650,31 @@ function displayProducts(products) {
     }
     
     paginatedProducts.forEach(product => {
-        const formattedPrice = parseFloat(product.price).toFixed(2);
+        const sellingPriceValue = parseFloat(
+            product.price ?? product.selling_price ?? product.retail_price ?? product.SellingPrice ?? product.RetailPrice ?? 0
+        ) || 0;
+        const costPriceValue = parseFloat(
+            product.cost_price ??
+            product.CostPrice ??
+            product.dynamic_fields?.cost_price ??
+            product.stock?.cost_price ??
+            product.stock?.CostPrice ??
+            0
+        ) || 0;
+        const formattedSellingPrice = sellingPriceValue.toLocaleString('en-PH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        const formattedOriginalPrice = costPriceValue.toLocaleString('en-PH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
         const isLowStock = product.quantity > 0 && product.quantity < 10;
-        const markup = product.markup_percentage || 0;
-        const costPrice = product.cost_price || product.price;
-        const originalPrice = parseFloat(costPrice).toFixed(2);
+        const markup = parseFloat(
+            product.markup_percentage ??
+            product.dynamic_fields?.markup_percentage ??
+            0
+        ) || 0;
 
         container.innerHTML += `
             <div class="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
@@ -671,8 +703,8 @@ function displayProducts(products) {
                 <div class="p-3 sm:p-4">
                     <h3 class="font-bold text-gray-900 text-sm sm:text-base md:text-lg mb-1 truncate">${escapeHtml(product.name)}</h3>
                     <div class="mb-1 sm:mb-2">
-                        <p class="text-[10px] sm:text-xs text-gray-400 line-through">₱ ${originalPrice}</p>
-                        <p class="text-base sm:text-xl md:text-2xl font-bold text-green-600">₱ ${formattedPrice}</p>
+                        <p class="text-[10px] sm:text-xs text-gray-400 line-through">₱ ${formattedOriginalPrice}</p>
+                        <p class="text-base sm:text-xl md:text-2xl font-bold text-green-600">₱ ${formattedSellingPrice}</p>
                         ${markup > 0 ? `<p class="text-[10px] sm:text-xs text-blue-600">+${markup}% margin</p>` : ''}
                     </div>
                     <div class="flex items-center justify-between text-xs sm:text-sm mb-2 sm:mb-3">
@@ -716,7 +748,7 @@ async function saveProduct(event) {
     const dynamicFieldsContainer = document.getElementById('dynamicFields');
     const dynamicInputs = dynamicFieldsContainer.querySelectorAll('input, select, textarea');
     dynamicInputs.forEach(input => {
-        if (input.id && input.value) {
+        if (input.id && input.value !== null && input.value !== undefined && input.value !== '') {
             formData.append(input.id, input.value);
         }
     });
@@ -770,8 +802,14 @@ async function editProduct(id) {
         document.getElementById('name').value = product.name || '';
         document.getElementById('brand').value = product.brand || '';
         document.getElementById('model_number').value = product.model_number || '';
-        document.getElementById('cost_price').value = product.cost_price || '';
-        document.getElementById('markup_percentage').value = product.markup_percentage || 0;
+        const dynamicFields = typeof product.dynamic_fields === 'string'
+            ? JSON.parse(product.dynamic_fields || '{}')
+            : (product.dynamic_fields || {});
+
+        document.getElementById('cost_price').value =
+            product.cost_price ?? dynamicFields.cost_price ?? '';
+        document.getElementById('markup_percentage').value =
+            product.markup_percentage ?? dynamicFields.markup_percentage ?? 0;
         document.getElementById('price').value = product.price || '';
         document.getElementById('quantity').value = product.quantity || '';
         document.getElementById('category_id').value = product.category_id || '';
@@ -788,22 +826,7 @@ async function editProduct(id) {
             document.getElementById('preview').src = '';
         }
         
-        await updateDynamicFields();
-        
-        setTimeout(() => {
-            if (product.dynamic_fields) {
-                const dynamicFields = typeof product.dynamic_fields === 'string' 
-                    ? JSON.parse(product.dynamic_fields) 
-                    : product.dynamic_fields;
-                
-                for (const [key, value] of Object.entries(dynamicFields)) {
-                    const field = document.getElementById(key);
-                    if (field && value) {
-                        field.value = value;
-                    }
-                }
-            }
-        }, 300);
+        await updateDynamicFields(dynamicFields);
         
         showForm();
         
