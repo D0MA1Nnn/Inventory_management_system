@@ -114,14 +114,14 @@
 
 <!-- NEW SALE MODAL - Responsive -->
 <div id="saleModal" class="modal-bg" onclick="if(event.target===this)closeSaleModal()">
-    <div class="bg-white rounded-2xl w-[95%] sm:w-[500px] max-w-[95%] shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 bg-white z-10 border-b">
+    <div class="bg-white rounded-2xl w-[95%] sm:w-[500px] lg:w-[720px] xl:w-[760px] max-w-[92vw] shadow-2xl mx-4 max-h-[88vh] lg:max-h-[84vh] overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b bg-white shrink-0">
             <span class="text-base sm:text-xl font-bold text-gray-900">New Sale</span>
             <button class="bg-transparent border-none text-xl sm:text-2xl cursor-pointer text-gray-500 hover:text-gray-700 transition" onclick="closeSaleModal()">✕</button>
         </div>
-        <div class="p-4 sm:p-6">
-            <form id="saleForm">
-                @csrf
+        <form id="saleForm" class="flex flex-col min-h-0">
+            @csrf
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:pr-5 lg:pb-8" style="scrollbar-gutter: stable;">
                 <div class="mb-3 sm:mb-4">
                     <label class="block text-gray-700 text-sm font-semibold mb-2">Product *</label>
                     <select id="sale_product_id" required class="w-full border border-gray-300 rounded-xl p-2.5 sm:p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
@@ -156,12 +156,14 @@
                     <label class="block text-gray-700 text-sm font-semibold mb-2">Notes</label>
                     <textarea id="sale_notes" rows="2" class="w-full border border-gray-300 rounded-xl p-2.5 sm:p-3 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="Optional notes"></textarea>
                 </div>
-                <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
-                    <button type="button" onclick="closeSaleModal()" class="py-2.5 sm:py-3 bg-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-300 transition text-sm">Cancel</button>
-                    <button type="submit" class="py-2.5 sm:py-3 bg-green-600 rounded-xl text-white font-semibold hover:bg-green-700 transition text-sm">Complete Sale</button>
+            </div>
+            <div class="shrink-0 border-t bg-white px-4 sm:px-6 py-3 sm:py-4 lg:sticky lg:bottom-0 lg:z-10 lg:px-6 lg:py-4">
+                <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 lg:flex-row lg:items-center lg:justify-end lg:gap-3">
+                    <button type="button" onclick="closeSaleModal()" class="py-2.5 sm:py-3 bg-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-300 transition text-sm lg:px-5 lg:py-2.5 lg:shrink-0">Cancel</button>
+                    <button type="submit" class="py-2.5 sm:py-3 bg-green-600 rounded-xl text-white font-semibold hover:bg-green-700 transition text-sm lg:px-5 lg:py-2.5 lg:shrink-0">Complete Sale</button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -192,9 +194,17 @@
     z-index: 200;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
 }
 .modal-bg.open {
     display: flex;
+}
+
+@media (min-width: 1024px) {
+    body:has(.modal-bg.open) {
+        overflow: hidden;
+    }
 }
 </style>
 
