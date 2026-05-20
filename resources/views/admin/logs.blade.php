@@ -114,12 +114,12 @@
                                 <td class="whitespace-nowrap px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">{{ $log->name }}</td>
                                 <td class="whitespace-nowrap px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-600">{{ $log->email }}</td>
                                 <td class="whitespace-nowrap px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm">
-                                    <span class="inline-flex rounded-full bg-blue-100 px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold uppercase tracking-wide text-blue-700">
+                                    <span class="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold uppercase tracking-wide text-blue-700">
                                         {{ $log->role }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm">
-                                    <span class="inline-flex rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold uppercase tracking-wide {{ $log->action === 'login' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
+                                    <span class="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold uppercase tracking-wide {{ $log->action === 'login' ? 'text-emerald-700' : 'text-rose-700' }}">
                                         {{ $log->action }}
                                     </span>
                                 </td>
@@ -158,7 +158,7 @@
 
                             <a
                                 href="{{ $logs->previousPageUrl() ?? '#' }}"
-                                class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 {{ $logs->onFirstPage() ? 'opacity-50 pointer-events-none' : '' }}"
+                                class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 {{ $logs->onFirstPage() ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' }}"
                             >
                                 Prev
                             </a>
@@ -174,7 +174,7 @@
 
                             <a
                                 href="{{ $logs->nextPageUrl() ?? '#' }}"
-                                class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 {{ $logs->hasMorePages() ? '' : 'opacity-50 pointer-events-none' }}"
+                                class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 {{ $logs->hasMorePages() ? '' : 'opacity-50 cursor-not-allowed pointer-events-none' }}"
                             >
                                 Next
                             </a>

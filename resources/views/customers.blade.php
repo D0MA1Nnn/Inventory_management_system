@@ -95,7 +95,7 @@ let currentCustomerTab = 'all';
 let currentCustomerSearch = '';
 let currentCustomerStatus = '';
 let currentCustomersPage = 1;
-const CUSTOMERS_PER_PAGE = 10;
+const CUSTOMERS_PER_PAGE = 5;
 
 function escapeHtml(text) {
     if (!text) return '';
@@ -125,9 +125,9 @@ function renderPagination(containerId, totalItems, currentPage, perPage, pageKey
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
     container.innerHTML = `
         <div class="flex items-center gap-1 sm:gap-2">
-            <button type="button" onclick="changePage('${pageKey}', ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Prev</button>
+            <button type="button" onclick="changePage('${pageKey}', ${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
             ${pages.map(page => `<button type="button" onclick="changePage('${pageKey}', ${page})" class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border ${page === currentPage ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}">${page}</button>`).join('')}
-            <button type="button" onclick="changePage('${pageKey}', ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50">Next</button>
+            <button type="button" onclick="changePage('${pageKey}', ${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
         </div>
     `;
 }
@@ -177,7 +177,7 @@ function renderCustomers(customers) {
             <td class="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-900">${escapeHtml(customer.name)}</td>
             <td class="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-600 break-all">${escapeHtml(customer.email || '-')}</td>
             <td class="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-600">${new Date(customer.created_at).toLocaleDateString()}</td>
-            <td class="px-3 sm:px-4 py-2 sm:py-3"><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold rounded-full bg-green-100 text-green-700">Active</span></td>
+            <td class="px-3 sm:px-4 py-2 sm:py-3"><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-xs font-semibold rounded-full text-green-700">Active</span></td>
         </tr>
     `).join('');
     renderPagination('customersPagination', customers.length, currentCustomersPage, CUSTOMERS_PER_PAGE, 'customers');

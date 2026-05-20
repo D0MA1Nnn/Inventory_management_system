@@ -34,7 +34,7 @@ class ActivityLogController extends Controller
                 $query->where('action', $action);
             })
             ->latest('created_at')
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         return view('admin.logs', [
